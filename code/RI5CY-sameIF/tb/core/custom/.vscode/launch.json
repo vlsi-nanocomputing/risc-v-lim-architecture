@@ -1,0 +1,52 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+  {
+    "name": "(gdb) Launch",
+    "type": "cppdbg",
+    "request": "launch",
+    "program": "${fileDirname}/${fileBasenameNoExtension}",
+    "args": [],
+    "stopAtEntry": false,
+    "cwd": "${fileDirname}",
+    "environment": [],
+    "externalConsole": false,
+    "MIMode": "gdb",
+    "setupCommands": [
+        {
+            "description": "Abilita la riformattazione per gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+        },
+        {
+            "description":  "Imposta Versione Disassembly su Intel",
+            "text": "-gdb-set disassembly-flavor intel",
+            "ignoreFailures": true
+        }
+    ]
+  },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [
+        ""
+      ],
+      "stopAtEntry": false,
+      "cwd": "c:/Users/andre/OneDrive - Politecnico di Torino/Desktop/PhD/Articoli/IevaRISCV/FunzionanteMSIM/RI5CY-thesis/RI5CY-sameIF/tb/core/custom",
+      "environment": [],
+      "program": "${fileDirname}/${fileBasenameNoExtension}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "externalConsole": false,
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+Information: Updating design information... (UID-85)
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 2
+Design : riscv_core
+Version: O-2018.06-SP4
+Date   : Tue Jun 16 01:31:09 2020
+****************************************
+
+Operating Conditions: typical   Library: NanGate_15nm_OCL
+Wire Load Model Mode: top
+
+  Startpoint: debug_req_i
+              (input port)
+  Endpoint: instr_addr_o[16]
+            (output port)
+  Path Group: default
+  Path Type: max
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  input external delay                                    0.00       0.00 r
+  debug_req_i (in)                                        0.00       0.00 r
+  id_stage_i/debug_req_i (riscv_id_stage_N_HWLP2_PULP_SECURE0_A_EXTENSION0_APU0_FPU0_PULP_ZFINX0_FP_DIVSQRT0_SHARED_FP0_SHARED_DSP_MULT0_SHARED_INT_MULT0_SHARED_INT_DIV0_SHARED_FP_DIVSQRT0_WAPUTYPE0_APU_NARGS_CPU3_APU_WOP_CPU6_APU_NDSFLAGS_CPU15_APU_NUSFLAGS_CPU5)
+                                                          0.00       0.00 r
+  id_stage_i/controller_i/debug_req_i (riscv_controller_FPU0)
+                                                          0.00       0.00 r
+  id_stage_i/controller_i/U9/ZN (OAI21_X2)                3.80       3.80 f
+  id_stage_i/controller_i/pc_mux_o[1] (riscv_controller_FPU0)
+                                                          0.00       3.80 f
+  id_stage_i/pc_mux_o[1] (riscv_id_stage_N_HWLP2_PULP_SECURE0_A_EXTENSION0_APU0_FPU0_PULP_ZFINX0_FP_DIVSQRT0_SHARED_FP0_SHARED_DSP_MULT0_SHARED_INT_MULT0_SHARED_INT_DIV0_SHARED_FP_DIVSQRT0_WAPUTYPE0_APU_NARGS_CPU3_APU_WOP_CPU6_APU_NDSFLAGS_CPU15_APU_NUSFLAGS_CPU5)
+                                                          0.00       3.80 f
+  if_stage_i/pc_mux_i[1] (riscv_if_stage_2_32_0_1a110800)
+                                                          0.00       3.80 f
+  if_stage_i/U78/Z (AND2_X2)                              6.41      10.21 f
+  if_stage_i/U79/Z (BUF_X4)                               5.91      16.12 f
+  if_stage_i/U173/ZN (AOI22_X1)                           4.88      21.01 r
+  if_stage_i/U512/Z (AND4_X1)                             7.61      28.62 r
+  if_stage_i/U177/ZN (NAND3_X1)                           3.18      31.80 f
+  if_stage_i/prefetch_32.prefetch_buffer_i/addr_i[16] (riscv_prefetch_buffer)
+                                                          0.00      31.80 f
+  if_stage_i/prefetch_32.prefetch_buffer_i/U237/ZN (NAND2_X1)
+                                                          3.60      35.40 r
+  if_stage_i/prefetch_32.prefetch_buffer_i/U368/ZN (NAND2_X1)
+                                                          1.67      37.06 f
+  if_stage_i/prefetch_32.prefetch_buffer_i/instr_addr_o[16] (riscv_prefetch_buffer)
+                                                          0.00      37.06 f
+  if_stage_i/instr_addr_o[16] (riscv_if_stage_2_32_0_1a110800)
+                                                          0.00      37.06 f
+  instr_addr_o[16] (out)                                  0.00      37.06 f
+  data arrival time                                                 37.06
+
+  max_delay                                               5.00       5.00
+  output external delay                                   0.00       5.00
+  data required time                                                 5.00
+  --------------------------------------------------------------------------
+  data required time                                                 5.00
+  data arrival time                                                -37.06
+  --------------------------------------------------------------------------
+  slack (VIOLATED)                                                 -32.06
+
+
+  Startpoint: debug_req_i
+              (input port)
+  Endpoint: instr_addr_o[20]
+            (output port)
+  Path Group: default
+  Path Type: max
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  input external delay                                    0.00       0.00 r
+  debug_req_i (in)                                        0.00       0.00 r
+  id_stage_i/debug_req_i (riscv_id_stage_N_HWLP2_PULP_SECURE0_A_EXTENSION0_APU0_FPU0_PULP_ZFINX0_FP_DIVSQRT0_SHARED_FP0_SHARED_DSP_MULT0_SHARED_INT_MULT0_SHARED_INT_DIV0_SHARED_FP_DIVSQRT0_WAPUTYPE0_APU_NARGS_CPU3_APU_WOP_CPU6_APU_NDSFLAGS_CPU15_APU_NUSFLAGS_CPU5)
+                                                          0.00       0.00 r
+  id_stage_i/controller_i/debug_req_i (riscv_controller_FPU0)
+                                                          0.00       0.00 r
+  id_stage_i/controller_i/U9/ZN (OAI21_X2)                3.80       3.80 f
+  id_stage_i/controller_i/pc_mux_o[1] (riscv_controller_FPU0)
+                                                          0.00       3.80 f
+  id_stage_i/pc_mux_o[1] (riscv_id_stage_N_HWLP2_PULP_SECURE0_A_EXTENSION0_APU0_FPU0_PULP_ZFINX0_FP_DIVSQRT0_SHARED_FP0_SHARED_DSP_MULT0_SHARED_INT_MULT0_SHARED_INT_DIV0_SHARED_FP_DIVSQRT0_WAPUTYPE0_APU_NARGS_CPU3_APU_WOP_CPU6_APU_NDSFLAGS_CPU15_APU_NUSFLAGS_CPU5)
+                                                          0.00       3.80 f
+  if_stage_i/pc_mux_i[1] (riscv_if_stage_2_32_0_1a110800)
+                                                          0.00       3.80 f
+  if_stage_i/U78/Z (AND2_X2)                              6.41      10.21 f
+  if_stage_i/U65/Z (BUF_X4)                               5.88      16.09 f
+  if_stage_i/U64/ZN (AOI22_X1)                            4.88      20.97 r
+  if_stage_i/U63/Z (AND4_X1)                              7.61      28.58 r
+  if_stage_i/U41/ZN (NAND3_X1)                            3.38      31.96 f
+  if_stage_i/prefetch_32.prefetch_buffer_i/addr_i[20] (riscv_prefetch_buffer)
+                                                          0.00      31.96 f
+  if_stage_i/prefetch_32.prefetch_buffer_i/U42/ZN (NAND2_X1)
+                                                          3.37      35.33 r
+  if_stage_i/prefetch_32.prefetch_buffer_i/U43/ZN (NAND2_X1)
+                                                          1.70      37.03 f
+  if_stage_i/prefetch_32.prefetch_buffer_i/instr_addr_o[20] (riscv_prefetch_buffer)
+                                                          0.00      37.03 f
+  if_stage_i/instr_addr_o[20] (riscv_if_stage_2_32_0_1a110800)
+                                                          0.00      37.03 f
+  instr_addr_o[20] (out)                                  0.00      37.03 f
+  data arrival time                                                 37.03
+
+  max_delay                                               5.00       5.00
+  output external delay                                   0.00       5.00
+  data required time                                                 5.00
+  --------------------------------------------------------------------------
+  data required time                                                 5.00
+  data arrival time                                                -37.03
+  --------------------------------------------------------------------------
+  slack (VIOLATED)                                                 -32.03
+
+
+1

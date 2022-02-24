@@ -1,0 +1,47 @@
+Information: Updating design information... (UID-85)
+Warning: Design 'dp_ram_logic' contains 1 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 2
+Design : dp_ram_logic
+Version: O-2018.06-SP4
+Date   : Tue Jun 16 01:45:54 2020
+****************************************
+
+ # A fanout number of 1000 was used for high fanout net computations.
+
+Operating Conditions: typical   Library: NanGate_15nm_OCL
+Wire Load Model Mode: top
+
+  Startpoint: addr_b_i[7]
+              (input port)
+  Endpoint: rvalid_b_o (output port)
+  Path Group: default
+  Path Type: max
+
+  Point                                    Incr       Path
+  -----------------------------------------------------------
+  input external delay                     0.00       0.00 f
+  addr_b_i[7] (in)                         0.00       0.00 f
+  U102201/ZN (NOR2_X2)                     2.39       2.39 r
+  U102200/ZN (NAND2_X2)                    3.15       5.54 f
+  U102218/ZN (NAND4_X2)                    2.82       8.36 r
+  U102204/ZN (NAND3_X2)                    4.01      12.37 f
+  U102203/Z (MUX2_X1)                      5.77      18.14 r
+  rvalid_b_o (out)                         0.00      18.14 r
+  data arrival time                                  18.14
+
+  max_delay                                5.00       5.00
+  output external delay                    0.00       5.00
+  data required time                                  5.00
+  -----------------------------------------------------------
+  data required time                                  5.00
+  data arrival time                                 -18.14
+  -----------------------------------------------------------
+  slack (VIOLATED)                                  -13.14
+
+
+1

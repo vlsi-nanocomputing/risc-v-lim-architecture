@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : dp_ram_logic
+Version: O-2018.06-SP4
+Date   : Tue Jun 16 01:35:11 2020
+****************************************
+
+Library(s) Used:
+
+    NanGate_15nm_OCL (File: /software/dk/NanGate_15nm_OCL/front_end/timing_power_noise/ECSM/NanGate_15nm_OCL_typical_conditional_ecsm.db)
+
+Number of ports:                          232
+Number of nets:                        114828
+Number of cells:                       114730
+Number of combinational cells:          96025
+Number of sequential cells:              9366
+Number of macros/black boxes:               0
+Number of buf/inv:                      11753
+Number of references:                      36
+
+Combinational area:              28657.975517
+Buf/Inv area:                     1909.702698
+Noncombinational area:           11969.298018
+Macro/Black Box area:                0.000000
+Net Interconnect area:      undefined  (No wire load specified)
+
+Total cell area:                 40627.273535
+Total area:                 undefined
+1

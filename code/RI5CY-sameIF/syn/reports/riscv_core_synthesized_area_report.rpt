@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : riscv_core
+Version: O-2018.06-SP4
+Date   : Tue Jun 16 01:31:09 2020
+****************************************
+
+Library(s) Used:
+
+    NanGate_15nm_OCL (File: /software/dk/NanGate_15nm_OCL/front_end/timing_power_noise/ECSM/NanGate_15nm_OCL_typical_conditional_ecsm.db)
+
+Number of ports:                        11231
+Number of nets:                         39122
+Number of cells:                        28070
+Number of combinational cells:          24837
+Number of sequential cells:              2556
+Number of macros/black boxes:               0
+Number of buf/inv:                       5501
+Number of references:                      15
+
+Combinational area:               8568.373386
+Buf/Inv area:                      964.263948
+Noncombinational area:            2625.011640
+Macro/Black Box area:                0.000000
+Net Interconnect area:      undefined  (No wire load specified)
+
+Total cell area:                 11193.385026
+Total area:                 undefined
+1
