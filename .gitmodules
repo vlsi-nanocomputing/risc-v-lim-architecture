@@ -2,10 +2,6 @@
 	path = riscv-gnu-toolchain
 	url = https://github.com/vlsi-nanocomputing/riscv-gnu-toolchain
 	branch = master
-[submodule "riscv-newlib"]
-	path = riscv-gnu-toolchain/riscv-newlib
-	url = https://github.com/riscv-collab/riscv-newlib.git
-	branch = riscv-newlib-3.2.0
 [submodule "fpnew"]
 	path = RI5CY-sameIF/rtl/fpnew
 	url = https://github.com/pulp-platform/fpnew
