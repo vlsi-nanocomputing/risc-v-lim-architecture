@@ -1,6 +1,6 @@
 [submodule "riscv-gnu-toolchain"]
 	path = riscv-gnu-toolchain
-	url = https://github.com/vlsi-nanocomputing/riscv-gnu-toolchain.git
+	url = https://github.com/vlsi-nanocomputing/riscv-gnu-toolchain
 	branch = master
 
 [submodule "fpnew"]
