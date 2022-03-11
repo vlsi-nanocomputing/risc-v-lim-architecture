@@ -11,12 +11,40 @@ Then, under the name of RI5CY, it became a RISC-V core (2016), and it has been m
 by the [PULP platform](https://www.pulp-platform.org/) team until February 2020,
 when it has been contributed to [OpenHW Group](https://www.openhwgroup.org/).
 
-## RISC-V with the new interface
-The RI5CY-newIF repository contains the CV32E40P/RISC-V IP that supports Logic-in-memory operations, that has a new interface to maximise the efficiency of the memory operations.
-
 ## RISC-V with the same interface
 The RI5CY-sameIF repository contains the CV32E40P/RISC-V IP that supports Logic-in-memory operations, that mantains the same original interface in order to prioritise the flexibility of the core.
 
+
+# Prerequisites
+Clone the current repository\
+    `$ git clone https://github.com/vlsi-nanocomputing/risc-v-lim-architecture.git`
+
+
+Enter the repository directory
+```
+    git submodule init
+    git submodule update
+```
+
+Enter the riscv-gnu-toolchain directory and type:\
+git checkout master
+
+Enter the directory `riscv-binutils` and run:\
+`git checkout riscv-binutils-2.38` 
+
+Type `cd ..` and run the configuration script:
+`./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32`
+
+Build the toolchain:
+`make -j N`
+
+Where N is the number of threads.
+
+# Usage
+Enter the directory `RI5CY-sameIF/tb/core` and modify the makefile. In particular, change the variable `RISCV_LIB` with your `<tool_chain_install_path>` previously used in the configuration.
+
+For execution a sample program run:
+`make custom-vsim-run`
 
 
 
