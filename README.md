@@ -14,6 +14,9 @@ when it has been contributed to [OpenHW Group](https://www.openhwgroup.org/).
 ## RISC-V with the same interface
 The RI5CY-sameIF repository contains the CV32E40P/RISC-V IP that supports Logic-in-memory operations, that mantains the same original interface in order to prioritise the flexibility of the core.
 
+## RISC-V with the new interface
+The RI5CY-newIF repository contains the CV32E40P/RISC-V IP that supports Logic-in-memory operations, that has a new interface to maximise the efficiency of the memory operations.
+
 
 # Prerequisites
 Clone the current repository\
