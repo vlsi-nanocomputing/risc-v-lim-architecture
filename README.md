@@ -1,4 +1,4 @@
-# RISC-Vlim, a RISV Framework for Logic-in-Memory Architectures
+# RISC-Vlim, a RISC-V Framework for Logic-in-Memory Architectures
 
 The aim of the project is to propose a RISC-Vlim microprocessor that supports Logic-in-Memory operations. The RISC-Vlim is based on the RISC-V ISA where the data memory is replaced with a memory capable of doing simple operations on the data stored inside it. The preliminary results demonstrate how the use of such memories can improve the algorithm execution speed, reducing the need of complex solutions and saving energy.\
 The project uses the available RISC-V IP and the Logic-in-memory concept in order to improve the average execution time of the RISC-V memory operations and then to reduce the overall execution time in programs.
