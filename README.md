@@ -1,5 +1,7 @@
-# Master Thesis project on OpenHW Group CORE-V CV32E40P RISC-V IP and Logic-In-Memory
-The Master Thesis project used the available RISC-V IP and the Logic-in-memory concept in order to improve the average execution time of the RISC-V memory operations and then to reduce the overall execution time in programs.
+# RISC-Vlim, a RISV Framework for Logic-in-Memory Architectures
+
+The aim of the project is to propose a RISC-Vlim microprocessor that supports Logic-in-Memory operations. The RISC-Vlim is based on the RISC-V ISA where the data memory is replaced with a memory capable of doing simple operations on the data stored inside it. The preliminary results demonstrate how the use of such memories can improve the algorithm execution speed, reducing the need of complex solutions and saving energy.\
+The project uses the available RISC-V IP and the Logic-in-memory concept in order to improve the average execution time of the RISC-V memory operations and then to reduce the overall execution time in programs.
 The goal has been reached by introducing a new memory model, capable to perform logic operations additionally to the simple reads or writes. To exploit this new memory capabilities the RISC-V ISA has been enlarged.
 
 ## RISC-V IP Overview
@@ -16,27 +18,20 @@ The RI5CY-sameIF repository contains the CV32E40P/RISC-V IP that supports Logic-
 
 
 # Prerequisites
-Clone the current repository\
-    `$ git clone https://github.com/vlsi-nanocomputing/risc-v-lim-architecture.git`
+Clone the current repository
 
+    $git clone https://github.com/vlsi-nanocomputing/risc-v-lim-architecture.git
 
-Enter the repository directory
-```
-    git submodule init
-    git submodule update
-```
+Enter the repository directory and run
 
-Enter the riscv-gnu-toolchain directory and type:\
-git checkout master
+    $git submodule update --init --recursive
 
-Enter the directory `riscv-binutils` and run:\
-`git checkout riscv-binutils-2.38` 
-
-Type `cd ..` and run the configuration script:
-`./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32`
+Now you are ready to run the configuration script:
+    $./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32
 
 Build the toolchain:
-`make -j N`
+
+    $make -j N
 
 Where N is the number of threads.
 
@@ -44,7 +39,8 @@ Where N is the number of threads.
 Enter the directory `RI5CY-sameIF/tb/core` and modify the makefile. In particular, change the variable `RISCV_LIB` with your `<tool_chain_install_path>` previously used in the configuration.
 
 For execution a sample program run:
-`make custom-vsim-run`
+
+    $make custom-vsim-run
 
 
 
