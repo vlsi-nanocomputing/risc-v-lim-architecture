@@ -81,7 +81,7 @@ RTLSRC_VLOG_TB_TOP	:= $(basename $(notdir $(RTLSRC_TB_TOP)))
 RTLSRC_VOPT_TB_TOP	:= $(RTLSRC_VLOG_TB_TOP)#$(addsuffix _vopt, $(RTLSRC_VLOG_TB_TOP))
 
 # riscv toolchain install path
-RISCV_LIB               ?= /home/andrea/Antonia/rv32ima
+RISCV_LIB               ?= <tool_chain_install_path>
 RISCV_EXE_PREFIX         = $(RISCV_LIB)/bin/riscv32-unknown-elf-
 
 # firmware vars
