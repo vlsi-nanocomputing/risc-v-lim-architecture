@@ -38,7 +38,7 @@ Where N is the number of threads.
 # Usage
 Enter the directory `RI5CY-sameIF/tb/core` and modify the makefile. In particular, change the variable `RISCV_LIB` with your `<tool_chain_install_path>` previously used in the configuration.
 
-For execution a sample program run:
+For executing a sample program run:
 
     $make custom-vsim-run
 
