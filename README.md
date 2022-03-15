@@ -25,19 +25,19 @@ Clone the current repository\
 
 Enter the repository directory
 ```
-    git submodule init
-    git submodule update
+    git checkout fix-simulation
+    git submodule update --init --recursive
 ```
 
-Enter the riscv-gnu-toolchain directory and type:\
-git checkout master
+Enter the `riscv-gnu-toolchain/riscv-binutils` directory and type:\
+```
+    git checkout riscv-binutils-2.36.1-lim
+```
 
-Enter the directory `riscv-binutils` and run:\
-`git checkout riscv-binutils-2.38` 
-
-Type `cd ..` and run the configuration script:
-`./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32`
-
+Come back to `riscv-gnu-toolchain` directory and run the configuration script:
+```
+    ./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32
+```
 Build the toolchain:
 `make -j N`
 
