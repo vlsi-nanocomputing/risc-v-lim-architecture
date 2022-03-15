@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/469124769.svg)](https://zenodo.org/badge/latestdoi/469124769)
+
 # RISC-Vlim, a RISC-V Framework for Logic-in-Memory Architectures
 
 The aim of the project is to propose a RISC-Vlim microprocessor that supports Logic-in-Memory operations. The RISC-Vlim is based on the RISC-V ISA where the data memory is replaced with a memory capable of doing simple operations on the data stored inside it. The preliminary results demonstrate how the use of such memories can improve the algorithm execution speed, reducing the need of complex solutions and saving energy.\
@@ -23,19 +25,13 @@ The RI5CY-newIF repository contains the CV32E40P/RISC-V IP that supports Logic-i
 # Prerequisites
 Clone the current repository
 
-<<<<<<< HEAD
     $git clone https://github.com/vlsi-nanocomputing/risc-v-lim-architecture.git
 
 Enter the repository directory and run
 
     $git submodule update --init --recursive
 
-Now you are ready to run the configuration script:
-
-    $./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32
-
-
-Come back to `riscv-gnu-toolchain` directory and run the configuration script:
+Enter the directory `riscv-gnu-toolchain` and run the configuration script:
 
     $./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32
 
