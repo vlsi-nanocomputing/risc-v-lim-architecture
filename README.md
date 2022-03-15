@@ -20,19 +20,13 @@ The RI5CY-sameIF repository contains the CV32E40P/RISC-V IP that supports Logic-
 # Prerequisites
 Clone the current repository
 
-<<<<<<< HEAD
     $git clone https://github.com/vlsi-nanocomputing/risc-v-lim-architecture.git
 
 Enter the repository directory and run
 
     $git submodule update --init --recursive
 
-Now you are ready to run the configuration script:
-
-    $./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32
-
-
-Come back to `riscv-gnu-toolchain` directory and run the configuration script:
+Enter the directory `riscv-gnu-toolchain` and run the configuration script:
 
     $./configure --prefix=<tool_chain_install_path> --with-arch=rv32ima --with-abi=ilp32
 
