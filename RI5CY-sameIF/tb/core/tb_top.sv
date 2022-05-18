@@ -78,6 +78,9 @@ module tb_top
                 $display("[TESTBENCH] %t: loading firmware %0s ...",
                          $time, firmware);
             $readmemh(firmware, riscv_wrapper_i.ram_i.dp_ram_i.mem);
+
+			//Load data in dummy_RT
+			$readmemh(firmware, riscv_wrapper_i.ram_i.dp_ram_i.dummy_racetrack.RT_mem);
         
             // make the core start fetching instruction immediately after the firmware is loaded in memory
             fetch_enable = '1;

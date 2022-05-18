@@ -35,10 +35,19 @@ if {$dp_ram ne ""} {
 	add wave -group [file tail $inst] $inst/*
     }
     add wave -group [file tail $dp_ram]  $dp_ram/sub_mem
-    add wave -group [file tail $dp_ram]  $dp_ram/sub_enabled_rows
-    add wave -group [file tail $dp_ram]  $dp_ram/sub_word_wired_or
+	add wave -group [file tail $dp_ram]  $dp_ram/sub_mem_rt
     add wave -group [file tail $dp_ram]  $dp_ram/sub_word_lines
     add wave -group [file tail $dp_ram]  $dp_ram/sub_word_lines_int
+	add wave -group [file tail $dp_ram]  $dp_ram/we_b_funct_mem
+	add wave -group [file tail $dp_ram]  $dp_ram/dummy_racetrack/state
+	add wave -group [file tail $dp_ram]  $dp_ram/dummy_racetrack/rdata_b_o
+	add wave -group [file tail $dp_ram]  $dp_ram/dummy_racetrack/en_read
+	add wave -group [file tail $dp_ram]  $dp_ram/dummy_racetrack/en_write
+	add wave -group [file tail $dp_ram]  $dp_ram/dummy_racetrack/wdata_b_i
+	add wave -group [file tail $dp_ram]  $dp_ram/dummy_racetrack/mask_i
+	add wave -group [file tail $dp_ram]  $dp_ram/dummy_racetrack/we_b_i
+
+
 }
 
 if {$rvcores ne ""} {
