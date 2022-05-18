@@ -16,15 +16,18 @@ module RT_block
 		input logic     			 current_m_data_i,
 	    input logic     			 current_m_mask_i,
 	    input logic     			 current_s_mask_i,
-		input logic	 [Nr*NMU-1:0]	 write_data_i,		//input write data racetrack
+		input  logic 			 	 current_s_program_i,	
+		input  logic 			 	 current_m_program_i, 	
+		input logic	 [Nr*NMU-1:0]	 write_data_i,			//input write data racetrack
 	    input logic     			 write_en_data_i,
-	    input logic  [Nr*NMU-1:0]    write_mask_i,		//input write mask racetrack
+	    input logic  [Nr*NMU-1:0]    write_mask_i,			//input write mask racetrack
 		input logic					 write_en_mask_i,
-        input logic     			 IN1_NAND_NORn_i,
+		input logic  [Nr*NMU-1:0]    write_program_i,		//input write program racetrack		
+		input logic					 write_en_program_i,										
         input logic  [Nb-1:0]		 word_lines_i,
 		input logic					 out_select_i,
 						
-		output logic [Nr*NMU-1:0]	 r_data_o		    //output (data & pNML)			
+		output logic [Nr*NMU-1:0]	 r_data_o		    	//output (data & pNML)			
 						
 	); 
 	
@@ -53,11 +56,15 @@ module RT_block
 			  .current_m_data_i(current_m_data_i),
 			  .current_m_mask_i(current_s_mask_i),
 			  .current_s_mask_i(current_m_mask_i),
+			  .current_s_program_i(current_s_program_i), 
+			  .current_m_program_i(current_m_program_i), 
 			  .write_i_data_i(write_data_i[i*Nr +:Nr]),
 			  .write_en_data_i(write_en_data_i),
 			  .write_i_mask_i(write_mask_i[i*Nr +:Nr]),
 			  .write_en_mask_i(write_en_mask_i),
-			  .IN1_NAND_NORn_i(IN1_NAND_NORn_i),
+			  .write_i_program_i(write_program_i[i*Nr +:Nr]),	
+			  .write_en_program_i(write_en_program_i),			
+			  
 			  .word_lines_i(word_lines_i), 
 			  .out_select_i(out_select_i),
 			  

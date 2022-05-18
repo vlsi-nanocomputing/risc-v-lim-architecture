@@ -2,7 +2,6 @@
 
 vlog -work ./work ../rtl/include/racetrack_defines.sv
 vlog -work ./work ../rtl/RT_cell.sv
-vlog -work ./work ../rtl/RT_write.sv
 vlog -work ./work ../rtl/RT_read_write_SOT.sv
 vlog -work ./work ../rtl/pNML_NAND_NOR.sv
 vlog -work ./work ../rtl/pNML_NAND_NOR_SOT.sv

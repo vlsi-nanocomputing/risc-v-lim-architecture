@@ -5,7 +5,7 @@ module FSM
 	   parameter CNT_WIDTH = 10
 	)
 	(
-		input  logic 					clk_i,								//FSM clock (?)
+		input  logic 					clk_i,								
 		input  logic					rstn_i,
 		input  logic					en_i,			
 		input  logic					shift_done_s_i, 					//notifies completion of set shifts
@@ -15,15 +15,18 @@ module FSM
 		input  logic [2:0]				logic_in_memory_funct_int_i,		//logic in memory functionality
 		
 		output logic					shift_en_s_o,						//enable for set shifter
-		output logic					shift_en_r_o,						//enable for set shifter
+		output logic					shift_en_r_o,						//enable for reset shifter
 						
 		output logic					shift_select_o,						//enable shift pulses
 		output logic					w_en_d_o,							//write enable for data 
 		output logic					w_en_m_o,							//write enable for mask
+		output logic					w_en_p_o,							//write enable for program racetrack	
 		output logic					r_en_o,								//read enagle for logic & data 
 		output logic					shift_s_o,							//shift direction
 		output logic					r_valid_o,							//valid signal for read/write data
 		output logic					NAND_NOR_o,							//select signal for LiM operation
+		
+		
 		output logic					Bz_m_o,								//Bz field module
 		output logic					out_select_o,						//select data or LiM data for block output
 		output logic					source_shift_sel_o,					//selection signal source shift mux
@@ -31,7 +34,7 @@ module FSM
 		output logic					en_lim_buf_o						//enable signal for data buffer during byte write LiM
 	);
 
-	enum {IDLE,PORT_SET,READ,WRITE, WRITE_MASK, LIM_NOR, LIM_NAND, READ_LIM, WRITE_LIM, PORT_RESET} state, next_state;
+	enum {IDLE,PORT_SET,READ,WRITE, WRITE_MASK_NAND, WRITE_MASK_NOR , LIM_NOR, LIM_NAND, READ_LIM, WRITE_LIM, PORT_RESET} state, next_state;
 	
 	logic	[3:0]	cnt_lim;		//signal for LiM programming counter
 	logic			lim_done;		//notifies end of LiM oeperation
@@ -73,15 +76,17 @@ module FSM
 				if(shift_done_s_i)begin
 					if(w_en_i) begin
 						unique case(logic_in_memory_funct_int_i)
-							3'b010:  next_state = WRITE_MASK;
-							3'b011:  next_state = WRITE_MASK;
+							3'b010:  next_state = WRITE_MASK_NAND;   
+							3'b011:  next_state = WRITE_MASK_NOR;    
 							
 							default: next_state = WRITE;	//go in WRITE only in NULL and XOR cases
 						endcase
 					end else begin
 						unique case(logic_in_memory_funct_int_i)
-							3'b010:  next_state = WRITE_MASK;
-							3'b011:  next_state = WRITE_MASK;
+							3'b010:  next_state = WRITE_MASK_NAND;  
+							3'b011:  next_state = WRITE_MASK_NOR;   
+							
+							
 							
 							default: next_state = READ;	//go in READ only in NULL and XOR cases
 						endcase
@@ -101,12 +106,11 @@ module FSM
 				next_state = PORT_RESET;
 			end
 			
-			WRITE_MASK: begin
-				unique case(logic_in_memory_funct_int_i)
-					3'b011 : next_state = LIM_NOR;
-					3'b010 : next_state = LIM_NAND;
-				endcase
-
+			WRITE_MASK_NAND: begin	
+				next_state = LIM_NAND;
+			end
+			WRITE_MASK_NOR: begin
+				 next_state = LIM_NOR;
 			end
 			
 			
@@ -180,6 +184,7 @@ module FSM
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;
 			end
 			
 			PORT_SET: begin
@@ -198,6 +203,7 @@ module FSM
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;
 			end
 			
 			READ: begin
@@ -216,6 +222,7 @@ module FSM
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 1;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;
 			end
 			
 			WRITE: begin
@@ -234,27 +241,50 @@ module FSM
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;
 				
 			end
 			
-			WRITE_MASK: begin	//write mask from external register
-				
-				shift_en_s_o		= 0;
-				shift_en_r_o		= 0;
-				shift_select_o		= 0;		//SEND ENABLE FOR BUFFERRRRRRRR
-				shift_s_o			= 0;
-				w_en_d_o			= 0;
-				w_en_m_o			= 1;
-				r_en_o				= 0 || r_en_byteW || r_en_feedbackW; //override read enable signal during byte write and LiM store (save value in buf)
-				r_valid_o			= 0;
-				NAND_NOR_o			= 0;
-				Bz_m_o				= 0;
-				out_select_o		= 0;
-				source_shift_sel_o	= 0;
-				en_ff_read_o		= 0;
+			WRITE_MASK_NAND: begin	//write mask from external register	
+					
+				shift_en_s_o		= 0;	
+				shift_en_r_o		= 0;	
+				shift_select_o		= 0;			
+				shift_s_o			= 0;	
+				w_en_d_o			= 0;	
+				w_en_m_o			= 1;	//write mask
+				r_en_o				= 0 || r_en_byteW || r_en_feedbackW; //override read enable signal during byte write and LiM store (save value in buf)	
+				r_valid_o			= 0;	
+				NAND_NOR_o			= 1;	
+				Bz_m_o				= 0;	
+				out_select_o		= 0;	
+				source_shift_sel_o	= 0;	
+				en_ff_read_o		= 0;	
 				en_lim_buf_o		= 1;	//save actual data value
-				
-			end
+				w_en_p_o			= 1;	//write program bit			
+					
+			end	
+			
+			WRITE_MASK_NOR: begin	//write mask from external register
+            	
+				shift_en_s_o		= 0;
+				shift_en_r_o		= 0;	
+				shift_select_o		= 0;			
+				shift_s_o			= 0;	
+				w_en_d_o			= 0;	
+				w_en_m_o			= 1;	//write mask
+				r_en_o				= 0 || r_en_byteW || r_en_feedbackW; //override read enable signal during byte write and LiM store (save value in buf)	
+				r_valid_o			= 0;	
+				NAND_NOR_o			= 0;	
+				Bz_m_o				= 0;	
+				out_select_o		= 0;	
+				source_shift_sel_o	= 0;	
+				en_ff_read_o		= 0;	
+				en_lim_buf_o		= 1;	//save actual data value
+				w_en_p_o			= 1;	//write program bit			
+					
+			end	
+					
 				
 			LIM_NAND: begin	
 			
@@ -272,6 +302,7 @@ module FSM
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;		
 				
 				
 			end	
@@ -292,6 +323,7 @@ module FSM
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;
 			end
 			
 			
@@ -311,6 +343,7 @@ module FSM
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 1;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;
 			end
 			
 			WRITE_LIM: begin
@@ -329,6 +362,7 @@ module FSM
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;
 			end
 			
 			PORT_RESET: begin
@@ -347,6 +381,7 @@ module FSM
 				source_shift_sel_o	= 1; //select sampled n shift
 				en_ff_read_o		= 0;
 				en_lim_buf_o		= 0;
+				w_en_p_o			= 0;
 				
 			end
 
