@@ -436,8 +436,8 @@ module RT_32_8_4_line
 			overhead_program_cell
 			(  
 				.rstn(rstn_i),
-				.current_s(current_s_program),
-				.current_m(current_m_program),
+				.current_s(current_s_program_i),
+				.current_m(current_m_program_i),
 				.backward_in(program_line[i+1]),
 				.forward_in(program_line_0),
 				.out(program_line[i])
@@ -451,8 +451,8 @@ module RT_32_8_4_line
 			overhead_program_cell
 			(  
 				.rstn(rstn_i),
-				.current_s(current_s_program),
-				.current_m(current_m_program),
+				.current_s(current_s_program_i),
+				.current_m(current_m_program_i),
 				.backward_in(program_line[i+1]),
 				.forward_in(program_line[i-1]),
 				.out(program_line[i])
@@ -466,8 +466,8 @@ module RT_32_8_4_line
 			rd_wr_program_cell
 			(
 				.rstn(rstn_i),
-				.current_s(current_s_program),
-				.current_m(current_m_program),
+				.current_s(current_s_program_i),
+				.current_m(current_m_program_i),
 				.read_current(read_current_i),
 				.backward_in(program_line[i+1]),
 				.forward_in(program_line[i-1]),
@@ -485,8 +485,8 @@ module RT_32_8_4_line
 			rd_wr_program_cell
 			(
 				.rstn(rstn_i),
-				.current_s(current_s_program),
-				.current_m(current_m_program),
+				.current_s(current_s_program_i),
+				.current_m(current_m_program_i),
 				.read_current(read_current_i),
 				.backward_in(program_line[i+1]),
 				.forward_in(program_line[i-1]),
@@ -505,8 +505,8 @@ module RT_32_8_4_line
 			program_cell
 			(  
 				.rstn(rstn_i),
-				.current_s(current_s_program),
-				.current_m(current_m_program),
+				.current_s(current_s_program_i),
+				.current_m(current_m_program_i),
 				.backward_in(program_line_last),
 				.forward_in(program_line[i-1]),
 				.out(program_line[i])
@@ -520,8 +520,8 @@ module RT_32_8_4_line
 			program_cell
 			(  
 				.rstn(rstn_i),
-				.current_s(current_s_program),
-				.current_m(current_m_program),
+				.current_s(current_s_program_i),
+				.current_m(current_m_program_i),
 				.backward_in(program_line[i+1]),
 				.forward_in(program_line[i-1]),
 				.out(program_line[i])
