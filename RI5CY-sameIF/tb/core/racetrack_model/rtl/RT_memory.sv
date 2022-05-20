@@ -111,7 +111,7 @@ module RT_memory
 		(
 			.rstn_i(rstn_i),
 		    .Bz_s_i(Bz_s_i),
-		    .Bz_m_i(Bz_m_i),
+		    .Bz_m_i(Bz_m),
 		    .current_read_i(r_pulse),	//read current waveform
 		    .current_s_lim_i(shift_s),
 		    .current_m_lim_i(shift_m),
