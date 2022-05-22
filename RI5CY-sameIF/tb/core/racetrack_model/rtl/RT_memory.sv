@@ -172,7 +172,7 @@ module RT_memory
 	//=====================================
 	//OUT DATA REGISTER + BYTE SELECTION + LiM STORE FUNCTIONALITIES
 	//=====================================
-	
+	//Range operations are done on the full word, range_active_i bypasses byte selection
 	
 	always @(posedge clk_i, negedge rstn_i) begin
        if ( !rstn_i) begin
