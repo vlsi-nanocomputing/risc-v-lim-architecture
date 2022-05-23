@@ -5,14 +5,14 @@ module FSM
 	   parameter CNT_WIDTH = 10
 	)
 	(
-		input  logic 					clk_i,								
+		input  logic 					clk_i,								//FSM clock (?)
 		input  logic					rstn_i,
 		input  logic					en_i,			
 		input  logic					shift_done_s_i, 					//notifies completion of set shifts
 		input  logic					shift_done_r_i, 					//notifies completion of reset shifts
 		input  logic					w_en_i,								//write enable from outside
 		input  logic [3:0]				be_b_i,			    				//byte selector signal
-		input  logic [2:0]				logic_in_memory_funct_int_i,		//logic in memory functionality
+		input  logic [7:0]				logic_in_memory_funct_int_i,		//logic in memory functionality
 		
 		output logic					shift_en_s_o,						//enable for set shifter
 		output logic					shift_en_r_o,						//enable for reset shifter
@@ -34,6 +34,7 @@ module FSM
 		output logic					en_lim_buf_o						//enable signal for data buffer during byte write LiM
 	);
 
+	
 	enum {IDLE,PORT_SET,READ,WRITE, WRITE_MASK_NAND, WRITE_MASK_NOR , LIM_NOR, LIM_NAND, READ_LIM, WRITE_LIM, PORT_RESET} state, next_state;
 	
 	logic	[3:0]	cnt_lim;		//signal for LiM programming counter
@@ -76,17 +77,17 @@ module FSM
 				if(shift_done_s_i)begin
 					if(w_en_i) begin
 						unique case(logic_in_memory_funct_int_i)
-							3'b010:  next_state = WRITE_MASK_NAND;   
-							3'b011:  next_state = WRITE_MASK_NOR;    
+							
+							 FUNCT_AND:  next_state = WRITE_MASK_NAND;   
+							 FUNCT_OR:  next_state = WRITE_MASK_NOR;   
 							
 							default: next_state = WRITE;	//go in WRITE only in NULL and XOR cases
 						endcase
 					end else begin
 						unique case(logic_in_memory_funct_int_i)
-							3'b010:  next_state = WRITE_MASK_NAND;  
-							3'b011:  next_state = WRITE_MASK_NOR;   
 							
-							
+							 FUNCT_AND:  next_state = WRITE_MASK_NAND;  
+							 FUNCT_OR:  next_state = WRITE_MASK_NOR;   
 							
 							default: next_state = READ;	//go in READ only in NULL and XOR cases
 						endcase
@@ -105,7 +106,7 @@ module FSM
 			WRITE: begin
 				next_state = PORT_RESET;
 			end
-			
+
 			WRITE_MASK_NAND: begin	
 				next_state = LIM_NAND;
 			end
@@ -438,7 +439,7 @@ module FSM
 	always_comb begin
 		unique case(logic_in_memory_funct_int_i) 
 			
-			3'b000:  r_en_feedbackW = 1'b0; //do not read during a standard access (write wdata_i)
+			 FUNCT_NONE:  r_en_feedbackW = 1'b0; //do not read during a standard access (write wdata_i)
 			
 			
 			default: r_en_feedbackW = 1'b1;

@@ -9,12 +9,12 @@ module pNML_NAND_NOR_SOT
 		input logic		backward_in,
 		input logic		Bz_s,
 		input logic		Bz_m,
-		input logic		read_current, //read_current terminal
+		input logic		read_current, 	//read_current terminal
 		input logic		current_s,
 		input logic		current_m,
 		
-		output logic 	out,    //out for racetrack connection
-		output logic	read_out//read terminal
+		output logic 	out,   		 	//out for racetrack connection
+		output logic	read_out		//read terminal
 	);
 	
 
@@ -22,7 +22,7 @@ module pNML_NAND_NOR_SOT
 	logic D_ff_out;
 	logic read_in;
 	logic clk_i;
-	logic en; //enable for FF
+	logic en; 		//enable for FF
 	logic NAND_out;
 	logic NOR_out;
 	logic eval_out; //output of logic operation selection

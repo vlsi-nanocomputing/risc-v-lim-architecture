@@ -12,8 +12,8 @@ module RT_read_write_SOT
 		input logic		write_input,  //write terminal
 		input logic		write_enable,
 		
-		output logic 	out,    //out for racetrack connection
-		output logic	read_out//read terminal
+		output logic 	out,   		 //out for racetrack connection
+		output logic	read_out	 //read terminal
 	);
 	
 	
@@ -51,7 +51,7 @@ module RT_read_write_SOT
 	
 	assign en  	   = '1; //FF enable alsways active
 	assign out 	   = D_ff_out;
-	assign read_in 	   = D_ff_out;
+	assign read_in = D_ff_out;
 	
 	//SELECTON PART
 	assign shift_in = current_s ? backward_in : forward_in;

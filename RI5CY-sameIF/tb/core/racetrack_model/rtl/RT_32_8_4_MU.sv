@@ -7,7 +7,9 @@ module RT_32_8_4_MU
 	(input  logic 						 rstn_i,
 	 input  logic 			 			 Bz_s_i,			//field B inly needed for NAND NOR pNML
 	 input  logic 			          	 Bz_m_i,
-	 input  logic						 read_current_i,
+	 input  logic						 read_current_d_i,	
+     input  logic						 read_current_m_i,  
+     input  logic						 read_current_p_i,  
 	 input	logic						 current_s_lim_i,
 	 input	logic						 current_m_lim_i,
 	 input	logic						 current_s_data_i,
@@ -22,12 +24,12 @@ module RT_32_8_4_MU
 	 input  logic 						 write_en_mask_i,
 	 input  logic [Nr-1:0]			 	 write_i_program_i,			
 	 input  logic 			 			 write_en_program_i, 		
-	
 	 input  logic [Nb-1:0]				 word_lines_i,
 	 input  logic						 out_select_i,
 	  
-	 output logic [Nr-1:0] 		    	 r_data_o 
-	
+	 output logic [Nr-1:0] 		    	 r_data_o,
+	 output logic [Nr-1:0] 		    	 r_data_m_o,		//out r_data of mask racetrack (for std. mem. mode)		
+	 output logic [Nr-1:0] 		    	 r_data_p_o 		//out r_data of program racetrack (for std. mem. mode)	
 
 	);
 	
@@ -84,7 +86,9 @@ module RT_32_8_4_MU
 				(	.rstn_i(rstn_i),
 		 			.Bz_s_i(Bz_s_i),
 		    		.Bz_m_i(Bz_m_i),
-					.read_current_i(read_current_i),
+					.read_current_d_i(read_current_d_i),
+					.read_current_m_i(read_current_m_i),	
+					.read_current_p_i(read_current_p_i),	
 		 			.current_s_lim_i(current_s_lim_i),	
 		 			.current_m_lim_i(current_m_lim_i),
 		 			.current_s_data_i(current_s_data_i), 
@@ -100,8 +104,8 @@ module RT_32_8_4_MU
 					.write_i_program_i(write_i_program_i[i]),		
 					.write_en_program_i(enabled_port_wr_program),   
 		 
-		 			.r_port_data_o(data_int[i*Np +:Np]),     //assign to data_int vector            	 
-		 			.r_port_lim_o(logic_int[i*Np +:Np]),    //assign to logic_block_int vector 
+		 			.r_port_data_o(data_int[i*Np +:Np]),     		//assign to data_int vector            	 
+		 			.r_port_lim_o(logic_int[i*Np +:Np]),     		//assign to logic_int vector 
 					.r_port_data_mask_o(data_mask_int[i*Np +:Np]),
 					.r_port_data_program_o(data_program_int[i*Np +:Np])
 				);		
@@ -124,7 +128,7 @@ module RT_32_8_4_MU
 				assign enabled_port_data[p]  	= |(word_lines_i[(p*Nsp)+: Nsp]);	
 				assign enabled_port_logic[p] 	= |(word_lines_i[(p*Nsp)+: Nsp]);		
 				assign enabled_port_mask[p]  	= |(word_lines_i[(p*Nsp)+: Nsp]);	
-				assign enabled_port_program[p]	= |(word_lines_i[(p*Nsp)+: Nsp]); 
+				assign enabled_port_program[p]	= |(word_lines_i[(p*Nsp)+: Nsp]); 	
 			end
 			else begin
 				assign enabled_port_data[p]  	= |(word_lines_i[Nb-1: p*Nsp]);	//select the whole remaining slice
@@ -157,23 +161,41 @@ module RT_32_8_4_MU
 	always_comb begin
 	
 		for(int i=0; i<Nr; i=i+1) begin
-				data_array[i+Nr*0]  = data_int[Np*i+0];
-				data_array[i+Nr*1]  = data_int[Np*i+1];
-				data_array[i+Nr*2]  = data_int[Np*i+2];
-				data_array[i+Nr*3]  = data_int[Np*i+3];
-				data_array[i+Nr*4]  = data_int[Np*i+4];
-				data_array[i+Nr*5]  = data_int[Np*i+5];
-				data_array[i+Nr*6]  = data_int[Np*i+6];
-				data_array[i+Nr*7]  = data_int[Np*i+7];
+				data_array[i+Nr*0]  		= data_int[Np*i+0];
+				data_array[i+Nr*1]  		= data_int[Np*i+1];
+				data_array[i+Nr*2]  		= data_int[Np*i+2];
+				data_array[i+Nr*3]  		= data_int[Np*i+3];
+				data_array[i+Nr*4]  		= data_int[Np*i+4];
+				data_array[i+Nr*5]  		= data_int[Np*i+5];
+				data_array[i+Nr*6]  		= data_int[Np*i+6];
+				data_array[i+Nr*7]  		= data_int[Np*i+7];
+						
+				logic_array[i+Nr*0] 		= logic_int[Np*i+0];
+	            logic_array[i+Nr*1] 		= logic_int[Np*i+1];
+	            logic_array[i+Nr*2] 		= logic_int[Np*i+2];
+	            logic_array[i+Nr*3] 		= logic_int[Np*i+3];
+	            logic_array[i+Nr*4] 		= logic_int[Np*i+4];
+				logic_array[i+Nr*5] 		= logic_int[Np*i+5];
+				logic_array[i+Nr*6] 		= logic_int[Np*i+6];
+				logic_array[i+Nr*7] 		= logic_int[Np*i+7];
 				
-				logic_array[i+Nr*0] = logic_int[Np*i+0];
-	            logic_array[i+Nr*1] = logic_int[Np*i+1];
-	            logic_array[i+Nr*2] = logic_int[Np*i+2];
-	            logic_array[i+Nr*3] = logic_int[Np*i+3];
-	            logic_array[i+Nr*4] = logic_int[Np*i+4];
-				logic_array[i+Nr*5] = logic_int[Np*i+5];
-				logic_array[i+Nr*6] = logic_int[Np*i+6];
-				logic_array[i+Nr*7] = logic_int[Np*i+7];
+				data_program_array[i+Nr*0] 	= data_program_int[Np*i+0];	//route program racetrack output (for std. mem. mode)
+				data_program_array[i+Nr*1] 	= data_program_int[Np*i+1];
+				data_program_array[i+Nr*2] 	= data_program_int[Np*i+2];
+				data_program_array[i+Nr*3] 	= data_program_int[Np*i+3];
+				data_program_array[i+Nr*4] 	= data_program_int[Np*i+4];
+				data_program_array[i+Nr*5] 	= data_program_int[Np*i+5];
+				data_program_array[i+Nr*6] 	= data_program_int[Np*i+6];
+				data_program_array[i+Nr*7] 	= data_program_int[Np*i+7];
+				
+				data_mask_array[i+Nr*0] 	= data_mask_int[Np*i+0]; //route mask racetrack output (for std. mem. mode)
+				data_mask_array[i+Nr*1] 	= data_mask_int[Np*i+1];
+				data_mask_array[i+Nr*2] 	= data_mask_int[Np*i+2];
+				data_mask_array[i+Nr*3] 	= data_mask_int[Np*i+3];
+				data_mask_array[i+Nr*4] 	= data_mask_int[Np*i+4];
+				data_mask_array[i+Nr*5] 	= data_mask_int[Np*i+5];
+				data_mask_array[i+Nr*6] 	= data_mask_int[Np*i+6];
+				data_mask_array[i+Nr*7] 	= data_mask_int[Np*i+7];				
 		end	             
 	end       
 
@@ -204,7 +226,33 @@ module RT_32_8_4_MU
 			end
 		end
 	end
+	
+	//=====================================
+	//PROGRAM-DATA SLICE SELECTION (for std. mem. mode)
+	//=====================================
 
+	always_comb begin
+	r_data_p_o = '0; //all zeros
+		for (int i=0; i<Np; i=i+1)begin //find active port
+			if(enabled_port_program[i]==1) begin
+				r_data_p_o = data_program_array[i*Nr +:Nr];
+			end
+		end
+	end
+	
+	//=====================================
+	//MASK-DATA SLICE SELECTION (for std. mem. mode)
+	//=====================================
+
+	always_comb begin
+	r_data_m_o = '0; //all zeros
+		for (int i=0; i<Np; i=i+1)begin //find active port
+			if(enabled_port_mask[i]==1) begin
+				r_data_m_o = data_mask_array[i*Nr +:Nr];
+			end
+		end
+	end
+	
 	//=====================================
 	//OUTPUT MUX
 	//=====================================

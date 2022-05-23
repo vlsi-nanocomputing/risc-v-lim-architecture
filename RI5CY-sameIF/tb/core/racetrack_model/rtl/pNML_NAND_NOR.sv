@@ -19,7 +19,7 @@ module pNML_NAND_NOR
 	logic D_ff_in;
 	logic D_ff_out;
 	logic clk_i;
-	logic en; //enable for FF
+	logic en;		 //enable for FF
 	logic NAND_out;
 	logic NOR_out;
 	logic eval_out; //output of logic operation selection

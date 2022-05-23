@@ -12,11 +12,11 @@ module RT_cell
 		output logic 	out
 	);
 	
-	logic clk_i; //clock signal for FF
-	logic sw_enable; //switch enable for FF
+	logic clk_i; 		//clock signal for FF
+	logic sw_enable; 	//switch enable for FF
 	logic D_ff_out;
-	logic en; //enable for FF
-	logic shift_in; //value for shift operation
+	logic en;			 //enable for FF
+	logic shift_in;		 //value for shift operation
 	
 	//STORAGE PART
 	always @(posedge clk_i, negedge rstn) begin
@@ -29,7 +29,7 @@ module RT_cell
 		end
 	end
 	
-	assign en  = '1; //FF enable alsways active
+	assign en  = '1;	 //FF enable alsways active
 	assign out = D_ff_out;
 	
 	//SELECTON PART

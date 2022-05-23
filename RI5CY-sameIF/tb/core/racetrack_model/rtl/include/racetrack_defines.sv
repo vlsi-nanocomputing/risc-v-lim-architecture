@@ -19,14 +19,16 @@ package racetrack_defines;
 	const time w_phase_LO		= 6ns;
 	
 	parameter WAIT_LIM_CYCLES   = 2;
+		
 	
-	//NEED TO BE REMOVED AFTER RISC INTEGRATION
-	parameter FUNCT_NONE = 3'b000;
-	parameter FUNCT_XOR  = 3'b001;
-	parameter FUNCT_AND  = 3'b010;
-	parameter FUNCT_OR   = 3'b011;
-	parameter FUNCT_MIN  = 3'b101;
-	parameter FUNCT_MAX  = 3'b110;
+	parameter FUNCT_NONE = 8'b00000000;
+	parameter FUNCT_XOR  = 8'b00000001;
+	parameter FUNCT_AND  = 8'b00000010;
+	parameter FUNCT_OR   = 8'b00000011;
+	parameter FUNCT_NAND = 8'b00001010;
+	parameter FUNCT_NOR  = 8'b00001011;
+	parameter FUNCT_XNOR = 8'b00001001;
+
 	
 	
 ;

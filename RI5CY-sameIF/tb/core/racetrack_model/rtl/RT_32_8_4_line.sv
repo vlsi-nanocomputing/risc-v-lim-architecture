@@ -8,7 +8,9 @@ module RT_32_8_4_line
 	(input  logic 						 rstn_i,
 	 input  logic 			 			 Bz_s_i,				//field B inly needed for NAND NOR pNML
 	 input  logic 			          	 Bz_m_i,
-	 input  logic						 read_current_i,		//read current pulse
+	 input  logic						 read_current_d_i,		//read current pulse for data/logic
+	 input  logic						 read_current_m_i,		//read current pulse for mask-data
+	 input  logic						 read_current_p_i,		//read current pulse for program-data
 	 input  logic 			 			 current_s_lim_i,	    //lim pulse direction
 	 input  logic 			 			 current_m_lim_i, 		//lim pulse waveform
 	 input  logic 			 			 current_s_data_i,		//data pulse direction
@@ -24,10 +26,10 @@ module RT_32_8_4_line
 	 input  logic [Np-1:0]	 			 write_en_mask_i, 		//one write enable for each mask port
 	 input  logic [Np-1:0]	 			 write_en_program_i, 	//one write enable for each program port		
 	 
-	 output logic [Np-1:0]             	 r_port_data_o,			//read port data part
+	 output logic [Np-1:0]             	 r_port_data_o,			//read port data part (1/2 byte  0 - std .mem. mode)
 	 output logic [Np-1:0]               r_port_lim_o,			//read port logic part
-	 output logic [Np-1:0]             	 r_port_data_mask_o,	//read port data-mask part		
-	 output logic [Np-1:0]               r_port_data_program_o	//read port data-program part	
+	 output logic [Np-1:0]             	 r_port_data_mask_o,	//read port data-mask part	(1/2 byte 1 - std .mem. mode)	
+	 output logic [Np-1:0]               r_port_data_program_o	//read port data-program part (1/2 byte 2 - std .mem. mode)	
 	);
 	
 	//==========================
@@ -48,14 +50,14 @@ module RT_32_8_4_line
 	logic 					lim_line_last;	
 	logic 					mask_line_last;	
 	logic					data_line_last;
-	logic					program_line_last; 
+	logic					program_line_last;
 	
 	
 	//1st forward_in set to 0 otherwise shift in is undefined
 	assign lim_line_0	    = 1'b0;
 	assign mask_line_0		= 1'b0;
 	assign data_line_0		= 1'b0;
-	assign program_line_0	= 1'b0;	//NEW
+	assign program_line_0	= 1'b0;	
 	
 	//Last backward_in set to 0 otherwise shift in is undefined
 	assign data_line_last 		= 1'b0;
@@ -114,7 +116,7 @@ module RT_32_8_4_line
 				.rstn(rstn_i),
             	.current_s(current_s_mask_i),
             	.current_m(current_m_mask_i),
-				.read_current(read_current_i),
+				.read_current(read_current_m_i),
             	.backward_in(mask_line[i+1]), 
             	.forward_in(mask_line[i-1]),
             	.write_input(write_i_mask_i),
@@ -134,7 +136,7 @@ module RT_32_8_4_line
 				.rstn(rstn_i),
 				.current_s(current_s_mask_i),
 				.current_m(current_m_mask_i),
-				.read_current(read_current_i),
+				.read_current(read_current_m_i),
 				.backward_in(mask_line[i+1]), 
 				.forward_in(mask_line[i-1]),
 				.write_input(write_i_mask_i),
@@ -197,7 +199,7 @@ module RT_32_8_4_line
 					.current_m(current_m_lim_i),
 					.backward_in(lim_line[i+1]),
 					.forward_in(lim_line_0),
-					.IN1_NAND_NOR_sel(program_line[i]),	
+					.IN1_NAND_NOR_sel(program_line[i]),
 					.IN2(data_line[i]), 					
 					.IN3(mask_line[i]),
 					.out(lim_line[i])
@@ -236,7 +238,7 @@ module RT_32_8_4_line
 				.Bz_m(Bz_m_i),
 				.current_s(current_s_lim_i),
 				.current_m(current_m_lim_i),
-				.read_current(read_current_i),
+				.read_current(read_current_d_i),
 				.backward_in(lim_line_0),
 				.forward_in(lim_line[i-1]),
 				.IN1_NAND_NOR_sel(program_line[i]),	
@@ -258,7 +260,7 @@ module RT_32_8_4_line
 				.Bz_m(Bz_m_i),
 				.current_s(current_s_lim_i),
 				.current_m(current_m_lim_i),
-				.read_current(read_current_i),
+				.read_current(read_current_d_i),
 				.backward_in(lim_line_0),
 				.forward_in(lim_line[i-1]),
 				.IN1_NAND_NOR_sel(program_line[i]),	
@@ -356,7 +358,7 @@ module RT_32_8_4_line
 				.rstn(rstn_i),
 				.current_s(current_s_data_i),
 				.current_m(current_m_data_i),
-				.read_current(read_current_i),
+				.read_current(read_current_d_i),
 				.backward_in(data_line[i+1]),
 				.forward_in(data_line[i-1]),
 				.out(data_line[i]),
@@ -375,7 +377,7 @@ module RT_32_8_4_line
 				.rstn(rstn_i),
 				.current_s(current_s_data_i),
 				.current_m(current_m_data_i),
-				.read_current(read_current_i),
+				.read_current(read_current_d_i),
 				.backward_in(data_line[i+1]),
 				.forward_in(data_line[i-1]),
 				.out(data_line[i]),
@@ -421,7 +423,7 @@ module RT_32_8_4_line
 		end
 	endgenerate
 		
-	//NEW	
+		
 		
 	//==========================
 	//PROGRAM/DATA RACETRACK	//this racetrack is used to force the programming to the pNML racetrack and used also as data standard racetrack in memory mode
@@ -468,7 +470,7 @@ module RT_32_8_4_line
 				.rstn(rstn_i),
 				.current_s(current_s_program_i),
 				.current_m(current_m_program_i),
-				.read_current(read_current_i),
+				.read_current(read_current_p_i),
 				.backward_in(program_line[i+1]),
 				.forward_in(program_line[i-1]),
 				.out(program_line[i]),
@@ -487,7 +489,7 @@ module RT_32_8_4_line
 				.rstn(rstn_i),
 				.current_s(current_s_program_i),
 				.current_m(current_m_program_i),
-				.read_current(read_current_i),
+				.read_current(read_current_p_i),
 				.backward_in(program_line[i+1]),
 				.forward_in(program_line[i-1]),
 				.out(program_line[i]),
