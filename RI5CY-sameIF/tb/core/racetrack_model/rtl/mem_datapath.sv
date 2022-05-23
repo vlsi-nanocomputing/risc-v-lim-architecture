@@ -28,7 +28,6 @@ module mem_datapath
 		output logic					r_valid_o
 	);
 
-	//localparam bytes  = 2**ADDR_WIDTH;
 	
 	localparam bytes  = MAX_SIZE;		//NEW	
 	localparam par    = Nr*NMU;			//data parallelism
@@ -38,8 +37,14 @@ module mem_datapath
 	localparam Nsp = Nb/Np;		
 	
     logic 	[words-1:0]				word_lines;	  
+	logic   [ADDR_WIDTH-1:0]		ADDR_i_dec;		//decoded address (std addr are incremented by 4)
 	
+	//======================================================================
+    // ADDRESS MAPPING
+    //====================================================================== 
 	
+	assign ADDR_i_dec		= ADDR_i>>2;	//decode std address	
+
 	//======================================================================
     // ADDRESS DECODER
     //====================================================================== 
@@ -48,7 +53,7 @@ module mem_datapath
         for (int i=0; i<words; i++) begin
             word_lines[i] = 1'b0; //initiaize to 0 wordlines
         end
-        word_lines[ADDR_i] = 1'b1; //set to 1 active wordline
+        word_lines[ADDR_i_dec] = 1'b1; //set to 1 active wordline
     end
 	
 	
@@ -80,7 +85,7 @@ module mem_datapath
 		.write_data_i(write_i_data_i),
 		.write_en_data_i(write_en_data_i),
 		.mask_i(mask_i),
-		.n_shift_i(ADDR_i[1:0]),   
+		.n_shift_i(ADDR_i_dec[1:0]),   
 		.logic_in_memory_funct_int_i(logic_in_memory_funct_int_i),
 		
 		.data_o(r_data_o),

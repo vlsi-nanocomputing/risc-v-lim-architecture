@@ -107,14 +107,6 @@ module tb_mem_datapath_fast;
 			@(posedge clk_system);
 		end
 	    rstn = 1'b1;
-		//en_ab = 1;
-		//repeat(1) begin				//wait 1 clock cycle
-		//	@(posedge clk_system);
-		//end
-		//en_ab = 0;
-		//repeat(2) begin				//wait 2 clock cycles
-		//	@(posedge clk_system);
-		//end
 		
 		//WRITE ROUTINE
 		repeat(5) begin
@@ -127,7 +119,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 			write_i_data = write_i_data +32'h349B;	//add 13467
 		end
 		
@@ -146,7 +138,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 		
 		
@@ -169,7 +161,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 		
 		
@@ -189,7 +181,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 		
 		
@@ -212,7 +204,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 		
 		
@@ -232,7 +224,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 		
 		//SW XOR
@@ -254,7 +246,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 		
 		
@@ -274,7 +266,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 		
 		
@@ -296,7 +288,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 			write_i_data = write_i_data +32'h349B;	//add 13467
 		end
 
@@ -320,7 +312,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 
 
@@ -341,7 +333,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 
 
@@ -363,7 +355,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 		end
 		
 		
@@ -386,7 +378,7 @@ module tb_mem_datapath_fast;
 			repeat(1) begin				//wait 1 clock cycles
 				@(posedge clk_system);
 			end
-			ADDR = ADDR +1;
+			ADDR = ADDR +4;
 			write_i_data = write_i_data +32'h349B;	//add 13467
 		end
 
@@ -395,7 +387,7 @@ module tb_mem_datapath_fast;
 		//BYTE READ ROUTINE
 		mask = 32'h8D;
 		write_en_data 	= 1'b0;
-		ADDR = 8'h1;			//read 2nd element
+		ADDR = 8'h4;			//read 2nd element
 		en_ab = 1;
 			repeat(1) begin				//wait 1 clock cycle
 				@(posedge clk_system);
