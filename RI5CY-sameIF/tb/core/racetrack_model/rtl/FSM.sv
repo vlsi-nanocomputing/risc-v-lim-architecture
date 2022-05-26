@@ -78,8 +78,10 @@ module FSM
 					if(w_en_i) begin
 						unique case(logic_in_memory_funct_int_i)
 							
-							 FUNCT_AND:  next_state = WRITE_MASK_NAND;   
-							 FUNCT_OR:  next_state = WRITE_MASK_NOR;   
+							 FUNCT_AND	:  next_state = WRITE_MASK_NAND;   
+							 FUNCT_OR	:  next_state = WRITE_MASK_NOR;   
+							 FUNCT_NAND :  next_state = WRITE_MASK_NAND;   
+							 FUNCT_NOR  :  next_state = WRITE_MASK_NOR;   
 							
 							default: next_state = WRITE;	//go in WRITE only in NULL and XOR cases
 						endcase
@@ -87,7 +89,9 @@ module FSM
 						unique case(logic_in_memory_funct_int_i)
 							
 							 FUNCT_AND:  next_state = WRITE_MASK_NAND;  
-							 FUNCT_OR:  next_state = WRITE_MASK_NOR;   
+							 FUNCT_OR:  next_state = WRITE_MASK_NOR;  
+							 FUNCT_NAND :  next_state = WRITE_MASK_NAND;   
+							 FUNCT_NOR  :  next_state = WRITE_MASK_NOR;   
 							
 							default: next_state = READ;	//go in READ only in NULL and XOR cases
 						endcase
@@ -442,7 +446,7 @@ module FSM
 			 FUNCT_NONE:  r_en_feedbackW = 1'b0; //do not read during a standard access (write wdata_i)
 			
 			
-			default: r_en_feedbackW = 1'b1;
+			default: r_en_feedbackW = 1'b1;	//during LiM operations read stored data (useful for LiM store operations)
 		
 		endcase
 	end

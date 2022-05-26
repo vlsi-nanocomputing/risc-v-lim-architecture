@@ -85,6 +85,7 @@ module RT_memory
 	logic [Nr*NMU-1:0] 				data_and_d;			//Bitwise AND active block data out
 	logic [Nr*NMU-1:0] 				data_xor_d;			//Bitwise XOR active block data out
 	logic [Nr*NMU-1:0] 				data_or_d;			//Bitwise OR active block data out
+	logic [Nr*NMU-1:0]				data_xnor_d;			//Bitwise XNOR active block data out
 	logic							en_lim_buf;			//enable signa for LiM buffer FF
 	logic [Nr*NMU-1:0]				lim_buf;			//LiM buffer (store data values before byte write operation)
 	logic [Nr*NMU-1:0]				program_w; 			//input write program racetrack 
@@ -206,10 +207,10 @@ module RT_memory
 	//LiM ARRAYS
 	//=====================================
 
-	assign data_and_d = ~data_d; 			//invert NAND output (exploit Racetrack LiM result)
-	assign data_or_d  = ~data_d; 			//invert NOR output  (exploit Racetrack LiM result)
-	assign data_xor_d = data_d ^ mask_i; 	//compute logic operation
-	
+	assign data_and_d  = ~data_d; 			//invert NAND output (exploit Racetrack LiM result)
+	assign data_or_d   = ~data_d; 			//invert NOR output  (exploit Racetrack LiM result)
+	assign data_xor_d  = data_d ^ mask_i; 	//compute XOR logic operation
+	assign data_xnor_d = ~data_xor_d;		//compute NXOR logic operation
 		
 	
 	
@@ -251,6 +252,34 @@ module RT_memory
 						end
 					end
 			end
+			
+			
+			FUNCT_NAND: begin
+					if(be_b_i[0] || range_active_i)begin	
+						for(int i=0; i<4; i++)begin			
+								if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_d[i*8 +: 8];
+						end
+					end
+			end	
+			
+			
+			FUNCT_NOR: begin
+					if(be_b_i[0] || range_active_i)begin
+						for(int i=0; i<4; i++)begin
+								if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_d[i*8 +: 8];
+						end
+					end
+	
+			end
+			
+			FUNCT_XNOR: begin
+					if(be_b_i[0] || range_active_i)begin
+						for(int i=0; i<4; i++)begin
+							if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_xnor_d[i*8 +: 8];
+						end
+					end
+			end
+						
 			
 		
 				default: begin
@@ -297,9 +326,37 @@ module RT_memory
 							if(be_b_i[i] || range_active_i) write_int[i*8 +: 8] = data_xor_d[i*8 +: 8];
 						end	
 		end
-	
-	
-	
+		
+			FUNCT_NAND: begin	
+                        for(int i=0; i<4; i++)begin
+							if(be_b_i[i] || range_active_i) begin
+								write_int[i*8 +: 8] = data_d[i*8 +: 8];	//take logic value from ractrack
+							end else begin
+								write_int[i*8 +: 8] = lim_buf[i*8 +: 8];	//restore actual value
+							end
+						end	
+		end
+		
+			FUNCT_NOR: begin
+                        for(int i=0; i<4; i++)begin
+							if(be_b_i[i] || range_active_i) begin
+								write_int[i*8 +: 8] = data_d[i*8 +: 8];		//take logic value from ractrack
+							end else begin
+								write_int[i*8 +: 8] = lim_buf[i*8 +: 8];	//restore actual value
+							end
+						end	
+		end
+		
+		
+			FUNCT_XNOR: begin
+                        for(int i=0; i<4; i++)begin
+							if(be_b_i[i] || range_active_i) write_int[i*8 +: 8] = data_xnor_d[i*8 +: 8];
+						end	
+		end
+		
+		
+				
+
 			default: begin
 						for(int i=0; i<4; i++)begin
 							if(be_b_i[i] || range_active_i) write_int[i*8 +: 8] = write_data_i[i*8 +: 8];
