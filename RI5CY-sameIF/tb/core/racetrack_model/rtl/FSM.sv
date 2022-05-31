@@ -1,11 +1,11 @@
-import racetrack_defines::*;
+import racetrack_defines::*; //remove after RISC integration
 
 module FSM
 	#( parameter N_WIDTH = 22,
 	   parameter CNT_WIDTH = 10
 	)
 	(
-		input  logic 					clk_i,								//FSM clock (?)
+		input  logic 					clk_i,								//FSM clock 
 		input  logic					rstn_i,
 		input  logic					en_i,			
 		input  logic					shift_done_s_i, 					//notifies completion of set shifts
@@ -88,8 +88,8 @@ module FSM
 					end else begin
 						unique case(logic_in_memory_funct_int_i)
 							
-							 FUNCT_AND:  next_state = WRITE_MASK_NAND;  
-							 FUNCT_OR:  next_state = WRITE_MASK_NOR;  
+							 FUNCT_AND  :  next_state = WRITE_MASK_NAND;  
+							 FUNCT_OR   :  next_state = WRITE_MASK_NOR;  
 							 FUNCT_NAND :  next_state = WRITE_MASK_NAND;   
 							 FUNCT_NOR  :  next_state = WRITE_MASK_NOR;   
 							
