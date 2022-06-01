@@ -81,7 +81,7 @@ RTLSRC_VLOG_TB_TOP	:= $(basename $(notdir $(RTLSRC_TB_TOP)))
 RTLSRC_VOPT_TB_TOP	:= $(RTLSRC_VLOG_TB_TOP)#$(addsuffix _vopt, $(RTLSRC_VLOG_TB_TOP))
 
 # riscv toolchain install path
-RISCV_LIB               ?= <tool_chain_install_path>
+RISCV_LIB               ?= /home/thesis/gianluca.goti/riscv-compiler-ext-inv
 RISCV_EXE_PREFIX         = $(RISCV_LIB)/bin/riscv32-unknown-elf-
 
 # firmware vars
@@ -157,12 +157,14 @@ dpiheader: .build-tb
 # ===================================================================
 # VCS testbench compilation
 # ===================================================================
+#ORIGIANL TIMESCALE -timescale=1ns/1ps 
+
 vcsify: $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
 	$(VCS) +vc -sverilog -race=all -ignore unique_checks -full64 \
-		-timescale=1ns/1ps \
+		-timescale=1ns/1ns -j20\
 		-CC "-I$(VCS_HOME)/include -O3 -march=native" $(VCS_FLAGS) \
 		$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) \
-		+incdir+$(RTLSRC_INCDIR)
+		+incdir+$(RTLSRC_INCDIR) 
 
 vcs-run: vcsify firmware/firmware.hex
 	./simv $(SIMV_FLAGS)
@@ -219,6 +221,25 @@ vcs-run-max_min_lim: vcsify custom/max_min_lim.hex
 vcs-run-transport_lim: vcsify custom/transport_min_cost_lim.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/transport_min_cost_lim.hex"
 	mv trace_core_00_0.log TraceAlgorithms/transport_lim.log
+
+#Run programs for RT memory
+
+vcs-run-bitwise-ext-asm-rt: vcsify custom/bitwise_lim_ext_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim_ext_asm_RT.log
+
+vcs-run-bitwise-ext-inv-asm-rt: vcsify custom/bitwise_lim_ext_inv_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_inv_asm.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim_ext_inv_asm_RT.log
+
+
+
+
+
+
+
+
+
 
 vcs-run-gui: VCS_FLAGS+=-debug_all
 vcs-run-gui: vcsify firmware/firmware.hex
@@ -420,6 +441,30 @@ custom/xnor_net_lim.elf: custom/xnor_net_lim.c
 		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
 		-lc -lm -lgcc
 
+custom/bitwise_lim_ext_asm.elf: custom/bitwise_lim_ext_asm.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -mabi=ilp32 -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		-T custom/link.ld \
+		-static \
+		custom/crt0.S \
+		$^ custom/syscalls.c custom/vectors.S \
+		-I $(RISCV_LIB)/riscv32-unknown-elf/include \
+		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc
+
+custom/bitwise_lim_ext_inv_asm.elf: custom/bitwise_lim_ext_inv_asm.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -mabi=ilp32 -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		-T custom/link.ld \
+		-static \
+		custom/crt0.S \
+		$^ custom/syscalls.c custom/vectors.S \
+		-I $(RISCV_LIB)/riscv32-unknown-elf/include \
+		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc
+
+
+
 
 custom-clean:
 	find ./custom -maxdepth 1 -not -name '*lim.hex' -name '*.hex' -delete && rm ./custom/*.elf
@@ -453,6 +498,19 @@ custom-vsim-run-gui-aes: vsim-run-gui
 custom-vsim-run-gui-bitwise: vsim-all custom/bitwise_lim.hex
 custom-vsim-run-gui-bitwise: ALL_VSIM_FLAGS += "+firmware=custom/bitwise_lim.hex"
 custom-vsim-run-gui-bitwise: vsim-run-gui
+
+#LiM programs with new extended compiler
+
+.PHONY: custom-vsim-run-gui-bitwise-ext-asm
+custom-vsim-run-gui-bitwise-ext-asm: vsim-all custom/bitwise_lim_ext_asm.hex
+custom-vsim-run-gui-bitwise-ext-asm: ALL_VSIM_FLAGS += "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose
+custom-vsim-run-gui-bitwise-ext-asm: vsim-run-gui
+
+#test new inverting functionalities
+.PHONY: custom-vsim-run-gui-bitwise-ext-inv-asm
+custom-vsim-run-gui-bitwise-ext-inv-asm: vsim-all custom/bitwise_lim_ext_inv_asm.hex
+custom-vsim-run-gui-bitwise-ext-inv-asm: ALL_VSIM_FLAGS += "+firmware=custom/bitwise_lim_ext_inv_asm.hex" +verbose 
+custom-vsim-run-gui-bitwise-ext-inv-asm: vsim-run-gui
 
 
 

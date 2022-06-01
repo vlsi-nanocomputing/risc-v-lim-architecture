@@ -14,12 +14,18 @@
 module riscv_wrapper
     #(parameter INSTR_RDATA_WIDTH = 32,
       parameter RAM_ADDR_WIDTH = 20,
+	  parameter MAX_SIZE = 12000,
+	  parameter MEM_MODE =1,
       parameter BOOT_ADDR = 'h180,
       parameter PULP_CLUSTER = 0,
       parameter FPU = 0,
       parameter PULP_ZFINX = 0,
       parameter DM_HALTADDRESS = 32'h1A110800)
     (input logic         clk_i,
+	 input 	logic		 clk_m_i, 		//magnetic clock
+	 input  logic		 Bz_s_i,  		//Magnetic field sign
+	 input  logic		 write_pulse_i,	//write pulse for racetrack
+	 input  logic		 read_pulse_i,	//read pulse for racetrack
      input logic         rst_ni,
 
      input logic         fetch_enable_i,
@@ -126,9 +132,15 @@ module riscv_wrapper
     // this handles read to RAM and memory mapped pseudo peripherals
     mm_ram
         #(.RAM_ADDR_WIDTH (RAM_ADDR_WIDTH),
+		  .MAX_SIZE(MAX_SIZE),	//Memory size
+		  .MEM_MODE(MEM_MODE),
           .INSTR_RDATA_WIDTH (INSTR_RDATA_WIDTH))
     ram_i
         (.clk_i                  ( clk_i                          ),
+		 .clk_m_i				 ( clk_m_i						  ),
+		 .Bz_s_i				 ( Bz_s_i						  ),
+		 .write_pulse_i			 ( write_pulse_i	 			  ),
+		 .read_pulse_i			 ( read_pulse_i	 				  ),
          .rst_ni                 ( rst_ni                         ),
 
          .instr_req_i            ( instr_req                      ),

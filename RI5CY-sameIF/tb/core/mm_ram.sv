@@ -19,8 +19,14 @@ import riscv_defines::*;
 
 module mm_ram
     #(parameter RAM_ADDR_WIDTH = 16,
+	  parameter MAX_SIZE = 12000,
+	  parameter MEM_MODE = 1,
       parameter INSTR_RDATA_WIDTH = 128)
     (input logic                          clk_i,
+	 input 	logic						  clk_m_i, 		//magnetic clock
+	 input  logic						  Bz_s_i,  		//Magnetic field sign
+	 input  logic						  write_pulse_i,	//write pulse for racetrack
+	 input  logic						  read_pulse_i,	//read pulse for racetrack
      input logic                          rst_ni,
 
      input logic                          instr_req_i,
@@ -515,10 +521,16 @@ module mm_ram
     // instantiate the ram
     dp_ram_logic
         #(.ADDR_WIDTH (RAM_ADDR_WIDTH),
+		  .MAX_SIZE(MAX_SIZE),	//Memory size
+		  .MEM_MODE(MEM_MODE),
           .INSTR_RDATA_WIDTH(INSTR_RDATA_WIDTH))
     dp_ram_i
         (
          .clk_i                   ( clk_i           ),
+		 .clk_m_i				  ( clk_m_i			),
+		 .Bz_s_i				  ( Bz_s_i			),
+		 .write_pulse_i			  ( write_pulse_i	),
+		 .read_pulse_i			  ( read_pulse_i	),
          .rst_ni                  ( rst_ni          ),
 
          .en_a_i                  ( ram_instr_req   ),
