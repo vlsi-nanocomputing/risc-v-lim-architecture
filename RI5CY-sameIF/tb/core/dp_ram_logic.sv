@@ -74,6 +74,7 @@ module dp_ram_logic
     logic                            en_b_int;						// Bank request internal (after manipulation)
     logic [31:0]                     wdata_b_int;
     logic                            word_lines[words];
+    logic                            word_lines_std_mem[bytes];     //wordlines for standard memory
     logic                            word_lines_int[words];
     logic                            range_active;					//signal that identifies a range operation
     logic [31:0]                     mask;	
@@ -120,13 +121,19 @@ module dp_ram_logic
     logic [ADDR_WIDTH-1:0]           addr_b_maxmin_q;               //sampled addr for max/min operations
     logic                            decoder_range_init[words];     //range decoder init wordlines
     logic                            decoder_range_end[words];      //range decoder end wordlines
-    logic                            word_wired_zeros[words];       //constant for max/min operations
-    logic                            word_wired_ones[words];        //constant for max/min operations
-    logic                            word_wired_or[words];          //wired or array
-    logic                            result_word_wired_or[words];   //result wired or array
-    logic                            enabled_rows[words];           //enabled rows for max/min operations
-    logic                            next_enabled_rows[words];      //next enabled rows for max/min operations
+    logic                            word_wired_zeros[bytes];       //constant for max/min operations
+    logic                            word_wired_ones[bytes];        //constant for max/min operations
+    logic                            word_wired_or[bytes];          //wired or array
+    logic                            result_word_wired_or[bytes];   //result wired or array
+    logic                            enabled_rows[bytes];           //enabled rows for max/min operations
+    logic                            next_enabled_rows[bytes];      //next enabled rows for max/min operations
 
+`ifndef RT_MEM       
+    logic [7:0]                      mem_and[bytes];
+    logic [7:0]                      mem_or[bytes];
+    logic [7:0]                      mem_xor[bytes];
+    logic [7:0]                      mem_in[bytes];
+`endif  
 
 
     always_comb addr_a_int = {addr_a_i[ADDR_WIDTH-1:2], 2'b0};
@@ -381,6 +388,39 @@ module dp_ram_logic
     end 
 
 
+    /* Generte byte-addressing wordlines */
+    always_comb_begin
+        
+        // Initialization
+        for (int i=0; i<bytes; i++) begin
+            assign word_lines_std_mem[i] = 1'b0;
+        end
+
+        if (range_active) begin
+            for (int i=0; i<bytes; i++) begin
+               assign word_lines_std_mem[i    ] = word_lines[i];
+               assign word_lines_std_mem[i + 1] = word_lines[i];
+               assign word_lines_std_mem[i + 2] = word_lines[i];
+               assign word_lines_std_mem[i + 3] = word_lines[i];
+
+            end
+        end else begin
+            for (int i=0; i<bytes; i=i+4) begin
+                word_lines_std_mem[i  ] = be_b_i[0] && word_lines[i];
+                word_lines_std_mem[i+1] = be_b_i[1] && word_lines[i];
+                word_lines_std_mem[i+2] = be_b_i[2] && word_lines[i];
+                word_lines_std_mem[i+3] = be_b_i[3] && word_lines[i];
+            end
+        end
+
+
+
+    end
+        
+
+
+
+
 `endif
 
 	
@@ -438,7 +478,7 @@ module dp_ram_logic
 
 
     //======================================================================
-    // MEMORY PART
+    // MEMORY ARRAY INSTANTIATION
     //======================================================================
 
 `ifdef RT_MEM    //racetrack memory part
@@ -506,19 +546,129 @@ module dp_ram_logic
     // STANDARD MEMORY
     
 
+    /* Read Logic - Data part */
+    always_ff @(posedge clk_i) begin
+	if (en_b_int && !we_b_i) begin
+	    unique case (logic_in_memory_funct_int)
+		FUNCT_AND: begin
+                        for (int i=0; i<bytes; i=i4+) begin
+                            if( word_lines_std_mem[i] ) begin
+                                rdata_b_o[ 7: 0] <= mem_and[i    ] ;
+			                    rdata_b_o[15: 8] <= mem_and[i + 1];
+			                    rdata_b_o[23:16] <= mem_and[i + 2];
+			                    rdata_b_o[31:24] <= mem_and[i + 3];
+                            end
+                        end	
+		end
+		
+		FUNCT_OR: begin
+                        for (int i=0; i<bytes; i=i+4) begin
+                            if( word_lines_std_mem[i] ) begin
+                                rdata_b_o[ 7: 0] <= mem_or[i    ];
+			                    rdata_b_o[15: 8] <= mem_or[i + 1];
+			                    rdata_b_o[23:16] <= mem_or[i + 2];
+			                    rdata_b_o[31:24] <= mem_or[i + 3];
+                            end
+                        end
+		end
+		
+		FUNCT_XOR: begin
+                        for (int i=0; i<bytes; i=i+4) begin
+                            if( word_lines_std_mem[i] ) begin
+                                rdata_b_o[ 7: 0] <= mem_xor[i    ];
+			                    rdata_b_o[15: 8] <= mem_xor[i + 1];
+			                    rdata_b_o[23:16] <= mem_xor[i + 2];
+			                    rdata_b_o[31:24] <= mem_xor[i + 3];
+                            end
+                        end
+		end
+		
+		FUNCT_MAX, FUNCT_MIN : begin
+			if ( stop_maxmin_iteration ) begin
+                            for(int i=0; i<bytes; i=i+4) begin
+                                if( next_enabled_rows[i] ) begin
+			                       rdata_b_o[ 7: 0] <= mem[i    ];
+			                       rdata_b_o[15: 8] <= mem[i + 1];
+			                       rdata_b_o[23:16] <= mem[i + 2];
+			                       rdata_b_o[31:24] <= mem[i + 3];
+                                end
+                            end
+                        end
+		end
+		
+		default: begin
+			for (int i=0; i<bytes; i=i+4) begin
+                            if( word_lines_std_mem[i] ) begin
+                                rdata_b_o[ 7: 0] <= mem[i    ];
+			                    rdata_b_o[15: 8] <= mem[i + 1];
+			                    rdata_b_o[23:16] <= mem[i + 2];
+			                    rdata_b_o[31:24] <= mem[i + 3];
+                            end
+                        end
+		end
+	    endcase
+	end  
+    end
 
 
-    //INSERIRE MODULO STD MEMORY
+    */ LiM part */    
 
 
+    // AND, OR, XOR, WIRED-OR
+    always_comb begin
+        for (int row = 0; row < bytes; row=row+4) begin
+            // AND ARRAY
+            mem_and[row    ] = mem[row    ] & mask[ 0+:8];
+            mem_and[row + 1] = mem[row + 1] & mask[ 8+:8];
+            mem_and[row + 2] = mem[row + 2] & mask[16+:8];
+            mem_and[row + 3] = mem[row + 3] & mask[24+:8];
+            // OR ARRAY
+            mem_or[row    ]  = mem[row    ] | mask[ 0+:8];
+            mem_or[row + 1]  = mem[row + 1] | mask[ 8+:8];
+            mem_or[row + 2]  = mem[row + 2] | mask[16+:8];
+            mem_or[row + 3]  = mem[row + 3] | mask[24+:8];
+            // XOR ARRAY
+            mem_xor[row    ] = mem[row    ] ^ mask[ 0+:8];
+            mem_xor[row + 1] = mem[row + 1] ^ mask[ 8+:8];
+            mem_xor[row + 2] = mem[row + 2] ^ mask[16+:8];
+            mem_xor[row + 3] = mem[row + 3] ^ mask[24+:8];
+            // WIRED-OR ARRAY
+            word_wired_or[row  ] = ( | ({mem[row+3], mem[row+2], mem[row+1], mem[row  ]} & mask) );
+            word_wired_or[row+1] = ( | ({mem[row+3], mem[row+2], mem[row+1], mem[row  ]} & mask) );
+            word_wired_or[row+2] = ( | ({mem[row+3], mem[row+2], mem[row+1], mem[row  ]} & mask) );
+            word_wired_or[row+3] = ( | ({mem[row+3], mem[row+2], mem[row+1], mem[row  ]} & mask) );
 
+            // WRITE-IN ARRAY
+            unique case (logic_in_memory_funct_int)
+                FUNCT_AND: begin
+                        mem_in[row  ] = mem_and[row  ];
+			            mem_in[row+1] = mem_and[row+1];
+                        mem_in[row+2] = mem_and[row+2];
+                        mem_in[row+3] = mem_and[row+3];
+		end
+                FUNCT_OR: begin
+                        mem_in[row  ] = mem_or[row  ];
+			            mem_in[row+1] = mem_or[row+1];
+                        mem_in[row+2] = mem_or[row+2];
+                        mem_in[row+3] = mem_or[row+3];
+		end
+                FUNCT_XOR: begin
+                        mem_in[row  ] = mem_xor[row  ];
+			            mem_in[row+1] = mem_xor[row+1];
+                        mem_in[row+2] = mem_xor[row+2];
+                        mem_in[row+3] = mem_xor[row+3];
+		end
+                default: begin
+			            mem_in[row  ] = wdata_b_i[ 0+:8];
+                        mem_in[row+1] = wdata_b_i[ 8+:8];
+                        mem_in[row+2] = wdata_b_i[16+:8];
+                        mem_in[row+3] = wdata_b_i[24+:8];
+		end
+            endcase
+        end
+    end
 
-    
-
-
-
-
-	
+    	
 
 	
 `endif
@@ -531,9 +681,10 @@ module dp_ram_logic
     // MIN-MAX LOGIC
     //======================================================================
 
+// MIN-MAX LOGIC
     /* constant vectors */
     always_comb begin
-        for (int i=0; i<words; i++) begin
+        for (int i=0; i<bytes; i++) begin
             word_wired_zeros[i] = 1'b0;
             word_wired_ones[i]  = 1'b1;
         end
@@ -543,19 +694,19 @@ module dp_ram_logic
     always_comb begin
         unique case (opcode_mem) 
             FUNCT_MAX: begin // Disabled row will show wired-or result equal to 0
-                for (int i = 0; i < words; i++) begin
+                for (int i = 0; i < bytes; i++) begin
                     result_word_wired_or[i] = word_wired_or[i] && enabled_rows[i];
                 end
             end
 
             FUNCT_MIN: begin // Disabled row will show wired-or result equal to 1
-                for (int i = 0; i < words; i++) begin
+                for (int i = 0; i < bytes; i++) begin
                     result_word_wired_or[i] = word_wired_or[i] || !enabled_rows[i];
                 end
             end
     
             default: begin
-                for (int i = 0; i < words; i++) begin
+                for (int i = 0; i < bytes; i++) begin
                     result_word_wired_or[i] = word_wired_or[i];
                 end
             end
@@ -568,15 +719,15 @@ module dp_ram_logic
     end
 
     always_comb begin
-        for (int i=0; i<words; i++) begin
+        for (int i=0; i<bytes; i++) begin
             next_enabled_rows[i] = '0;
         end
 
         if (en_b_int) begin
             // Initaliase enabled_rows
             if (start_maxmin) begin
-                for (int i=0; i<words; i++) begin //only data memory part
-                    next_enabled_rows[i] = word_lines[i];
+                for (int i=0; i<bytes; i++) begin //only data memory part
+                    next_enabled_rows[i] = word_lines_std_mem[i];
                 end
             // Update enabled_rows
             end else begin
@@ -586,9 +737,12 @@ module dp_ram_logic
                             next_enabled_rows = enabled_rows;
                         end
                         else begin
-                            for (int i = 0; i < words; i=++) begin
+                            for (int i = 0; i < bytes; i=i+4) begin
                                 if (enabled_rows[i]) begin // enable for the entire word (32-bit) is updated
                                     next_enabled_rows[i  ] = result_word_wired_or[i];
+                                    next_enabled_rows[i+1] = result_word_wired_or[i];
+                                    next_enabled_rows[i+2] = result_word_wired_or[i];
+                                    next_enabled_rows[i+3] = result_word_wired_or[i];
                                 end
                             end                             
                         end
@@ -599,16 +753,19 @@ module dp_ram_logic
                             next_enabled_rows = enabled_rows;
                         end
                         else begin
-                            for (int i = 0; i < words; i=i++) begin
+                            for (int i = 0; i < bytes; i=i+4) begin
                                 if (enabled_rows[i]) begin // enable for the entire word (32-bit) is updated
                                     next_enabled_rows[i  ] = !result_word_wired_or[i];
+                                    next_enabled_rows[i+1] = !result_word_wired_or[i];
+                                    next_enabled_rows[i+2] = !result_word_wired_or[i];
+                                    next_enabled_rows[i+3] = !result_word_wired_or[i];
                                 end
                             end                             
                         end
                     end 
  
                     default: begin
-                        for (int i=0; i<words; i++) begin
+                        for (int i=0; i<bytes; i++) begin
                             next_enabled_rows[i] = '0; 
                         end
                     end
