@@ -90,21 +90,26 @@ module dp_ram_logic
 	logic							 cnt_en;						//enable for counter in range decoder
 	logic							 cmp_end_add;					//comparator for end address in range decoder	
 	logic [ADDR_WIDTH-1:0]           addr_b_range_cmp;				//address end decremented by four for the comparators			
-
 	logic							 we_b_q;				
 	logic							 we_b_int;				
 	logic [ADDR_WIDTH-1:0]         	 addr_b_int_dec;				//decoded address (divide by 4)
 	logic [ADDR_WIDTH-1:0]         	 addr_b_range_dec;				//decoded address (divide by 4)
 	logic [ADDR_WIDTH-1:0]         	 addr_mem_dec;					//decoded address (divide by 3) for memory mode
-	logic                            decoder_range[words]; 			//initial decoder range
+	logic                            decoder_init[words]; 			//initial decoder 
 	logic                            word_lines_lim[words]; 		//word_lines for LiM mode
 	logic							 word_lines_tri[words_tri];		//word_lines for memory mode
 	logic							 active_triplet[triplets];
-
-
 	logic [2:0]						 word_sel_tri;					//word selection for memory mode
 	logic [1:0]						 n_shift;						//n. of required shift
 	logic [1:0]						 n_shift_lim;					//n. of required shift for LiM mode
+    logic [31:0]                     mask_count;                    //mask signal for max/min operation
+    logic                            start_maxmin;                  //start signal for max/min operation
+    logic                            stop_maxmin_iteration;         //stop signal for max/min operation                
+    logic                            en_b_maxmin_valid;             //valid signal for maxmin operations
+    logic                            en_b_maxmin_q;                 //sampled enable sinal for max/min operations            
+    logic [31:0]                     wdata_b_maxmin_q;              //sampled write data for max/min operations
+    logic                            en_b_maxmin_valid_q;           //sampled valid signal for max/min operations
+    logic [ADDR_WIDTH-1:0]           addr_b_maxmin_q;               //sampled addr for max/min operations
 
 
 
@@ -115,41 +120,78 @@ module dp_ram_logic
 
 
 	//======================================================================
-    // HANDSHAKING PROTOCOL (takes into account RT's latency)
+    // HANDSHAKING PROTOCOL 
     //====================================================================== 
+
+    
+    `ifdef RT_MEM    //racetrack memory part
 	
-	 assign en_b_rt_valid = en_b_i && !we_b_funct_mem;	//generate enable signal for sampling input signals
+	    assign en_b_rt_valid = en_b_i && !we_b_funct_mem;	//generate enable signal for sampling input signals
 
 	
-	//sample input signal for handshake
-	always_ff @(posedge clk_i, negedge rst_ni) begin
-        if (~rst_ni) begin								//if reset is 0 (active low) set the signal to 0
-             en_b_rt_valid_q   <= 1'b0;
-        end
-        else if (en_b_rt_valid || rvalid_rt) begin	
-             en_b_rt_q             <= en_b_i; 							
-			 wdata_b_rt_q      	   <= wdata_b_i;
-             en_b_rt_valid_q   	   <= en_b_rt_valid;
-			 addr_b_rt_q		   <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-			 //addr_b_rt_q		   <= {dec_addr_b_i};	//NEW
-			 be_b_q				   <= be_b_i;
-			 we_b_q				   <= we_b_i;	
+	    //sample input signal for handshake
+	    always_ff @(posedge clk_i, negedge rst_ni) begin
+            if (~rst_ni) begin								//if reset is 0 (active low) set the signal to 0
+                 en_b_rt_valid_q   <= 1'b0;
+            end
+            else if (en_b_rt_valid || rvalid_rt) begin	
+                 en_b_rt_q             <= en_b_i; 							
+			     wdata_b_rt_q      	   <= wdata_b_i;
+                 en_b_rt_valid_q   	   <= en_b_rt_valid;
+			     addr_b_rt_q		   <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+			     be_b_q				   <= be_b_i;
+			     we_b_q				   <= we_b_i;	
 
-        end
-    end  
+            end
+        end  
 	
 	
-	// Valid signal for maxmin handshake
-    assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q        	 : en_b_i;
-    assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q      	 : wdata_b_i;
-    assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q       	 : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-	//assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q       	 : {dec_addr_b_i};
-	assign be_b_int			   = (en_b_rt_valid_q) ? be_b_q        	     : be_b_i;
-	assign we_b_int			   = (en_b_rt_valid_q) ? we_b_q				 : we_b_i;		
+	    // Valid signal for maxmin handshake
+        assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q        	 : en_b_i;
+        assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q      	 : wdata_b_i;
+        assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q       	 : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+	    assign be_b_int			   = (en_b_rt_valid_q) ? be_b_q        	     : be_b_i;
+	    assign we_b_int			   = (en_b_rt_valid_q) ? we_b_q				 : we_b_i;		
 
-	//only sw_active_logic can be carried out in one clock cycle
-    assign rvalid_b_o          = (en_b_rt_valid_q || en_b_rt_valid ) ?  rvalid_rt  : gnt_b_i; 	
+	    //only sw_active_logic can be carried out in one clock cycle
+        assign rvalid_b_o          = (en_b_rt_valid_q || en_b_rt_valid ) ?  rvalid_rt  : gnt_b_i; 	
+
+
+
 	
+    `else    //standard memory part
+
+
+
+
+        // Registers to mantain stable the input data in case of maxmin request
+        assign en_b_maxmin_valid = ((opcode_mem == FUNCT_MIN) || (opcode_mem == FUNCT_MAX)) && en_b_i && !we_b_funct_mem;
+
+        assign start_maxmin = en_b_maxmin_valid && gnt_b_i;
+
+        always_ff @(posedge clk_i, negedge rst_ni) begin
+            if (~rst_ni) begin
+                 en_b_maxmin_valid_q   <= 1'b0;
+            end
+            else if (en_b_maxmin_valid || stop_maxmin_iteration) begin
+                 en_b_maxmin_q         <= en_b_i;
+                 wdata_b_maxmin_q      <= wdata_b_i;
+                 en_b_maxmin_valid_q   <= en_b_maxmin_valid;
+                 addr_b_maxmin_q       <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+            end
+        end  
+
+        // Valid signal for maxmin handshake
+        assign en_b_int            = (en_b_maxmin_valid_q) ? en_b_maxmin_q         : en_b_i;
+        assign wdata_b_int         = (en_b_maxmin_valid_q) ? wdata_b_maxmin_q      : wdata_b_i;
+        assign addr_b_int          = (en_b_maxmin_valid_q) ? addr_b_maxmin_q       : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+
+        assign rvalid_b_o          = (en_b_maxmin_valid_q || en_b_maxmin_valid ) ? stop_maxmin_iteration  : gnt_b_i; 
+
+
+    `end
+
+
 
 
     //======================================================================
@@ -168,10 +210,10 @@ module dp_ram_logic
 	/*Decoder for range operations (LiM mode)*/	
 	   always_comb begin
         for (int i=0; i<words; i++) begin // Range operations can be done only with aligned memory locations
-            decoder_range[i] = 1'b0;
+            decoder_init[i] = 1'b0;
         end
         if (range_active) begin //if it is a range operation go on 
-            decoder_range[addr_b_range>>2] = 1'b1; //assert active wordline
+            decoder_init[addr_b_range>>2] = 1'b1; //assert active wordline
         end
     end
 
@@ -182,7 +224,7 @@ module dp_ram_logic
         end
   			if(range_active) begin
 				for (int i=0; i<words; i++) begin
-            		word_lines_lim[i] = decoder_range[i] & MEM_MODE;
+            		word_lines_lim[i] = decoder_init[i] & MEM_MODE;
         		end
 			end else begin
 				word_lines_lim[addr_b_int_dec] = 1'b1 & MEM_MODE; //set to 1 active wordline
@@ -301,7 +343,9 @@ module dp_ram_logic
     assign we_b_funct_mem = (addr_b_int == LOGIC_MEM_FUNCT_ADDRESS); 
 																	 
 	assign logic_in_memory_funct_int = logic_in_memory_funct[7:0] & {8{~we_b_funct_mem}}; // when funct cell is written, the old stored functionality should be ignored
-																						  
+					
+
+																	  
 																						  
     //======================================================================
     // READ MEMORY LOGIC
@@ -338,7 +382,13 @@ module dp_ram_logic
 	
 	assign opcode_mem   = logic_in_memory_funct[7:0]; 
     assign asize_mem    = logic_in_memory_funct[31:8];	
-	
+
+
+    //======================================================================
+    // MEMORY PART
+    //======================================================================
+
+    `ifdef RT_MEM    //racetrack memory part
 	
 	//======================================================================
     // RT MEMORY
@@ -364,12 +414,9 @@ module dp_ram_logic
 
 	end
 
-	
 
-
-	//======================================================================
-    // RACETRACK MEMORY 
-    //====================================================================== 
+    // RACETRACK MEMORY MODULE
+    
 	RT_memory
 	#(.ADDR_WIDTH(ADDR_WIDTH),										
 	  .MAX_SIZE(MAX_SIZE),											
@@ -400,13 +447,68 @@ module dp_ram_logic
 		.valid_o(rvalid_rt_int)										
 	);
 
+
+    `else    //standard memory part
+
+    //======================================================================
+    // STANDARD MEMORY
+    //======================================================================
+
+
+
+    //INSERIRE MODULO STD MEMORY
+
+
+
+
+    
+
+
+
+
 	
+
+	
+     `endif
+
+
+
+
 
     //======================================================================
     // MASK LOGIC
     //======================================================================
     
-     assign   mask = wdata_b_int;	//takes the mask from wdata_b_int 
+    `ifdef RT_MEM    //racetrack memory part
+
+        assign   mask = wdata_b_int;	//takes the mask from wdata_b_int 
+
+    `else           //std. memory part
+        
+        always @(posedge clk_i, negedge rst_ni) begin
+            if ( !rst_ni ) begin
+                mask_count <= '0;
+            end else if ( (opcode_mem==FUNCT_MAX || opcode_mem==FUNCT_MIN) && en_b_int && !we_b_funct_mem ) begin
+                if (start_maxmin) begin
+                    mask_count <= 2**31;
+                end
+                else begin
+                    mask_count <= mask_count/2;
+                end;
+            end
+         end
+
+        assign stop_maxmin_iteration = mask_count[0];
+    
+        always_comb begin
+            mask = wdata_b_int;
+            if( (opcode_mem==FUNCT_MAX || opcode_mem==FUNCT_MIN) && en_b_int && !we_b_funct_mem ) begin
+                mask = mask_count;
+            end
+        end   
+
+    `endif
+
         
  
     //======================================================================
