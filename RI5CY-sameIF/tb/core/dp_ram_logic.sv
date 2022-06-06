@@ -11,7 +11,7 @@
 
 import riscv_defines::*;
 `define DEBUG
-`define RT_MEM //comment to build standard memory
+//`define RT_MEM //comment to build standard memory
 
 module dp_ram_logic
     #(parameter ADDR_WIDTH = 10, 
@@ -47,8 +47,6 @@ module dp_ram_logic
     `ifdef RT_MEM    //racetrack memory part   
 	    localparam bytes     = MAX_SIZE;
         localparam words     = bytes/4; 		
-	    localparam words_tri = words*3;
-	    localparam triplets  = words_tri/3;
         localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
 
     `else   //standard memory part
@@ -59,6 +57,8 @@ module dp_ram_logic
 	
     `endif
   
+    localparam words_tri = words*3;
+	localparam triplets  = words_tri/3;
 	
 														
 														
@@ -128,12 +128,12 @@ module dp_ram_logic
     logic                            enabled_rows[bytes];           //enabled rows for max/min operations
     logic                            next_enabled_rows[bytes];      //next enabled rows for max/min operations
 
-`ifndef RT_MEM       
+//`ifndef RT_MEM       
     logic [7:0]                      mem_and[bytes];
     logic [7:0]                      mem_or[bytes];
     logic [7:0]                      mem_xor[bytes];
     logic [7:0]                      mem_in[bytes];
-`endif  
+//`endif  
 
 
     always_comb addr_a_int = {addr_a_i[ADDR_WIDTH-1:2], 2'b0};
@@ -220,12 +220,14 @@ module dp_ram_logic
     //======================================================================
     // ADDRESS DECODER 
     //====================================================================== 
+
+    //MAP RISC address (4 by 4)
+	 assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
    
  
 `ifdef RT_MEM    //racetrack memory part   
 
-        //MAP RISC address (4 by 4)
-	    assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
+        
 
 	    //MAP MEMORY MODE address 
 	    assign addr_mem_dec = addr_b_int_dec/3;	
@@ -342,7 +344,7 @@ module dp_ram_logic
 	end
 
 
-`else
+`else //standard memory part
 
 
     // RANGE DECODER
@@ -351,7 +353,7 @@ module dp_ram_logic
          for (int i=0; i<words; i++) begin
              decoder_range_init[i] = 1'b0;
          end
-         decoder_range_init[addr_b_int] = 1'b1;
+         decoder_range_init[ addr_b_int_dec] = 1'b1;
      end
 
 
@@ -360,7 +362,7 @@ module dp_ram_logic
             decoder_range_end[i] = 1'b0;
         end
         if (range_active) begin
-            decoder_range_end[addr_b_range_end] = 1'b1;
+            decoder_range_end[addr_b_range_end>>2] = 1'b1;
         end
     end
 
@@ -387,37 +389,45 @@ module dp_ram_logic
         end 
     end 
 
-
-    /* Generte byte-addressing wordlines */
-    always_comb_begin
+        /* Generte byte-addressing wordlines */
+     always_comb begin
         
         // Initialization
-        for (int i=0; i<bytes; i++) begin
-            assign word_lines_std_mem[i] = 1'b0;
+        for (int i=0; i<bytes; i=i+4) begin
+             word_lines_std_mem[i] = 1'b0;
         end
 
         if (range_active) begin
-            for (int i=0; i<bytes; i++) begin
-               assign word_lines_std_mem[i    ] = word_lines[i];
-               assign word_lines_std_mem[i + 1] = word_lines[i];
-               assign word_lines_std_mem[i + 2] = word_lines[i];
-               assign word_lines_std_mem[i + 3] = word_lines[i];
+            for (int i=0; i<bytes; i=i+4) begin
+            /*
+                word_lines_std_mem[i    ] = word_lines[i];
+                word_lines_std_mem[i + 1] = word_lines[i];
+                word_lines_std_mem[i + 2] = word_lines[i];
+                word_lines_std_mem[i + 3] = word_lines[i];
+            */
+
+                word_lines_std_mem[i    ] = word_lines[i/4];
+                word_lines_std_mem[i + 1] = word_lines[i/4];
+                word_lines_std_mem[i + 2] = word_lines[i/4];
+                word_lines_std_mem[i + 3] = word_lines[i/4];
 
             end
         end else begin
             for (int i=0; i<bytes; i=i+4) begin
+            /*
                 word_lines_std_mem[i  ] = be_b_i[0] && word_lines[i];
                 word_lines_std_mem[i+1] = be_b_i[1] && word_lines[i];
                 word_lines_std_mem[i+2] = be_b_i[2] && word_lines[i];
                 word_lines_std_mem[i+3] = be_b_i[3] && word_lines[i];
+            */
+
+                word_lines_std_mem[i  ] = be_b_i[0] && word_lines[i/4];
+                word_lines_std_mem[i+1] = be_b_i[1] && word_lines[i/4];
+                word_lines_std_mem[i+2] = be_b_i[2] && word_lines[i/4];
+                word_lines_std_mem[i+3] = be_b_i[3] && word_lines[i/4];
             end
         end
-
-
-
     end
-        
-
 
 
 
@@ -544,6 +554,17 @@ module dp_ram_logic
 
    
     // STANDARD MEMORY
+
+    /* Write Lofic - Data part*/
+
+    always @(posedge clk_i) begin
+        if (en_b_int && we_b_i) begin // DATA MEMORY PART  
+            for (int row=0; row<bytes; row++) begin
+                if(word_lines_std_mem[row]) mem[row] <= mem_in[row];
+            end
+        end
+    end
+
     
 
     /* Read Logic - Data part */
@@ -551,7 +572,7 @@ module dp_ram_logic
 	if (en_b_int && !we_b_i) begin
 	    unique case (logic_in_memory_funct_int)
 		FUNCT_AND: begin
-                        for (int i=0; i<bytes; i=i4+) begin
+                        for (int i=0; i<bytes; i=i+4) begin
                             if( word_lines_std_mem[i] ) begin
                                 rdata_b_o[ 7: 0] <= mem_and[i    ] ;
 			                    rdata_b_o[15: 8] <= mem_and[i + 1];
@@ -611,7 +632,7 @@ module dp_ram_logic
     end
 
 
-    */ LiM part */    
+    /* LiM part */    
 
 
     // AND, OR, XOR, WIRED-OR

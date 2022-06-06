@@ -13,6 +13,7 @@
 // Contributor: Robert Balas <balasr@student.ethz.ch>
 //              Jeremy Bennett <jeremy.bennett@embecosm.com>
 
+//`define RT_MEM    //comment to use std. memory
 
 module tb_top
     #(parameter INSTR_RDATA_WIDTH = 32,
@@ -141,6 +142,9 @@ module tb_top
 
 			////////////////////////////////////////////////////////////////
 
+`ifdef RT_MEM    //racetrack memory part   
+    
+            $display("Entered in RT memory initialization");
 
 			//WRITE RACETRACK WITH READMEMH VALUES
 
@@ -202,10 +206,10 @@ module tb_top
 			release riscv_wrapper_i.ram_i.dp_ram_i.we_b_funct_mem;
 			release riscv_wrapper_i.ram_i.dp_ram_i.addr_b_range;
 			release riscv_wrapper_i.ram_i.dp_ram_i.be_b_i;
+`endif
 
 			//////////////////////////////////////////////////////////////
 
-			//$readmemh(firmware, riscv_wrapper_i.ram_i.dp_ram_i.dummy_racetrack.RT_mem);
         
             // make the core start fetching instruction immediately after the firmware is loaded in memory
             fetch_enable = '1;

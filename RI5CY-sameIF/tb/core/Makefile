@@ -174,7 +174,7 @@ vcs-run-xnor: vcsify custom/xnor_net.hex
 	mv trace_core_00_0.log TraceAlgorithms/xnor_net.log
 
 vcs-run-bitwise: vcsify custom/bitwise.hex
-	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise.hex"
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise.hex" +verbose
 	mv trace_core_00_0.log TraceAlgorithms/bitwise.log
 
 vcs-run-bitmap: vcsify custom/bitmap_search.hex
@@ -203,7 +203,7 @@ vcs-run-test_lim: vcsify custom/test_lim.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/test_lim.hex"
 
 vcs-run-bitwise_lim: vcsify custom/bitwise_lim.hex
-	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim.hex"
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim.hex" +verbose
 	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim.log
 
 vcs-run-bitmap_lim: vcsify custom/bitmap_search_lim.hex
@@ -496,7 +496,7 @@ custom-vsim-run-gui-aes: vsim-run-gui
 
 .PHONY: custom-vsim-run-gui-bitwise
 custom-vsim-run-gui-bitwise: vsim-all custom/bitwise_lim.hex
-custom-vsim-run-gui-bitwise: ALL_VSIM_FLAGS += "+firmware=custom/bitwise_lim.hex"
+custom-vsim-run-gui-bitwise: ALL_VSIM_FLAGS += "+firmware=custom/bitwise_lim.hex" +verbose
 custom-vsim-run-gui-bitwise: vsim-run-gui
 
 #LiM programs with new extended compiler
