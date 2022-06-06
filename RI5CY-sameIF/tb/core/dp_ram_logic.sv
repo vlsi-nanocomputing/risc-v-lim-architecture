@@ -11,6 +11,7 @@
 
 import riscv_defines::*;
 `define DEBUG
+`define RT_MEM //comment to build standard memory
 
 module dp_ram_logic
     #(parameter ADDR_WIDTH = 10, 
@@ -43,19 +44,26 @@ module dp_ram_logic
      output logic                          rvalid_b_o 	//data valid signal
     );
 
-   
-	localparam bytes     = MAX_SIZE;
-	localparam words     = bytes/4; 		
-	localparam words_tri = words*3;
-	localparam triplets  = words_tri/3;
+    `ifdef RT_MEM    //racetrack memory part   
+	    localparam bytes     = MAX_SIZE;
+        localparam words     = bytes/4; 		
+	    localparam words_tri = words*3;
+	    localparam triplets  = words_tri/3;
+        localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
 
+    `else   //standard memory part
+
+        localparam bytes = 2**ADDR_WIDTH;
+        localparam words = bytes/4; 
+        localparam LOGIC_MEM_FUNCT_ADDRESS = (bytes/32-4);
+	
+    `endif
   
-	localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
+	
 														
 														
     // Normal memory
-    logic [7:0]                      mem[bytes];	
-													
+	logic [7:0]                      mem[bytes];			       //memory array for isntruction part								
 	
     logic [ADDR_WIDTH-1:0]           addr_a_int;					// instruction addresses
     logic [ADDR_WIDTH-1:0]           addr_b_int;					//data addresses
@@ -110,6 +118,14 @@ module dp_ram_logic
     logic [31:0]                     wdata_b_maxmin_q;              //sampled write data for max/min operations
     logic                            en_b_maxmin_valid_q;           //sampled valid signal for max/min operations
     logic [ADDR_WIDTH-1:0]           addr_b_maxmin_q;               //sampled addr for max/min operations
+    logic                            decoder_range_init[words];     //range decoder init wordlines
+    logic                            decoder_range_end[words];      //range decoder end wordlines
+    logic                            word_wired_zeros[words];       //constant for max/min operations
+    logic                            word_wired_ones[words];        //constant for max/min operations
+    logic                            word_wired_or[words];          //wired or array
+    logic                            result_word_wired_or[words];   //result wired or array
+    logic                            enabled_rows[words];           //enabled rows for max/min operations
+    logic                            next_enabled_rows[words];      //next enabled rows for max/min operations
 
 
 
@@ -124,7 +140,7 @@ module dp_ram_logic
     //====================================================================== 
 
     
-    `ifdef RT_MEM    //racetrack memory part
+`ifdef RT_MEM    //racetrack memory part
 	
 	    assign en_b_rt_valid = en_b_i && !we_b_funct_mem;	//generate enable signal for sampling input signals
 
@@ -159,7 +175,7 @@ module dp_ram_logic
 
 
 	
-    `else    //standard memory part
+`else    //standard memory part
 
 
 
@@ -189,52 +205,54 @@ module dp_ram_logic
         assign rvalid_b_o          = (en_b_maxmin_valid_q || en_b_maxmin_valid ) ? stop_maxmin_iteration  : gnt_b_i; 
 
 
-    `end
+`endif
 
 
 
 
     //======================================================================
-    // ADDRESS DECODER - RANGE SERIALIZER
+    // ADDRESS DECODER 
     //====================================================================== 
-    // RANGE DECODER
+   
+ 
+`ifdef RT_MEM    //racetrack memory part   
 
-	//MAP RISC address (4 by 4)
-	assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
+        //MAP RISC address (4 by 4)
+	    assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
 
-	//MAP MEMORY MODE address 
-	assign addr_mem_dec = addr_b_int_dec/3;	
+	    //MAP MEMORY MODE address 
+	    assign addr_mem_dec = addr_b_int_dec/3;	
 
 
 
-	/*Decoder for range operations (LiM mode)*/	
-	   always_comb begin
-        for (int i=0; i<words; i++) begin // Range operations can be done only with aligned memory locations
-            decoder_init[i] = 1'b0;
+	    /*Decoder for range operations (LiM mode)*/	
+	       always_comb begin
+            for (int i=0; i<words; i++) begin // Range operations can be done only with aligned memory locations
+                decoder_init[i] = 1'b0;
+            end
+            if (range_active) begin //if it is a range operation go on 
+                decoder_init[addr_b_range>>2] = 1'b1; //assert active wordline
+            end
         end
-        if (range_active) begin //if it is a range operation go on 
-            decoder_init[addr_b_range>>2] = 1'b1; //assert active wordline
+
+       /* Normal decoder - Initial address decoder (LiM mode)*/
+	    always_comb begin
+            for (int i=0; i<words; i++) begin
+                word_lines_lim[i] = 1'b0; //initiaize to 0 wordlines
+            end
+  			    if(range_active) begin
+				    for (int i=0; i<words; i++) begin
+            		    word_lines_lim[i] = decoder_init[i] & MEM_MODE;
+        		    end
+			    end else begin
+				    word_lines_lim[addr_b_int_dec] = 1'b1 & MEM_MODE; //set to 1 active wordline
+			    end
         end
-    end
-
-   /* Normal decoder - Initial address decoder (LiM mode)*/
-	always_comb begin
-        for (int i=0; i<words; i++) begin
-            word_lines_lim[i] = 1'b0; //initiaize to 0 wordlines
-        end
-  			if(range_active) begin
-				for (int i=0; i<words; i++) begin
-            		word_lines_lim[i] = decoder_init[i] & MEM_MODE;
-        		end
-			end else begin
-				word_lines_lim[addr_b_int_dec] = 1'b1 & MEM_MODE; //set to 1 active wordline
-			end
-    end
 
 
 
 
-	/*ACTIVE TRIPLET SELECTION  (Memory mode)*/
+	/* Active triplet selection  (Memory mode)*/
   	genvar i;
   
 	  generate
@@ -246,7 +264,7 @@ module dp_ram_logic
 
 
 	
-	/*  TRIPLET WORD SELECTION  */
+	/* Triplet word selection */
 	  always_comb begin
 	  word_sel_tri = 3'b0;
 		for(int i=0; i<triplets; i++) begin
@@ -258,20 +276,18 @@ module dp_ram_logic
 		end
 	  end
   
-  //std_wordlines: wordlines for std. mem. mode
-	  always_comb begin
-		    for (int i=0; i<words_tri; i++) begin
-		        word_lines_tri[i] = 1'b0; //initiaize to 0 wordlines
-		    end
-		 word_lines_tri[addr_b_int_dec] = 1'b1 & !MEM_MODE; //NEW
-		end
+     //std_wordlines: wordlines for std. mem. mode
+	      always_comb begin
+		        for (int i=0; i<words_tri; i++) begin
+		            word_lines_tri[i] = 1'b0; //initiaize to 0 wordlines
+		        end
+		     word_lines_tri[addr_b_int_dec] = 1'b1 & !MEM_MODE; //NEW
+		  end
 
 
-	//======================================================================
-    // WORDLINE MUX
-    //====================================================================== 
-  
-  	assign word_lines = (MEM_MODE) ? word_lines_lim : active_triplet;   //MEM_MODE = 1 LiM mode
+	
+     // WORDLINE MUX
+  	 assign word_lines = (MEM_MODE) ? word_lines_lim : active_triplet;   //MEM_MODE = 1 LiM mode
 	
 
 
@@ -285,20 +301,6 @@ module dp_ram_logic
 
 	//select n shift based on the memory mode
 	assign n_shift = (MEM_MODE) ? n_shift_lim : addr_mem_dec[1:0];
-
-
-
-
-
-    /* Final address decoder */
-    assign range_active = en_b_int && (asize_mem != 0 && asize_mem != 1) && !we_b_funct_mem;  //generate a signal when range operations are active
- 
-    assign addr_b_range_end = addr_b_int + asize_mem_int;
-
-
-	
-
-
 
 
 	/*	Counter for range operations */
@@ -319,8 +321,6 @@ module dp_ram_logic
 	assign cnt_en 	  		= rvalid_rt_int && !cmp_end_add;			//increment add when memory transaction is done and it is not the final address
 	assign addr_b_range_cmp =  addr_b_range_end -32'h4;					//takes the decision on address N-1
 
-	
-	//assign addr_b_range_cmp =  (addr_b_range_end -32'h4)>>2;			//takes the decision on address N-1
 
 	
 
@@ -334,12 +334,65 @@ module dp_ram_logic
 		end
 	end
 
+
+`else
+
+
+    // RANGE DECODER
+    /* Normal decoder - Initial address decoder*/
+     always_comb begin
+         for (int i=0; i<words; i++) begin
+             decoder_range_init[i] = 1'b0;
+         end
+         decoder_range_init[addr_b_int] = 1'b1;
+     end
+
+
+     always_comb begin
+        for (int i=0; i<words; i++) begin // Range operations can be done only with aligned memory locations
+            decoder_range_end[i] = 1'b0;
+        end
+        if (range_active) begin
+            decoder_range_end[addr_b_range_end] = 1'b1;
+        end
+    end
+
+    /* Word_lines */
+    always_comb begin
+        // Initialization
+        for (int i=0; i<words; i++) begin
+            word_lines_int[i] = decoder_range_init[i] | decoder_range_end[i]; // In the range case, only two bits are equal to 1. In the single case, just one
+            word_lines[i]     = decoder_range_init[i];
+        end
+     
+        // Range operation: possible only on words (32 bits)
+        if (range_active) begin
+            word_lines_int[0] = 1'b0;
+            for (int i=1; i<words; i=i++) begin
+                word_lines[i    ] = (word_lines_int[i] & !word_lines[i-1]) | (!word_lines_int[i] & word_lines[i-1]);
+            end
+        end
+        // Single case: possible on bytes (8 bits), half-words (16 bits) and words (32 bits)
+        else begin
+            for (int i=0; i<words; i=i++) begin
+                word_lines[i  ] = word_lines_int[i];
+            end
+        end 
+    end 
+
+
+`endif
+
 	
+    /* Final address decoder */ 
+    assign range_active = en_b_int && (asize_mem != 0 && asize_mem != 1) && !we_b_funct_mem;  //generate a signal when range operations are active
+ 
+    assign addr_b_range_end = addr_b_int + asize_mem_int;
 	
 
+    
 
-
-	//active when the LiM is being programmed
+	/* LiM programming decocoding */
     assign we_b_funct_mem = (addr_b_int == LOGIC_MEM_FUNCT_ADDRESS); 
 																	 
 	assign logic_in_memory_funct_int = logic_in_memory_funct[7:0] & {8{~we_b_funct_mem}}; // when funct cell is written, the old stored functionality should be ignored
@@ -388,11 +441,10 @@ module dp_ram_logic
     // MEMORY PART
     //======================================================================
 
-    `ifdef RT_MEM    //racetrack memory part
+`ifdef RT_MEM    //racetrack memory part
 	
-	//======================================================================
+	
     // RT MEMORY
-    //======================================================================
 
 	//convert unpacked wordlines to packed array
 	assign word_lines_p = { << { word_lines }};
@@ -448,11 +500,11 @@ module dp_ram_logic
 	);
 
 
-    `else    //standard memory part
+`else    //standard memory part
 
-    //======================================================================
+   
     // STANDARD MEMORY
-    //======================================================================
+    
 
 
 
@@ -469,7 +521,109 @@ module dp_ram_logic
 	
 
 	
-     `endif
+`endif
+
+
+
+`ifndef RT_MEM   
+
+    //======================================================================
+    // MIN-MAX LOGIC
+    //======================================================================
+
+    /* constant vectors */
+    always_comb begin
+        for (int i=0; i<words; i++) begin
+            word_wired_zeros[i] = 1'b0;
+            word_wired_ones[i]  = 1'b1;
+        end
+    end
+
+    /* result_wired_or logic */
+    always_comb begin
+        unique case (opcode_mem) 
+            FUNCT_MAX: begin // Disabled row will show wired-or result equal to 0
+                for (int i = 0; i < words; i++) begin
+                    result_word_wired_or[i] = word_wired_or[i] && enabled_rows[i];
+                end
+            end
+
+            FUNCT_MIN: begin // Disabled row will show wired-or result equal to 1
+                for (int i = 0; i < words; i++) begin
+                    result_word_wired_or[i] = word_wired_or[i] || !enabled_rows[i];
+                end
+            end
+    
+            default: begin
+                for (int i = 0; i < words; i++) begin
+                    result_word_wired_or[i] = word_wired_or[i];
+                end
+            end
+        endcase
+    end
+    
+    /* enabled_rows logic */
+    always @(posedge clk_i) begin
+        enabled_rows <= next_enabled_rows;
+    end
+
+    always_comb begin
+        for (int i=0; i<words; i++) begin
+            next_enabled_rows[i] = '0;
+        end
+
+        if (en_b_int) begin
+            // Initaliase enabled_rows
+            if (start_maxmin) begin
+                for (int i=0; i<words; i++) begin //only data memory part
+                    next_enabled_rows[i] = word_lines[i];
+                end
+            // Update enabled_rows
+            end else begin
+                unique case (opcode_mem) 
+                    FUNCT_MAX: begin
+                        if (result_word_wired_or == word_wired_zeros || result_word_wired_or == word_wired_ones) begin // do not update the enable
+                            next_enabled_rows = enabled_rows;
+                        end
+                        else begin
+                            for (int i = 0; i < words; i=++) begin
+                                if (enabled_rows[i]) begin // enable for the entire word (32-bit) is updated
+                                    next_enabled_rows[i  ] = result_word_wired_or[i];
+                                end
+                            end                             
+                        end
+                    end  
+
+                    FUNCT_MIN: begin
+                        if (result_word_wired_or == word_wired_zeros || result_word_wired_or == word_wired_ones) begin // do not update the enable
+                            next_enabled_rows = enabled_rows;
+                        end
+                        else begin
+                            for (int i = 0; i < words; i=i++) begin
+                                if (enabled_rows[i]) begin // enable for the entire word (32-bit) is updated
+                                    next_enabled_rows[i  ] = !result_word_wired_or[i];
+                                end
+                            end                             
+                        end
+                    end 
+ 
+                    default: begin
+                        for (int i=0; i<words; i++) begin
+                            next_enabled_rows[i] = '0; 
+                        end
+                    end
+                endcase
+            end
+        end
+    end
+
+`endif
+
+
+
+
+
+
 
 
 
@@ -479,11 +633,11 @@ module dp_ram_logic
     // MASK LOGIC
     //======================================================================
     
-    `ifdef RT_MEM    //racetrack memory part
+`ifdef RT_MEM    //racetrack memory part
 
         assign   mask = wdata_b_int;	//takes the mask from wdata_b_int 
 
-    `else           //std. memory part
+`else           //std. memory part
         
         always @(posedge clk_i, negedge rst_ni) begin
             if ( !rst_ni ) begin
@@ -507,7 +661,7 @@ module dp_ram_logic
             end
         end   
 
-    `endif
+`endif
 
         
  
