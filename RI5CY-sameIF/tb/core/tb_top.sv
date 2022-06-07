@@ -91,6 +91,8 @@ module tb_top
 
 
 //////////////////////////////////////////////////////////////////////
+`ifdef RT_MEM    //racetrack memory part   
+
 //RT memory initialization signals and parameters
 
 		localparam words = MAX_SIZE_MEM/4; //compute number of words (32 bits)
@@ -100,7 +102,7 @@ module tb_top
 		//dummy rom word
 		logic [31:0] dummy_rom_w [words-1:0]; //32 bit parallelism
 		logic [RAM_ADDR_WIDTH-1:0]	rt_add='b0;
-
+`endif  
 //////////////////////////////////////////////////////////////////////
 
 
@@ -144,7 +146,7 @@ module tb_top
 
 `ifdef RT_MEM    //racetrack memory part   
     
-            $display("Entered in RT memory initialization");
+            $display("Start RT memory initialization");
 
 			//WRITE RACETRACK WITH READMEMH VALUES
 
@@ -206,6 +208,7 @@ module tb_top
 			release riscv_wrapper_i.ram_i.dp_ram_i.we_b_funct_mem;
 			release riscv_wrapper_i.ram_i.dp_ram_i.addr_b_range;
 			release riscv_wrapper_i.ram_i.dp_ram_i.be_b_i;
+
 `endif
 
 			//////////////////////////////////////////////////////////////
