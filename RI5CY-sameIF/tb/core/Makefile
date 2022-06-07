@@ -228,9 +228,6 @@ vcs-run-bitwise-ext-asm: vcsify custom/bitwise_lim_ext_asm.hex
 
 
 
-
-
-
 #Run programs for RT memory
 
 vcs-run-bitwise-ext-asm-rt: vcsify custom/bitwise_lim_ext_asm.hex

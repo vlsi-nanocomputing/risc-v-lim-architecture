@@ -13,7 +13,7 @@
 // Contributor: Robert Balas <balasr@student.ethz.ch>
 //              Jeremy Bennett <jeremy.bennett@embecosm.com>
 
-//`define RT_MEM    //comment to use std. memory
+//`define RT_LIM_MEM //un-comment to build LiM Racetrack memory array
 
 module tb_top
     #(parameter INSTR_RDATA_WIDTH = 32,
@@ -91,7 +91,7 @@ module tb_top
 
 
 //////////////////////////////////////////////////////////////////////
-`ifdef RT_MEM    //racetrack memory part   
+`ifdef RT_LIM_MEM    //racetrack memory part   
 
 //RT memory initialization signals and parameters
 
@@ -144,7 +144,7 @@ module tb_top
 
 			////////////////////////////////////////////////////////////////
 
-`ifdef RT_MEM    //racetrack memory part   
+`ifdef RT_LIM_MEM    //racetrack memory part   
     
             $display("Start RT memory initialization");
 

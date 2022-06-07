@@ -11,7 +11,9 @@
 
 import riscv_defines::*;
 `define DEBUG
-//`define RT_MEM //comment to build standard memory
+//`define RT_LIM_MEM //un-comment to build LiM Racetrack memory array
+//`define LIM_MEM    //un-comment to build LiM standard memory array
+`define STD_MEM    //un-comment to build standard memory array
 
 module dp_ram_logic
     #(parameter ADDR_WIDTH = 10, 
@@ -44,19 +46,24 @@ module dp_ram_logic
      output logic                          rvalid_b_o 	//data valid signal
     );
 
-    `ifdef RT_MEM    //racetrack memory part   
+`ifdef RT_LIM_MEM    //LiM Racetrack memory part   
 	    localparam bytes     = MAX_SIZE;
         localparam words     = bytes/4; 		
         localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
 
-    `else   //standard memory part
+`elsif LIM_MEM   //LiM memory part
 
         localparam bytes = 2**ADDR_WIDTH;
         localparam words = bytes/4; 
-        //localparam LOGIC_MEM_FUNCT_ADDRESS = (bytes/32-4);
-        localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
+        localparam LOGIC_MEM_FUNCT_ADDRESS = (bytes/32-4);
+        //localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
+
+`elsif STD_MEM  //standard memory part
+
+        localparam bytes = 2**ADDR_WIDTH;
+        localparam words = 1; //remove unnecessary signals with ifdef
 	
-    `endif
+`endif
   
     localparam words_tri = words*3;
 	localparam triplets  = words_tri/3;
@@ -147,7 +154,7 @@ module dp_ram_logic
     //====================================================================== 
 
     
-`ifdef RT_MEM    //racetrack memory part
+`ifdef RT_LIM_MEM    //racetrack memory part
 	
 	    assign en_b_rt_valid = en_b_i && !we_b_funct_mem;	//generate enable signal for sampling input signals
 
@@ -182,7 +189,7 @@ module dp_ram_logic
 
 
 	
-`else    //standard memory part
+`elsif LIM_MEM    //LiM standard memory part
 
 
 
@@ -211,6 +218,10 @@ module dp_ram_logic
         assign we_b_int            = we_b_i;
         assign rvalid_b_o          = (en_b_maxmin_valid_q || en_b_maxmin_valid ) ? stop_maxmin_iteration  : gnt_b_i; 
 
+`elsif STD_MEM
+
+        always_comb  addr_b_int = {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+        assign rvalid_b_o       =  gnt_b_i; 
 
 `endif
 
@@ -224,7 +235,7 @@ module dp_ram_logic
     
    
  
-`ifdef RT_MEM    //racetrack memory part   
+`ifdef RT_LIM_MEM    //racetrack memory part   
 
         //MAP RISC address (4 by 4)
 	    assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
@@ -344,7 +355,7 @@ module dp_ram_logic
 	end
 
 
-`else //standard memory part
+`elsif LIM_MEM //LiM standard memory part
 
 
     // RANGE DECODER
@@ -399,8 +410,31 @@ module dp_ram_logic
 
 
 
+`elsif STD_MEM //standard memory part
+
+
+        /* Initial address decoder*/
+            always_comb begin
+                for (int i=0; i<bytes; i++) begin
+                    word_lines_std_mem_int[i] = 1'b0;
+                end
+                word_lines_std_mem_int[addr_b_int] = 1'b1;
+            end
+
+        /*Final address decoder with byte selection*/
+        always_comb begin
+            for (int i=0; i<bytes; i=i+4) begin
+                word_lines_std_mem[i  ] = be_b_i[0] && word_lines_std_mem_int[i];
+                word_lines_std_mem[i+1] = be_b_i[1] && word_lines_std_mem_int[i];
+                word_lines_std_mem[i+2] = be_b_i[2] && word_lines_std_mem_int[i];
+                word_lines_std_mem[i+3] = be_b_i[3] && word_lines_std_mem_int[i];
+            end
+        end
+
+
 `endif
 
+`ifndef STD_MEM 
 	
     /* Final address decoder */ 
     assign range_active = en_b_int && (asize_mem != 0 && asize_mem != 1) && !we_b_funct_mem;  //generate a signal when range operations are active
@@ -414,7 +448,7 @@ module dp_ram_logic
     assign we_b_funct_mem = (addr_b_int == LOGIC_MEM_FUNCT_ADDRESS); 
 																	 
 	assign logic_in_memory_funct_int = logic_in_memory_funct[7:0] & {8{~we_b_funct_mem}}; // when funct cell is written, the old stored functionality should be ignored
-					
+`endif					
 
 																	  
 																						  
@@ -431,7 +465,7 @@ module dp_ram_logic
     end
 	
 
-
+`ifndef STD_MEM 
     //======================================================================
     // LOGIC-IN-MEMORY
     //======================================================================
@@ -453,13 +487,13 @@ module dp_ram_logic
 	
 	assign opcode_mem   = logic_in_memory_funct[7:0]; 
     assign asize_mem    = logic_in_memory_funct[31:8];	
-
+`endif
 
     //======================================================================
     // MEMORY ARRAY INSTANTIATION
     //======================================================================
 
-`ifdef RT_MEM    //racetrack memory part
+`ifdef RT_LIM_MEM    //racetrack memory part
 	
 	
     // RT MEMORY
@@ -518,10 +552,9 @@ module dp_ram_logic
 	);
 
 
-`else    //standard memory part
+`elsif LIM_MEM    //LiM standard memory part
 
    
-    // STANDARD MEMORY
 
     /* Write Logic - Data part */
 
@@ -533,7 +566,7 @@ module dp_ram_logic
         end
     end
     
-   // Read logic
+   /* Read logic */
     always_ff @(posedge clk_i) begin
 	if (en_b_int && !we_b_i) begin
 	    unique case (logic_in_memory_funct_int)
@@ -707,14 +740,50 @@ module dp_ram_logic
         end
     end
 
-    	
+`elsif STD_MEM //standard memory array
+
+
+    /* Write Logic - Data part */
+
+    always @(posedge clk_i) begin
+        if (en_b_i && we_b_i) begin // DATA MEMORY PART  
+            for (int row=0; row<bytes; row++) begin
+                if(word_lines_std_mem[row]) mem[row] <= mem_in[row];
+            end
+        end
+    end
+
+
+    /* Read logic */
+    always_ff @(posedge clk_i) begin
+	    if (en_b_i && !we_b_i) begin
+            for (int i=0; i<bytes; i=i+4) begin
+                   if( word_lines_std_mem[i] ) begin
+                       rdata_b_o[ 7: 0] <= mem[i    ];
+					   rdata_b_o[15: 8] <= mem[i + 1];
+					   rdata_b_o[23:16] <= mem[i + 2];
+					   rdata_b_o[31:24] <= mem[i + 3];
+                   end
+		     end
+        end
+    end
+
+    /* Write in array */
+    always_comb begin
+        for (int row = 0; row < bytes; row=row+4) begin
+            mem_in[row  ] = wdata_b_i[ 0+:8];
+            mem_in[row+1] = wdata_b_i[ 8+:8];
+            mem_in[row+2] = wdata_b_i[16+:8];
+            mem_in[row+3] = wdata_b_i[24+:8];
+        end
+    end
 
 	
 `endif
 
 
 
-`ifndef RT_MEM   
+`ifdef LIM_MEM   
 
     //======================================================================
     // MIN-MAX LOGIC
@@ -829,11 +898,11 @@ module dp_ram_logic
     // MASK LOGIC
     //======================================================================
     
-`ifdef RT_MEM    //racetrack memory part
+`ifdef RT_LIM_MEM    //racetrack memory part
 
         assign   mask = wdata_b_int;	//takes the mask from wdata_b_int 
 
-`else           //std. memory part
+`elsif LIM_MEM           //std. memory part
         
         always @(posedge clk_i, negedge rst_ni) begin
             if ( !rst_ni ) begin
@@ -866,7 +935,7 @@ module dp_ram_logic
     //======================================================================
 `ifndef SYNTHESIS
 `ifdef DEBUG
-`ifdef RT_MEM
+`ifdef RT_LIM_MEM
 
     localparam                       N_VECTOR = 32;
     logic                            sub_word_lines[4*N_VECTOR];
@@ -882,7 +951,7 @@ module dp_ram_logic
             sub_word_lines_int[i] = word_lines_int['h30000+i];
         end
     end
-`else
+`elsif LIM_MEM
 
     localparam                       N_VECTOR = 32;
     logic                            sub_word_lines[4*N_VECTOR];
