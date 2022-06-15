@@ -38,7 +38,7 @@ module tb_top
     const int  FIRMWARE_WAIT_CYCLES = 6;
 
 
-	//time parameter for racetrakc
+	//time parameter for racetrack
 	
 	const time CLK_M_PHASE_HI     = 1ns;
 	const time CLK_M_PHASE_LO     = 1ns;
@@ -54,14 +54,6 @@ module tb_top
 	const time w_phase_HI		= 1ns;
 	const time w_phase_LO		= 6ns;
 
-
-	//local parameter for RT size (bytes)
-	localparam MAX_SIZE = 64000*4;	//128k words (256kB)
-	
-
-	//local parameter for memory initialization	(bytes)
-	localparam MAX_SIZE_MEM = 16352; 	
-
 	
 
 
@@ -69,13 +61,7 @@ module tb_top
     logic                   clk   = 'b1;
     logic                   rst_n = 'b0;
 
-	//signals for racetrack
-	logic						  clk_m       = 'b1; 	//magnetic clock
-	logic						  Bz_s        = 'b1; 	//Magnetic field sign
-	logic						  write_pulse = 'b1;	//write pulse for racetrack
-	logic						  read_pulse  = 'b1;	//read pulse for racetrack
-
-
+   
     // cycle counter
     int unsigned            cycle_cnt_q;
 
@@ -90,10 +76,16 @@ module tb_top
 
 
 
-//////////////////////////////////////////////////////////////////////
+
 `ifdef RT_LIM_MEM    //racetrack memory part   
 
-//RT memory initialization signals and parameters
+//Racetrack memory signals and parameters for initialization 
+
+        //local parameter for RT size (bytes)
+	    localparam MAX_SIZE = 64000*4;	//128k words (256kB)
+	
+	    //local parameter for memory initialization	(bytes)
+	    localparam MAX_SIZE_MEM = 16352; 	
 
 		localparam words = MAX_SIZE_MEM/4; //compute number of words (32 bits)
 
@@ -103,7 +95,7 @@ module tb_top
 		logic [31:0] dummy_rom_w [words-1:0]; //32 bit parallelism
 		logic [RAM_ADDR_WIDTH-1:0]	rt_add='b0;
 `endif  
-//////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -141,8 +133,10 @@ module tb_top
             $readmemh(firmware, riscv_wrapper_i.ram_i.dp_ram_i.mem);
 
 			
-
-			////////////////////////////////////////////////////////////////
+    ///////////////////////////
+	// Racetrack memory initialization
+	///////////////////////////
+			
 
 `ifdef RT_LIM_MEM    //racetrack memory part   
     
@@ -211,7 +205,7 @@ module tb_top
 
 `endif
 
-			//////////////////////////////////////////////////////////////
+			
 
         
             // make the core start fetching instruction immediately after the firmware is loaded in memory
@@ -231,16 +225,17 @@ module tb_top
         end
     end: clock_gen
 
+`ifdef RT_LIM_MEM    //racetrack memory part   
 
 	///////////////////////////
-	// LiM Signals generation
+	// Racetrack Signals generation
 	///////////////////////////
 
 	// Bz_s generation
     initial begin: Bz_s_gen
         forever begin
-            #BZs_PHASE_HI  Bz_s = 1'b0;
-            #BZs_PHASE_LO  Bz_s = 1'b1;
+            #BZs_PHASE_HI  riscv_wrapper_i.ram_i.dp_ram_i.Bz_s_i = 1'b0;
+            #BZs_PHASE_LO  riscv_wrapper_i.ram_i.dp_ram_i.Bz_s_i = 1'b1;
         end
     end: Bz_s_gen
 
@@ -248,29 +243,30 @@ module tb_top
 	// magnetic clock generation
     initial begin: clock_m_gen
         forever begin
-            #CLK_M_PHASE_HI  clk_m = 1'b0;
-            #CLK_M_PHASE_LO  clk_m = 1'b1;
+            #CLK_M_PHASE_HI  riscv_wrapper_i.ram_i.dp_ram_i.clk_m_i = 1'b0;
+            #CLK_M_PHASE_LO  riscv_wrapper_i.ram_i.dp_ram_i.clk_m_i = 1'b1;
         end
     end: clock_m_gen
 	
 	// read current waveform generation
     initial begin: read_pulse_gen
         forever begin
-            #r_init_LO   read_pulse = 1'b1;
-            #r_phase_HI  read_pulse = 1'b0;
-			#r_phase_LO  read_pulse = 1'b0;
+            #r_init_LO   riscv_wrapper_i.ram_i.dp_ram_i.read_pulse_i = 1'b1;
+            #r_phase_HI  riscv_wrapper_i.ram_i.dp_ram_i.read_pulse_i = 1'b0;
+			#r_phase_LO  riscv_wrapper_i.ram_i.dp_ram_i.read_pulse_i = 1'b0;
         end
     end: read_pulse_gen
 	
-	// read current waveform generation
+	// write current waveform generation
     initial begin: write_pulse_gen
         forever begin
-            #w_init_LO   write_pulse = 1'b1;
-            #w_phase_HI  write_pulse = 1'b0;
-			#w_phase_LO  write_pulse = 1'b0;
+            #w_init_LO   riscv_wrapper_i.ram_i.dp_ram_i.write_pulse_i = 1'b1;
+            #w_phase_HI  riscv_wrapper_i.ram_i.dp_ram_i.write_pulse_i = 1'b0;
+			#w_phase_LO  riscv_wrapper_i.ram_i.dp_ram_i.write_pulse_i = 1'b0;
         end
     end: write_pulse_gen
 
+`endif
 
     // reset generation
     initial begin: reset_gen
@@ -340,11 +336,8 @@ module tb_top
           .DM_HALTADDRESS (DM_HALTADDRESS))
     riscv_wrapper_i
         (.clk_i          ( clk          ),
-		 .clk_m_i		 ( clk_m	    ),
-		 .Bz_s_i		 ( Bz_s			),
-		 .write_pulse_i	 ( write_pulse	),
-		 .read_pulse_i	 ( read_pulse	),
          .rst_ni         ( rst_n        ),
+
          .fetch_enable_i ( fetch_enable ),
          .tests_passed_o ( tests_passed ),
          .tests_failed_o ( tests_failed ),

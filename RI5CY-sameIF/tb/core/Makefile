@@ -226,6 +226,10 @@ vcs-run-bitwise-ext-asm: vcsify custom/bitwise_lim_ext_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose +t 1ns +j20 
 	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim_ext_asm.log
 
+vcs-run-bitwise-inv-ext-asm: vcsify custom/bitwise_lim_ext_inv_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_inv_asm.hex" +verbose 
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim_ext_inv_asm.log
+
 
 
 #Run programs for RT memory

@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 	//restore standard operations
 	asm volatile("sw_active_none %[result], %[input_i], 0"
     : [result] "=r" (zero)
-    : [input_i] "r" (cnfAddress), "[result]" (zero)
+    : [input_i] "r" (0x1fffc), "[result]" (zero)
     );
 
 	(*final_result) = sum_a + sum_b;

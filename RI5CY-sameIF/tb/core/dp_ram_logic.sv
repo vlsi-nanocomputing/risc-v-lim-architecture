@@ -11,9 +11,10 @@
 
 import riscv_defines::*;
 `define DEBUG
-`define RT_LIM_MEM //un-comment to build LiM Racetrack memory array
+//`define RT_LIM_MEM //un-comment to build LiM Racetrack memory array
 //`define LIM_MEM    //un-comment to build LiM standard memory array
 //`define STD_MEM    //un-comment to build standard memory array
+ 
 
 module dp_ram_logic
     #(parameter ADDR_WIDTH = 10, 
@@ -21,10 +22,6 @@ module dp_ram_logic
 	 parameter MEM_MODE = 1,
 	 parameter INSTR_RDATA_WIDTH = 32)
     (input  logic                          clk_i,
-	 input 	logic						   clk_m_i, 		//magnetic clock
-	 input  logic						   Bz_s_i,  		//Magnetic field sign
-	 input  logic						   write_pulse_i,	//write pulse for racetrack
-	 input  logic						   read_pulse_i,	//read pulse for racetrack
      input  logic                          rst_ni,			
 
 	
@@ -56,7 +53,6 @@ module dp_ram_logic
         localparam bytes = 2**ADDR_WIDTH;
         localparam words = bytes/4; 
         localparam LOGIC_MEM_FUNCT_ADDRESS = (bytes/32-4);
-        //localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
 
 `elsif STD_MEM  //standard memory part
 
@@ -70,21 +66,37 @@ module dp_ram_logic
 	
 														
 														
-    // Normal memory
-	logic [7:0]                      mem[bytes];			       //memory array for isntruction part								
+    // Normal memory (global signals)
+	logic [7:0]                      mem[bytes];			       //memory array for isntruction part	
+						
 	
-    logic [ADDR_WIDTH-1:0]           addr_a_int;					// instruction addresses
+    logic [ADDR_WIDTH-1:0]           addr_a_int;					//instruction addresses
     logic [ADDR_WIDTH-1:0]           addr_b_int;					//data addresses
+
+`ifdef STD_MEM
+    
+    // Not-Logic-in-memory signals
+    logic                            word_lines_std_mem[bytes];     //wordlines for byte addressed memory
+    logic                            word_lines_std_mem_int[bytes]; 
+
+`endif
+
+`ifndef RT_LIM_MEM
+
+    // LiM & Not-LiM signals
+    logic [7:0]                      mem_in[bytes];		
  
-    // Logic-in-memory
+`endif
+
+`ifndef STD_MEM
+ 
+    // Logic-in-memory signals
     logic [ADDR_WIDTH-1:0]           asize_mem_int;					//range operation without byte offset (2 LSBs)
     logic [ADDR_WIDTH-1:0]           addr_b_range_end;				//range operation end address
     logic                            en_b_int;						// Bank request internal (after manipulation)
     logic [31:0]                     wdata_b_int;
     logic                            word_lines[words];             //wordlines for word addressed memory
     logic                            word_lines_int[words];
-    logic                            word_lines_std_mem[bytes];     //wordlines for byte addressed memory
-    logic                            word_lines_std_mem_int[bytes]; 
     logic                            range_active;					//signal that identifies a range operation
     logic [31:0]                     mask;	
 	logic [7:0]                      logic_in_memory_funct_int; 	//Logic function after masking 
@@ -136,16 +148,30 @@ module dp_ram_logic
     logic                            result_word_wired_or[bytes];   //result wired or array
     logic                            enabled_rows[bytes];           //enabled rows for max/min operations
     logic                            next_enabled_rows[bytes];      //next enabled rows for max/min operations
+    
     logic [7:0]                      mem_and[bytes];
     logic [7:0]                      mem_or[bytes];
     logic [7:0]                      mem_xor[bytes];
-    logic [7:0]                      mem_in[bytes];
 
+`endif
+
+    
+`ifdef RT_LIM_MEM    //racetrack memory part
+
+    //Racetrack waveforms
+       logic						   clk_m_i       = 1'b1; 		//magnetic clock
+	   logic						   Bz_s_i        = 1'b1; 		//Magnetic field sign
+	   logic						   write_pulse_i = 1'b1;	//write pulse for racetrack
+	   logic						   read_pulse_i  = 1'b1;	//read pulse for racetrack
+ 
+`endif
 
 
     always_comb addr_a_int = {addr_a_i[ADDR_WIDTH-1:2], 2'b0};
+
+
     
-    always_comb asize_mem_int = {asize_mem[ADDR_WIDTH-1:0], 2'b0}; // Only 32 bits words are considered as vector elements
+    
 	
 
 
@@ -448,6 +474,7 @@ module dp_ram_logic
     assign we_b_funct_mem = (addr_b_int == LOGIC_MEM_FUNCT_ADDRESS); 
 																	 
 	assign logic_in_memory_funct_int = logic_in_memory_funct[7:0] & {8{~we_b_funct_mem}}; // when funct cell is written, the old stored functionality should be ignored
+
 `endif					
 
 																	  
@@ -455,7 +482,7 @@ module dp_ram_logic
     //======================================================================
     // READ MEMORY LOGIC
     //======================================================================
-	
+	//Independent from data memory technology
 
     // INSTRUCTION PART
     always_ff @(posedge clk_i) begin
@@ -483,10 +510,12 @@ module dp_ram_logic
         end
     end
     
+    always_comb asize_mem_int = {asize_mem[ADDR_WIDTH-1:0], 2'b0}; // Only 32 bits words are considered as vector elements
 
 	
 	assign opcode_mem   = logic_in_memory_funct[7:0]; 
     assign asize_mem    = logic_in_memory_funct[31:8];	
+
 `endif
 
     //======================================================================

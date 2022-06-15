@@ -22,10 +22,6 @@ module riscv_wrapper
       parameter PULP_ZFINX = 0,
       parameter DM_HALTADDRESS = 32'h1A110800)
     (input logic         clk_i,
-	 input 	logic		 clk_m_i, 		//magnetic clock
-	 input  logic		 Bz_s_i,  		//Magnetic field sign
-	 input  logic		 write_pulse_i,	//write pulse for racetrack
-	 input  logic		 read_pulse_i,	//read pulse for racetrack
      input logic         rst_ni,
 
      input logic         fetch_enable_i,
@@ -137,10 +133,6 @@ module riscv_wrapper
           .INSTR_RDATA_WIDTH (INSTR_RDATA_WIDTH))
     ram_i
         (.clk_i                  ( clk_i                          ),
-		 .clk_m_i				 ( clk_m_i						  ),
-		 .Bz_s_i				 ( Bz_s_i						  ),
-		 .write_pulse_i			 ( write_pulse_i	 			  ),
-		 .read_pulse_i			 ( read_pulse_i	 				  ),
          .rst_ni                 ( rst_ni                         ),
 
          .instr_req_i            ( instr_req                      ),
