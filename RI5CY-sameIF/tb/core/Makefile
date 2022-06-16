@@ -246,7 +246,9 @@ vcs-run-bitmap-ext-asm-rt: vcsify custom/bitmap_search_lim_ext_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitmap_search_lim_ext_asm.hex" +verbose +t 1ns +j20 
 	mv trace_core_00_0.log TraceAlgorithms/bitmap_search_lim_ext_asm_RT.log
 
-
+vcs-run-aes-ext-asm-rt: vcsify custom/aes128_addroundkey_lim_ext_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/aes128_addroundkey_lim_ext_asm.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/aes128_addroundkey_lim_ext_asm_RT.log
 
 
 
@@ -497,7 +499,16 @@ custom/bitmap_search_lim_ext_asm.elf: custom/bitmap_search_lim_ext_asm.c
 		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
 		-lc -lm -lgcc
 
-
+custom/aes128_addroundkey_lim_ext_asm.elf: custom/aes128_addroundkey_lim_ext_asm.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -mabi=ilp32 -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		-T custom/link.ld \
+		-static \
+		custom/crt0.S \
+		$^ custom/syscalls.c custom/vectors.S \
+		-I $(RISCV_LIB)/riscv32-unknown-elf/include \
+		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc
 
 
 
