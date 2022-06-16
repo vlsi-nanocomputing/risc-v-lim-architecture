@@ -85,7 +85,7 @@ module tb_top
 	    localparam MAX_SIZE = 64000*4;	//128k words (256kB)
 	
 	    //local parameter for memory initialization	(bytes)
-	    localparam MAX_SIZE_MEM = 16352; 	
+	    localparam MAX_SIZE_MEM = 16548; 	
 
 		localparam words = MAX_SIZE_MEM/4; //compute number of words (32 bits)
 
