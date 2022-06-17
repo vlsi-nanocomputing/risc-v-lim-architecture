@@ -18,7 +18,7 @@
 module tb_top
     #(parameter INSTR_RDATA_WIDTH = 32,
       parameter RAM_ADDR_WIDTH = 22,
-	  parameter MEM_MODE = 1,
+	  parameter MEM_MODE = 1,    //working mode for RT memory 1=LiM, 0=std 
       parameter BOOT_ADDR  = 'h180,
       parameter PULP_CLUSTER = 0,
       parameter FPU = 0,
@@ -84,7 +84,7 @@ module tb_top
 
         	
 	    //local parameter for memory initialization	(bytes)
-	    localparam MAX_SIZE_MEM = 16548; 	
+	    localparam MAX_SIZE_MEM = 16612; 	
 
 		localparam words = MAX_SIZE_MEM/4; //compute number of words (32 bits)
 
