@@ -49,7 +49,7 @@ Three memory configuration are available:
 - Standard memory with LiM functionalities
 - Racetrack memory with LiM functionalities
 
-Un-comment the correct `define in files `RI5CY-sameIF/tb/core/dp_ram_logic.sv` and `define in `RI5CY-sameIF/tb/core/tb_tob.sv`.
+Un-comment the correct define in files `RI5CY-sameIF/tb/core/dp_ram_logic.sv` and define in `RI5CY-sameIF/tb/core/tb_tob.sv`.
 
 For the Racetrack memory it is possible to adopt two different modes:
 - Memory mode
