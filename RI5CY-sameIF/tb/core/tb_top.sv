@@ -13,7 +13,7 @@
 // Contributor: Robert Balas <balasr@student.ethz.ch>
 //              Jeremy Bennett <jeremy.bennett@embecosm.com>
 
-`define RT_LIM_MEM //un-comment to build LiM Racetrack memory array
+`define RT_LIM_MEM //un-comment to build LiM Racetrack memory array, comment to build other memories
 
 module tb_top
     #(parameter INSTR_RDATA_WIDTH = 32,
