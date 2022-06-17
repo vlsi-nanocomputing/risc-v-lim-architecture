@@ -73,18 +73,13 @@ module dp_ram_logic
     logic [ADDR_WIDTH-1:0]           addr_a_int;					//instruction addresses
     logic [ADDR_WIDTH-1:0]           addr_b_int;					//data addresses
 
-`ifdef STD_MEM
-    
-    // Not-Logic-in-memory signals
-    logic                            word_lines_std_mem[bytes];     //wordlines for byte addressed memory
-    logic                            word_lines_std_mem_int[bytes]; 
-
-`endif
 
 `ifndef RT_LIM_MEM
 
-    // LiM & Not-LiM signals
+    //Signals for std & std-LiM signals
     logic [7:0]                      mem_in[bytes];		
+    logic                            word_lines_std_mem[bytes];     //wordlines for byte addressed memory
+    logic                            word_lines_std_mem_int[bytes]; 
  
 `endif
 
