@@ -74,16 +74,15 @@ module tb_top
     // signals for ri5cy
     logic                   fetch_enable;
 
-
+   //local parameter for RT size (bytes)
+   localparam MAX_SIZE = 64000*4;	//128k words (256kB)
 
 
 `ifdef RT_LIM_MEM    //racetrack memory part   
 
 //Racetrack memory signals and parameters for initialization 
 
-        //local parameter for RT size (bytes)
-	    localparam MAX_SIZE = 64000*4;	//128k words (256kB)
-	
+        	
 	    //local parameter for memory initialization	(bytes)
 	    localparam MAX_SIZE_MEM = 16548; 	
 
