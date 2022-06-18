@@ -177,6 +177,10 @@ vcs-run-bitwise: vcsify custom/bitwise.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise.hex" +verbose
 	mv trace_core_00_0.log TraceAlgorithms/bitwise.log
 
+vcs-run-bitwise-inv: vcsify custom/bitwise_inv.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_inv.hex" +verbose
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_inv.log
+
 vcs-run-bitmap: vcsify custom/bitmap_search.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitmap_search.hex"
 	mv trace_core_00_0.log TraceAlgorithms/bitmap.log
@@ -373,6 +377,17 @@ custom/bitmap_search.elf: custom/bitmap_search.c
 		-lc -lm -lgcc
 
 custom/bitwise.elf: custom/bitwise.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		-T custom/link.ld \
+		-static \
+		custom/crt0.S \
+		$^ custom/syscalls.c custom/vectors.S \
+		-I $(RISCV_LIB)/riscv32-unknown-elf/include \
+		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc
+
+custom/bitwise_inv.elf: custom/bitwise_inv.c
 	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -o $@ -w -Os -g -nostdlib \
 		$(CUSTOM_GCC_FLAGS) \
 		-T custom/link.ld \
