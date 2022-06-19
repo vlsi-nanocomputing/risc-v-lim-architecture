@@ -1,1 +1,0 @@
-Hex files goes into sim folder
