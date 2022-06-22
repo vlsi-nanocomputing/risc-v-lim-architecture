@@ -199,9 +199,7 @@ vcs-run-max_min: vcsify custom/max_min.hex
 
 
 #LIM PROGRAMS
-vcs-run-xnorlim: vcsify custom/xnor_net_lim.hex
-	./simv $(SIMV_FLAGS) "+firmware=custom/xnor_net_lim.hex"
-	mv trace_core_00_0.log TraceAlgorithms/xnor_net_lim.log
+
 
 vcs-run-test_lim: vcsify custom/test_lim.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/test_lim.hex"
@@ -226,7 +224,7 @@ vcs-run-transport_lim: vcsify custom/transport_min_cost_lim.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/transport_min_cost_lim.hex"
 	mv trace_core_00_0.log TraceAlgorithms/transport_lim.log
 
-#LiM programs with new extended compiler
+#LIM PROGRAMS WITH NEW COMPILER AND INLINE ASSEMBLY
 
 vcs-run-bitwise-ext-asm: vcsify custom/bitwise_lim_ext_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose 
@@ -244,9 +242,12 @@ vcs-run-aes-ext-asm: vcsify custom/aes128_addroundkey_lim_ext_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/aes128_addroundkey_lim_ext_asm.hex" +verbose 
 	mv trace_core_00_0.log TraceAlgorithms/aes128_addroundkey_lim_ext_asm.log
 
+vcs-run-xnorlim: vcsify custom/xnor_net_lim.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/xnor_net_lim.hex"
+	mv trace_core_00_0.log TraceAlgorithms/xnor_net_lim.log
 
 
-#Run programs for RT memory with new extended compiler
+#LIM PROGRAMS FOR RT MEMORY WITH NEW COMPILER AND INLINE ASSEMBLY
 
 vcs-run-bitwise-ext-asm-rt: vcsify custom/bitwise_lim_ext_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose +t 1ns +j20 
