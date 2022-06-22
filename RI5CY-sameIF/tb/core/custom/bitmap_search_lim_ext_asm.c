@@ -4,7 +4,7 @@
 int main(int argc, char* argv[])
 {
     /* variable declaration */
-    int i, N=1, mask=0, partial, res, operand, target16 = 0x30000, target17 = 0x30018, target19 = 0x30048, target20 = 0x30060, target_v_gender = 0x30078, zero = 0; 
+    int i, N=0, mask=0, partial, res, operand; 
     int Nr = 7; //number of rows
     volatile int (*result_M_over19)[Nr];
     volatile int (*result_over18)[Nr];
@@ -15,7 +15,8 @@ int main(int argc, char* argv[])
     volatile int (*v_age20)[Nr];
     volatile int (*v_genderM)[Nr];
     volatile int (*v_genderF)[Nr];
-    
+
+    register unsigned int x0 asm("x0");
     
     /* Initialize bitmap */
 
@@ -48,42 +49,34 @@ int main(int argc, char* argv[])
 
 	//program LiM for stand-alone OR operation
 	asm volatile("sw_active_or %[result], %[input_i], 0"
-    : [result] "=r" (N)
+    : [result] "=r" (x0)
     : [input_i] "r" (0x1fffc), "[result]" (N)
     );
 
     for(i=0; i<Nr-1; i++) {
-
-        partial = 0x00000000; //initialize variable for standard lw
-        operand = 0x00000000; //initialize variable for standard lw
         
-        //lw_mask operation for OR computation
+        //lw_mask operation for lw
 	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
 	    : [result] "=r" (partial)
-	    : [input_s] "r" (target20), [input_t] "r"  (partial), "[result]" (partial)
+         : [input_s] "r" (&(*v_age20)[i]), [input_t] "r"  (x0), "[result]" (partial)
 	    );
         
         //lw_mask operation for OR computation
 	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
 	    : [result] "=r" (partial)
-	    : [input_s] "r" (target19), [input_t] "r"  (partial), "[result]" (partial)
+        : [input_s] "r" (&(*v_age19)[i]), [input_t] "r"  (partial), "[result]" (partial)
 	    );
 
         //lw_mask operation for lw 
 	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
 	    : [result] "=r" (operand)
-	    : [input_s] "r" (target_v_gender), [input_t] "r"  (operand), "[result]" (operand)
+        : [input_s] "r" (&(*v_genderM)[i]), [input_t] "r"  (x0), "[result]" (operand)
 	    );
-        
+       
         res = operand & partial; 
 
         //sw operation to store results
 	    (*result_M_over19)[i] = res;
-
-        target20 = target20 + 0x00000004;  //update address
-        target19 = target19 + 0x00000004;  //update address
-        target_v_gender = target_v_gender + 0x00000004;  //update address
-        
 
     }
 
@@ -91,18 +84,16 @@ int main(int argc, char* argv[])
 
    for(i=0; i<Nr-1; i++) {
 
-        partial = 0x00000000; //initialize variable for standard lw
-
-        //lw first operand
+         //lw first operand
 	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
 	    : [result] "=r" (partial)
-	    : [input_s] "r" (target17), [input_t] "r"  (partial), "[result]" (partial)
+	    : [input_s] "r" (&(*v_age17)[i]), [input_t] "r"  (x0), "[result]" (partial)
 	    );
 
        //lw_mask operation for OR computation
 	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
 	    : [result] "=r" (partial)
-	    : [input_s] "r" (target16), [input_t] "r"  (partial), "[result]" (partial)
+	    : [input_s] "r" (&(*v_age16)[i]), [input_t] "r"  (partial), "[result]" (partial)
 	    );
 
        //NOT operation
@@ -111,16 +102,13 @@ int main(int argc, char* argv[])
        //sw operation to store results
 	   (*result_over18)[i] = res;
 
-       target16 = target16 + 0x00000004;  //update address
-       target17 = target17 + 0x00000004;  //update address
-
    }
  
 
    //restore standard operations
 	asm volatile("sw_active_none %[result], %[input_i], 0"
-    : [result] "=r" (zero)
-    : [input_i] "r" (0x1fffc), "[result]" (zero)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 
 
