@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {    
 
-	int mask_nor, mask_nand, mask_xnor, s_alone = 1, zero = 0, N = 5, i, sum_a = 0x0, sum_b = 0x0;
+	int mask_nor, mask_nand, mask_xnor, N = 5, i, sum_a = 0x0, sum_b = 0x0;
 	volatile int (*vector)[N];
 	volatile int (*stand_alone);
 	volatile int (*final_result);
@@ -13,6 +13,8 @@ int main(int argc, char *argv[])
 	vector = (volatile int(*)[N]) 0x030000, 
 	stand_alone = (volatile int(*))0x30040, 
 	final_result= (volatile int(*))0x30044;
+
+    register unsigned int x0 asm("x0");
 
 	//configuration address, where the config of the memory is stored = 0x1fffc
 	//configure vector[N-1] address = 0x030010
@@ -50,8 +52,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_nor %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 	(*stand_alone) = mask_nor;
 
@@ -60,8 +62,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_nand %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 	
 
@@ -81,8 +83,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_nand %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 	(*stand_alone) = mask_nand;
 
@@ -91,8 +93,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_xnor %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 
 
@@ -112,8 +114,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_xnor %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 	(*stand_alone) = mask_xnor;
 
@@ -133,8 +135,8 @@ int main(int argc, char *argv[])
 
 	//restore standard operations
 	asm volatile("sw_active_none %[result], %[input_i], 0"
-    : [result] "=r" (zero)
-    : [input_i] "r" (0x1fffc), "[result]" (zero)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 
 	(*final_result) = sum_a + sum_b;
