@@ -4,10 +4,12 @@
 int main(int argc, char *argv[])
 {    
 
-	int mask_or, mask_and, mask_xor, s_alone = 1, zero = 0, N = 5, i, sum_a = 0xFFFFFFFF, sum_b = 0xFFFFFFFF;
+	int mask_or, mask_and, mask_xor, N = 5, i, sum_a = 0xFFFFFFFF, sum_b = 0xFFFFFFFF;
 	volatile int (*vector)[N];
 	volatile int (*stand_alone);
 	volatile int (*final_result);
+
+    register unsigned int x0 asm("x0");
 	
 	//define variables' addresses
 	vector = (volatile int(*)[N]) 0x030000, 
@@ -52,8 +54,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_or %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 	(*stand_alone) = mask_or;
 
@@ -62,8 +64,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_and %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 	
 
@@ -83,8 +85,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_and %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 	(*stand_alone) = mask_and;
 
@@ -93,8 +95,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_xor %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 
 
@@ -114,8 +116,8 @@ int main(int argc, char *argv[])
 
 	//program LiM for stand-alone operation
 	asm volatile("sw_active_xor %[result], %[input_i], 0"
-    : [result] "=r" (s_alone)
-    : [input_i] "r" (0x1fffc), "[result]" (s_alone)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 	(*stand_alone) = mask_xor;
 
@@ -134,8 +136,8 @@ int main(int argc, char *argv[])
 
 	//restore standard operations
 	asm volatile("sw_active_none %[result], %[input_i], 0"
-    : [result] "=r" (zero)
-    : [input_i] "r" (0x1fffc), "[result]" (zero)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 
 	(*final_result) = sum_a + sum_b;
