@@ -11,6 +11,7 @@ int main(int argc, char* argv[])
     states = (volatile int(*)[4][4]) 0x30000;
     key    = (volatile int(*)[4][4]) 0x30200;
 
+    register unsigned int x0 asm("x0");
     
     (*states)[0][0]=0x32; (*states)[0][1]=0x88; (*states)[0][2]=0x31; (*states)[0][3]=0xE0;
     (*states)[1][0]=0x43; (*states)[1][1]=0x54; (*states)[1][2]=0x31; (*states)[1][3]=0x37;
@@ -24,11 +25,11 @@ int main(int argc, char* argv[])
     (*key)[3][0]=0xF2; (*key)[3][1]=0xE8; (*key)[3][2]=0x60; (*key)[3][3]=0x08;
 
    /* Others */
-   int i, j, N = 1, zero = 0, opK, targetK = 0x30200;
+   int i, j, N = 1, opK;
 
    //Program memory for XOR operations
    asm volatile("sw_active_xor %[result], %[input_i], 0"
-    : [result] "=r" (N)
+    : [result] "=r" (x0)
     : [input_i] "r" (0x1fffc), "[result]" (N)
     );
  
@@ -38,29 +39,25 @@ int main(int argc, char* argv[])
        for (j=0; j<4; j++) {
 
        
-           opK = 0x00000000;
-
-           //lw first operand
+          //lw first operand
 	       asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
 	       : [result] "=r" (opK)
-	       : [input_s] "r" (targetK), [input_t] "r"  (opK), "[result]" (opK)
+           : [input_s] "r" (&(*key)[i][j]), [input_t] "r"  (x0), "[result]" (opK)
 	       );
    
            //sw operation to activate sw_xor 
            (*states)[i][j] = opK;
 
-           targetK = targetK + 0x00000004;  //update address
-
+         
        }
    }
 
    //restore standard operations
 	asm volatile("sw_active_none %[result], %[input_i], 0"
-    : [result] "=r" (zero)
-    : [input_i] "r" (0x1fffc), "[result]" (zero)
+    : [result] "=r" (x0)
+    : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
 
-    
 
    return EXIT_SUCCESS;
 }
