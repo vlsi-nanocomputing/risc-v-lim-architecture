@@ -207,6 +207,10 @@ vcs-run-bitwise-inv-rt: vcsify custom/bitwise_inv.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_inv.hex" +verbose +t 1ns +j20 
 	mv trace_core_00_0.log TraceAlgorithms/bitwise_inv_RT.log
 
+vcs-run-bitmap-rt: vcsify custom/bitmap_search.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitmap_search.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/bitmap_RT.log
+
 
 #LIM PROGRAMS
 
