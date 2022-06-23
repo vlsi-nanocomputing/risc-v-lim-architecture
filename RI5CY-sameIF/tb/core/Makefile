@@ -215,6 +215,10 @@ vcs-run-aes-rt: vcsify custom/aes128_addroundkey.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/aes128_addroundkey.hex" +verbose +t 1ns +j20 
 	mv trace_core_00_0.log TraceAlgorithms/aes_RT.log
 
+vcs-run-xnor-rt: vcsify custom/xnor_net.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/xnor_net.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/xnor_net_RT.log
+
 
 
 #LIM PROGRAMS
