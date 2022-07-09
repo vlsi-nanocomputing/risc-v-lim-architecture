@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 	(*stand_alone) = (*vector)[1]+0x768
 	
 
-	/* OR operation */
+    /* OR operation */
 
     //program LiM for range operation
     asm volatile("sw_active_or %[result], %[input_i], 0"
