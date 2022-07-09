@@ -14,31 +14,20 @@ int main(int argc, char *argv[])
 	//define variables' addresses
 	vector = (volatile int(*)[N]) 0x030000, 
 	stand_alone = (volatile int(*))0x30040, 
-	final_result= (volatile int(*))0x30044;
-
-	//configuration address, where the config of the memory is stored = 0x1fffc
-	//configure vector[N-1] address = 0x030010
-	//configure vector[N-2] address = 0x03000C
-    //configure vector[N-3] address = 0x30008
-    
+	final_result= (volatile int(*))0x30044;  
 
 	//initialize mask values
 	mask_and  = 0x8F;
 	mask_or   = 0xF1;
 	mask_xor  = 0xF0;
-   
-
-	
+   	
 	
 	/* fill vector */
     for(i=0; i<N; i++){    
     	(*vector)[i] = i*13467;
     }
 
-	(*stand_alone) = (*vector)[1]+0x768;
-
-	
-	
+	(*stand_alone) = (*vector)[1]+0x768
 	
 
 	/* OR operation */
