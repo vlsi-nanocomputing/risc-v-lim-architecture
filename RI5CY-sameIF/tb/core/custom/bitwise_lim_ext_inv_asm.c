@@ -7,27 +7,22 @@
 int main(int argc, char *argv[])
 {    
 
-	int mask_nor, mask_nand, mask_xnor, N = 5, i, sum_a = 0x0, sum_b = 0x0;
-	volatile int (*vector)[N];
-	volatile int (*stand_alone);
-	volatile int (*final_result);
+    int mask_nor, mask_nand, mask_xnor, N = 5, i, sum_a = 0x0, sum_b = 0x0;
+    volatile int (*vector)[N];
+    volatile int (*stand_alone);
+    volatile int (*final_result);
 	
     //define variables' addresses
-	vector = (volatile int(*)[N]) 0x030000, 
-	stand_alone = (volatile int(*))0x30040, 
-	final_result= (volatile int(*))0x30044;
+    vector = (volatile int(*)[N]) 0x030000, 
+    stand_alone = (volatile int(*))0x30040, 
+    final_result= (volatile int(*))0x30044;
 
     register unsigned int x0 asm("x0");
 
-	//configuration address, where the config of the memory is stored = 0x1fffc
-	//configure vector[N-1] address = 0x030010
-	//configure vector[N-2] address = 0x03000C
-    //configure vector[N-3] address = 0x30008
-
-	//initialize mask values
-	mask_nand  = 0x8F;
-	mask_nor   = 0xF1;
-	mask_xnor  = 0xF0;
+    //initialize mask values
+    mask_nand  = 0x8F;
+    mask_nor   = 0xF1;
+    mask_xnor  = 0xF0;
 
 	
 	
