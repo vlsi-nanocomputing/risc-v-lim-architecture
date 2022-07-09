@@ -7,22 +7,22 @@
 int main(int argc, char *argv[])
 {    
 
-	int mask_or, mask_and, mask_xor, N = 5, i, sum_a = 0xFFFFFFFF, sum_b = 0xFFFFFFFF;
-	volatile int (*vector)[N];
-	volatile int (*stand_alone);
-	volatile int (*final_result);
+    int mask_or, mask_and, mask_xor, N = 5, i, sum_a = 0xFFFFFFFF, sum_b = 0xFFFFFFFF;
+    volatile int (*vector)[N];
+    volatile int (*stand_alone);
+    volatile int (*final_result);
 
     register unsigned int x0 asm("x0");
 	
-	//define variables' addresses
-	vector = (volatile int(*)[N]) 0x030000, 
-	stand_alone = (volatile int(*))0x30040, 
-	final_result= (volatile int(*))0x30044;  
+    //define variables' addresses
+    vector = (volatile int(*)[N]) 0x030000, 
+    stand_alone = (volatile int(*))0x30040, 
+    final_result= (volatile int(*))0x30044;  
 
-	//initialize mask values
-	mask_and  = 0x8F;
-	mask_or   = 0xF1;
-	mask_xor  = 0xF0;
+    //initialize mask values
+    mask_and  = 0x8F;
+    mask_or   = 0xF1;
+    mask_xor  = 0xF0;
    	
 	
     /* fill vector */
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     	(*vector)[i] = i*13467;
     }
 
-	(*stand_alone) = (*vector)[1]+0x768
+    (*stand_alone) = (*vector)[1]+0x768
 	
 
     /* OR operation */
