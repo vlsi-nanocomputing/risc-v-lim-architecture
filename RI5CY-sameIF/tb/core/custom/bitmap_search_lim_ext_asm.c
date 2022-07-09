@@ -1,4 +1,8 @@
 /* Bitmap search program*/
+//This program emulates the bitmap search algorithm, students' features are distributed over 6 integer vectors.
+//In this program two queries are perfomed
+// 1. Which students are male and older than 19?
+// 2. Which students are older than 18?
 
 #include <stdio.h>
 #include <stdlib.h>

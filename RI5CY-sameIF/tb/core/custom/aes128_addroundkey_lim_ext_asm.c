@@ -1,4 +1,6 @@
 /* AES128 Addroundkey program*/
+//Compute AES128 Addroundkey, the algorithm encrypts chunks of 128-bit data organized in a 4x4 matrix named 'states'.
+//Data is transformed with a XOR operation using a 4x4 matrix named 'key'.
 
 #include <stdio.h>
 #include <stdlib.h>
