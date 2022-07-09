@@ -11,10 +11,7 @@
 
 import riscv_defines::*;
 `define DEBUG
-`define RT_LIM_MEM //un-comment to build LiM Racetrack memory array
-//`define LIM_MEM    //un-comment to build LiM standard memory array
-//`define STD_MEM    //un-comment to build standard memory array
- 
+
 
 module dp_ram_logic
     #(parameter ADDR_WIDTH = 10, 
