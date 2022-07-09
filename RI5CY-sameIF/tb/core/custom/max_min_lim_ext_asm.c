@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     }
 
     //program LiM for max operation
-	asm volatile("sw_active_max %[result], %[input_i], 0"
+    asm volatile("sw_active_max %[result], %[input_i], 0"
     : [result] "=r" (N)
     : [input_i] "r" (cnfAddress), "[result]" (N)
     );
