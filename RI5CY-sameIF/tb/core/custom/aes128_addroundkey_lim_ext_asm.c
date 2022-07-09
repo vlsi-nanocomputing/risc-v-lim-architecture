@@ -42,19 +42,20 @@ int main(int argc, char* argv[])
    /* Add around key */
    for (i=0; i<4; i++) {
        for (j=0; j<4; j++) { 
-          //lw key[i][j] inside the core
-	       asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	       : [result] "=r" (opK)
+
+           //lw key[i][j] inside the core
+           asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+           : [result] "=r" (opK)
            : [input_s] "r" (&(*key)[i][j]), [input_t] "r"  (x0), "[result]" (opK)
-	       );
+           );
    
            //sw operation to activate sw_xor, compute XOR oepration between states[i][j] and key[i][j]
            (*states)[i][j] = opK; //use key as mask
        }
    }
 
-   //restore standard operations
-	asm volatile("sw_active_none %[result], %[input_i], 0"
+    //restore standard operations
+    asm volatile("sw_active_none %[result], %[input_i], 0"
     : [result] "=r" (x0)
     : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
