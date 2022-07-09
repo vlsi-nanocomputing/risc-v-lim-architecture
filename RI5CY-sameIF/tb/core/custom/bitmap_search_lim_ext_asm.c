@@ -50,54 +50,61 @@ int main(int argc, char* argv[])
         (*result_over18)[i]   = 0;
     }
 
-	//program LiM for stand-alone OR operation
-	asm volatile("sw_active_or %[result], %[input_i], 0"
+    //program LiM for stand-alone OR operation
+    asm volatile("sw_active_or %[result], %[input_i], 0"
     : [result] "=r" (x0)
     : [input_i] "r" (0x1fffc), "[result]" (N)
     );
 
     /* Query: identify male people that are 19 or 20 */
     for(i=0; i<Nr-1; i++) {
+
         //load first operand with neutral load
-	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	    : [result] "=r" (partial)
-         : [input_s] "r" (&(*v_age20)[i]), [input_t] "r"  (x0), "[result]" (partial)
-	    );
+        asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+        : [result] "=r" (partial)
+        : [input_s] "r" (&(*v_age20)[i]), [input_t] "r"  (x0), "[result]" (partial)
+        );
+
         //lw_mask operation for OR computation, use previous operand as mask (equivalent to v_age19[i] | v_age20[i])
-	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	    : [result] "=r" (partial)
+        asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+        : [result] "=r" (partial)
         : [input_s] "r" (&(*v_age19)[i]), [input_t] "r"  (partial), "[result]" (partial)
-	    );
+        );
+
         //load last operand with neutral load
-	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	    : [result] "=r" (operand)
+        asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+        : [result] "=r" (operand)
         : [input_s] "r" (&(*v_genderM)[i]), [input_t] "r"  (x0), "[result]" (operand)
-	    );
+        );
         res = operand & partial; //compute AND operation inside the core
+
         //sw operation to store results (neutral store)
-	    (*result_M_over19)[i] = res;
+        (*result_M_over19)[i] = res;
     }
 
     /* Query: identify people that are older than 18 */
    for(i=0; i<Nr-1; i++) {
-         //lload first operand with neutral load
-	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	    : [result] "=r" (partial)
-	    : [input_s] "r" (&(*v_age17)[i]), [input_t] "r"  (x0), "[result]" (partial)
-	    );
-       //lw_mask operation for OR computation, use previous operand as mask (equivalent to v_age17[i] | v_age16[i])
-	    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	    : [result] "=r" (partial)
-	    : [input_s] "r" (&(*v_age16)[i]), [input_t] "r"  (partial), "[result]" (partial)
-	    );
-       res = ~ partial; //compute AND operation inside the core
+
+        //lload first operand with neutral load
+        asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+        : [result] "=r" (partial)
+        : [input_s] "r" (&(*v_age17)[i]), [input_t] "r"  (x0), "[result]" (partial)
+        );
+
+        //lw_mask operation for OR computation, use previous operand as mask (equivalent to v_age17[i] | v_age16[i])
+        asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+        : [result] "=r" (partial)
+        : [input_s] "r" (&(*v_age16)[i]), [input_t] "r"  (partial), "[result]" (partial)
+        );
+        res = ~ partial; //compute AND operation inside the core
+        
        //sw operation to store results (neutral store)
 	   (*result_over18)[i] = res;
    }
  
 
-   //restore standard operations
-	asm volatile("sw_active_none %[result], %[input_i], 0"
+    //restore standard operations
+    asm volatile("sw_active_none %[result], %[input_i], 0"
     : [result] "=r" (x0)
     : [input_i] "r" (0x1fffc), "[result]" (x0)
     );
