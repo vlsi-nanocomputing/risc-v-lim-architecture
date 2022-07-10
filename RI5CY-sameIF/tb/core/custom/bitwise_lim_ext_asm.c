@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     	(*vector)[i] = i*13467;
     }
 
-    (*stand_alone) = (*vector)[1]+0x768
+    (*stand_alone) = (*vector)[1]+0x768;
 	
 
     /* OR operation */
