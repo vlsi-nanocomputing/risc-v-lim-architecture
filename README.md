@@ -50,11 +50,11 @@ Available memories:
 - Standard memory with LiM functionalities (LIM_MEM)
 - Racetrack memory with LiM functionalities (RT_LIM_MEM)
 
-Racetrack memory supports two different modes:
-- Memory mode
-- LiM mode
+Racetrack memory supports two different modes, set the correct parameter MEM_MODE in file `RI5CY-sameIF/tb/core/tb_tob.sv` to choose the wanted configuration:
+- Memory mode (MEM_MODE = 0)
+- LiM mode    (MEM_MODE = 1)
 
-Set the correct parameter MEM_MODE in file `RI5CY-sameIF/tb/core/tb_tob.sv` to choose the wanted configuration.
+
 
 For executing a sample program run:
 
