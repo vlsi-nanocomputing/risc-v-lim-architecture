@@ -46,9 +46,9 @@ Enter the directory `RI5CY-sameIF/tb/core` and modify the Makefile. In particula
 
 Modify variable `MEM_TYPE` inside the Makefile to build the desired memory type.
 Available memories:
-- Standard memory
-- Standard memory with LiM functionalities
-- Racetrack memory with LiM functionalities
+- Standard memory (STD_MEM)
+- Standard memory with LiM functionalities (LIM_MEM)
+- Racetrack memory with LiM functionalities (RT_LIM_MEM)
 
 Racetrack memory supports two different modes:
 - Memory mode
