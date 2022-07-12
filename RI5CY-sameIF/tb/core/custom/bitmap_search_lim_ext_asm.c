@@ -23,6 +23,9 @@ int main(int argc, char* argv[])
     volatile int (*v_genderF)[Nr];
 
     register unsigned int x0 asm("x0");
+
+    //configuration address, where the config of the memory is stored.
+    int cnfAddress = 0x1fffc;
     
     //Define variable addresses
     result_M_over19 = (volatile int(*)[Nr]) 0x300B0;
@@ -53,7 +56,7 @@ int main(int argc, char* argv[])
     //program LiM for stand-alone OR operation
     asm volatile("sw_active_or %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (N)
+    : [input_i] "r" (cnfAddress), "[result]" (N)
     );
 
     /* Query: identify male people that are 19 or 20 */
@@ -106,7 +109,7 @@ int main(int argc, char* argv[])
     //restore standard operations
     asm volatile("sw_active_none %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (x0)
+    : [input_i] "r" (cnfAddress), "[result]" (x0)
     );
 
 
