@@ -15,6 +15,9 @@ int main(int argc, char* argv[])
     states = (volatile int(*)[4][4]) 0x30000;    //define states matrix starting address
     key    = (volatile int(*)[4][4]) 0x30200;    //define key matrix starting address
 
+    //configuration address, where the config of the memory is stored.
+    int cnfAddress = 0x1fffc;
+
     register unsigned int x0 asm("x0");
     
     //Initialize states matrix
@@ -35,7 +38,7 @@ int main(int argc, char* argv[])
    //Program memory for XOR operations
    asm volatile("sw_active_xor %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (N)
+    : [input_i] "r" (cnfAddress), "[result]" (N)
     );
  
 
@@ -57,7 +60,7 @@ int main(int argc, char* argv[])
     //restore standard operations
     asm volatile("sw_active_none %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (x0)
+    : [input_i] "r" (cnfAddress), "[result]" (x0)
     );
 
 
