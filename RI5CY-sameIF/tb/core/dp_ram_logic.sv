@@ -96,34 +96,34 @@ module dp_ram_logic
     logic [23:0]                     asize_mem;						//Range for LiM operations
     logic                            we_b_funct_mem;				//Notifies LiM programming
     logic [7:0]                      opcode_mem; 					//Opcode for LiM operations
-    logic							 en_b_rt_valid;	 		 
-    logic							 en_b_rt_valid_q;	
+    logic                            en_b_rt_valid;	 		 
+    logic                            en_b_rt_valid_q;	
     logic                            en_b_rt_q;						//sampled en_b 
     logic [ADDR_WIDTH-1:0]           addr_b_rt_q;					//sampeld address for RT
     logic [31:0]                     wdata_b_rt_q;					//sambled write_data for RT
-    logic							 rvalid_rt;						//valid signal from RT 
-    logic							 rvalid_rt_int;					//internal valid signal from RT (useful for range oprations)
-    logic [3:0]						 be_b_int;						//internal be_b
-    logic [3:0]						 be_b_q;						//sampled be_b signal 
+    logic                            rvalid_rt;                     //valid signal from RT 
+    logic                            rvalid_rt_int;                 //internal valid signal from RT (useful for range oprations)
+    logic [3:0]                      be_b_int;                      //internal be_b
+    logic [3:0]                      be_b_q;                        //sampled be_b signal 
     logic [words-1:0]                word_lines_p;					//packed wordlines for dummy RT
-    logic   					     en_b_int_rt;					//masked start transaction signal for RT
+    logic                            en_b_int_rt;                   //masked start transaction signal for RT
     logic [ADDR_WIDTH-1:0]           addr_b_range;					//address in range operations
-    logic							 ld;							//load enable for counter in range decoder
-    logic							 cnt_en;						//enable for counter in range decoder
-    logic							 cmp_end_add;					//comparator for end address in range decoder	
+    logic                            ld;                            //load enable for counter in range decoder
+    logic                            cnt_en;                        //enable for counter in range decoder
+    logic                            cmp_end_add;                   //comparator for end address in range decoder	
     logic [ADDR_WIDTH-1:0]           addr_b_range_cmp;				//address end decremented by four for the comparators			
-    logic							 we_b_q;				
-    logic							 we_b_int;				
-    logic [ADDR_WIDTH-1:0]         	 addr_b_int_dec;				//decoded address (divide by 4)
-    logic [ADDR_WIDTH-1:0]         	 addr_b_range_dec;				//decoded address (divide by 4)
-    logic [ADDR_WIDTH-1:0]         	 addr_mem_dec;					//decoded address (divide by 3) for memory mode
+    logic                            we_b_q;				
+    logic                            we_b_int;				
+    logic [ADDR_WIDTH-1:0]           addr_b_int_dec;                //decoded address (divide by 4)
+    logic [ADDR_WIDTH-1:0]           addr_b_range_dec;              //decoded address (divide by 4)
+    logic [ADDR_WIDTH-1:0]           addr_mem_dec;                  //decoded address (divide by 3) for memory mode
     logic                            decoder_init[words]; 			//initial decoder for word addressed memory
     logic                            word_lines_lim[words]; 		//word_lines for LiM mode
-    logic							 word_lines_tri[words_tri];		//word_lines for memory mode
-    logic							 active_triplet[triplets];
-    logic [2:0]						 word_sel_tri;					//word selection for memory mode
-    logic [1:0]						 n_shift;						//n. of required shift
-    logic [1:0]						 n_shift_lim;					//n. of required shift for LiM mode
+    logic                            word_lines_tri[words_tri];     //word_lines for memory mode
+    logic                            active_triplet[triplets];
+    logic [2:0]                      word_sel_tri;                  //word selection for memory mode
+    logic [1:0]                      n_shift;                       //n. of required shift
+    logic [1:0]                      n_shift_lim;                   //n. of required shift for LiM mode
     logic [31:0]                     mask_count;                    //mask signal for max/min operation
     logic                            start_maxmin;                  //start signal for max/min operation
     logic                            stop_maxmin_iteration;         //stop signal for max/min operation                
@@ -184,11 +184,11 @@ module dp_ram_logic
             end
             else if (en_b_rt_valid || rvalid_rt) begin	
                  en_b_rt_q             <= en_b_i; 							
-                 wdata_b_rt_q      	   <= wdata_b_i;
-                 en_b_rt_valid_q   	   <= en_b_rt_valid;
-                 addr_b_rt_q		   <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-                 be_b_q				   <= be_b_i;
-                 we_b_q				   <= we_b_i;	
+                 wdata_b_rt_q          <= wdata_b_i;
+                 en_b_rt_valid_q       <= en_b_rt_valid;
+                 addr_b_rt_q           <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+                 be_b_q                <= be_b_i;
+                 we_b_q                <= we_b_i;	
 
             end
         end  
@@ -198,8 +198,8 @@ module dp_ram_logic
         assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q        	 : en_b_i;
         assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q      	 : wdata_b_i;
         assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q       	 : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-        assign be_b_int			   = (en_b_rt_valid_q) ? be_b_q        	     : be_b_i;
-        assign we_b_int			   = (en_b_rt_valid_q) ? we_b_q				 : we_b_i;		
+        assign be_b_int            = (en_b_rt_valid_q) ? be_b_q              : be_b_i;
+        assign we_b_int            = (en_b_rt_valid_q) ? we_b_q              : we_b_i;		
 
 	    //only sw_active_logic can be carried out in one clock cycle
         assign rvalid_b_o          = (en_b_rt_valid_q || en_b_rt_valid ) ?  rvalid_rt  : gnt_b_i; 	
