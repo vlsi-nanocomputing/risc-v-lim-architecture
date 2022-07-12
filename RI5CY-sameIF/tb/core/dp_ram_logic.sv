@@ -25,19 +25,19 @@ module dp_ram_logic
      input  logic                          en_a_i,
      input  logic [ADDR_WIDTH-1:0]         addr_a_i,
      input  logic [31:0]                   wdata_a_i,
-     output logic [INSTR_RDATA_WIDTH-1:0]  rdata_a_o, 	//output read instruction
-     input  logic                          we_a_i, 		//set to 0 in mm_ram (always load)
-     input  logic [3:0]                    be_a_i, 		// set to all 1s in mm_ram, always want 32-bits
+     output logic [INSTR_RDATA_WIDTH-1:0]  rdata_a_o,   //output read instruction
+     input  logic                          we_a_i,      //set to 0 in mm_ram (always load)
+     input  logic [3:0]                    be_a_i,      // set to all 1s in mm_ram, always want 32-bits
 
 	
-     input  logic                          en_b_i, 		// Bank request from amo_shim
-     input  logic [ADDR_WIDTH-1:0]         addr_b_i, 	//data address 
-     input  logic [31:0]                   wdata_b_i, 	//input data
-     output logic [31:0]                   rdata_b_o, 	//output read data
-     input  logic                          we_b_i,  	//  1: Store, 0: Load from amo_shim
-     input  logic [3:0]                    be_b_i, 		// Byte enable from amo_shim
-     input  logic                          gnt_b_i, 	//bank grant from amo shim
-     output logic                          rvalid_b_o 	//data valid signal
+     input  logic                          en_b_i,      // Bank request from amo_shim
+     input  logic [ADDR_WIDTH-1:0]         addr_b_i,    //data address 
+     input  logic [31:0]                   wdata_b_i,   //input data
+     output logic [31:0]                   rdata_b_o,   //output read data
+     input  logic                          we_b_i,      //  1: Store, 0: Load from amo_shim
+     input  logic [3:0]                    be_b_i,      // Byte enable from amo_shim
+     input  logic                          gnt_b_i,     //bank grant from amo shim
+     output logic                          rvalid_b_o   //data valid signal
     );
 
 `ifdef RT_LIM_MEM    //LiM Racetrack memory part   
@@ -153,8 +153,8 @@ module dp_ram_logic
     //Racetrack waveforms
     logic						   clk_m_i       = 1'b1;    //magnetic clock
     logic						   Bz_s_i        = 1'b1;    //Magnetic field sign
-    logic						   write_pulse_i = 1'b1;	//write pulse for racetrack
-    logic						   read_pulse_i  = 1'b1;	//read pulse for racetrack
+    logic						   write_pulse_i = 1'b1;    //write pulse for racetrack
+    logic						   read_pulse_i  = 1'b1;    //read pulse for racetrack
  
 `endif
 
