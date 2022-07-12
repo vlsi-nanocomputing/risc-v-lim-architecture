@@ -83,42 +83,42 @@ module dp_ram_logic
 `ifndef STD_MEM
  
     // Logic-in-memory signals
-    logic [ADDR_WIDTH-1:0]           asize_mem_int;					//range operation without byte offset (2 LSBs)
-    logic [ADDR_WIDTH-1:0]           addr_b_range_end;				//range operation end address
-    logic                            en_b_int;						// Bank request internal (after manipulation)
+    logic [ADDR_WIDTH-1:0]           asize_mem_int;                 //range operation without byte offset (2 LSBs)
+    logic [ADDR_WIDTH-1:0]           addr_b_range_end;              //range operation end address
+    logic                            en_b_int;                      // Bank request internal (after manipulation)
     logic [31:0]                     wdata_b_int;
     logic                            word_lines[words];             //wordlines for word addressed memory
     logic                            word_lines_int[words];
-    logic                            range_active;					//signal that identifies a range operation
+    logic                            range_active;                  //signal that identifies a range operation
     logic [31:0]                     mask;	
-    logic [7:0]                      logic_in_memory_funct_int; 	//Logic function after masking 
-    logic [31:0]                     logic_in_memory_funct; 		//LiM programming cell
-    logic [23:0]                     asize_mem;						//Range for LiM operations
-    logic                            we_b_funct_mem;				//Notifies LiM programming
-    logic [7:0]                      opcode_mem; 					//Opcode for LiM operations
+    logic [7:0]                      logic_in_memory_funct_int;     //Logic function after masking 
+    logic [31:0]                     logic_in_memory_funct;         //LiM programming cell
+    logic [23:0]                     asize_mem;                     //Range for LiM operations
+    logic                            we_b_funct_mem;                //Notifies LiM programming
+    logic [7:0]                      opcode_mem;                    //Opcode for LiM operations
     logic                            en_b_rt_valid;	 		 
     logic                            en_b_rt_valid_q;	
-    logic                            en_b_rt_q;						//sampled en_b 
-    logic [ADDR_WIDTH-1:0]           addr_b_rt_q;					//sampeld address for RT
-    logic [31:0]                     wdata_b_rt_q;					//sambled write_data for RT
+    logic                            en_b_rt_q;                     //sampled en_b 
+    logic [ADDR_WIDTH-1:0]           addr_b_rt_q;                   //sampeld address for RT
+    logic [31:0]                     wdata_b_rt_q;                  //sambled write_data for RT
     logic                            rvalid_rt;                     //valid signal from RT 
     logic                            rvalid_rt_int;                 //internal valid signal from RT (useful for range oprations)
     logic [3:0]                      be_b_int;                      //internal be_b
     logic [3:0]                      be_b_q;                        //sampled be_b signal 
     logic [words-1:0]                word_lines_p;					//packed wordlines for dummy RT
     logic                            en_b_int_rt;                   //masked start transaction signal for RT
-    logic [ADDR_WIDTH-1:0]           addr_b_range;					//address in range operations
+    logic [ADDR_WIDTH-1:0]           addr_b_range;                  //address in range operations
     logic                            ld;                            //load enable for counter in range decoder
     logic                            cnt_en;                        //enable for counter in range decoder
     logic                            cmp_end_add;                   //comparator for end address in range decoder	
-    logic [ADDR_WIDTH-1:0]           addr_b_range_cmp;				//address end decremented by four for the comparators			
+    logic [ADDR_WIDTH-1:0]           addr_b_range_cmp;              //address end decremented by four for the comparators			
     logic                            we_b_q;				
     logic                            we_b_int;				
     logic [ADDR_WIDTH-1:0]           addr_b_int_dec;                //decoded address (divide by 4)
     logic [ADDR_WIDTH-1:0]           addr_b_range_dec;              //decoded address (divide by 4)
     logic [ADDR_WIDTH-1:0]           addr_mem_dec;                  //decoded address (divide by 3) for memory mode
-    logic                            decoder_init[words]; 			//initial decoder for word addressed memory
-    logic                            word_lines_lim[words]; 		//word_lines for LiM mode
+    logic                            decoder_init[words];           //initial decoder for word addressed memory
+    logic                            word_lines_lim[words];         //word_lines for LiM mode
     logic                            word_lines_tri[words_tri];     //word_lines for memory mode
     logic                            active_triplet[triplets];
     logic [2:0]                      word_sel_tri;                  //word selection for memory mode
@@ -151,8 +151,8 @@ module dp_ram_logic
 `ifdef RT_LIM_MEM    //racetrack memory part
 
     //Racetrack waveforms
-    logic						   clk_m_i       = 1'b1; 		//magnetic clock
-    logic						   Bz_s_i        = 1'b1; 		//Magnetic field sign
+    logic						   clk_m_i       = 1'b1;    //magnetic clock
+    logic						   Bz_s_i        = 1'b1;    //Magnetic field sign
     logic						   write_pulse_i = 1'b1;	//write pulse for racetrack
     logic						   read_pulse_i  = 1'b1;	//read pulse for racetrack
  
@@ -195,9 +195,9 @@ module dp_ram_logic
 	
 	
 	    // Valid signal for maxmin handshake
-        assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q        	 : en_b_i;
-        assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q      	 : wdata_b_i;
-        assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q       	 : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+        assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q           : en_b_i;
+        assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q        : wdata_b_i;
+        assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q         : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
         assign be_b_int            = (en_b_rt_valid_q) ? be_b_q              : be_b_i;
         assign we_b_int            = (en_b_rt_valid_q) ? we_b_q              : we_b_i;		
 
