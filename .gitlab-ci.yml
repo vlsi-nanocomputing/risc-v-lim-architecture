@@ -1,5 +1,6 @@
 stages:
  - vsim_mem_std_mode0
+ - vsim_mem_std_mode1
 
 #variables:
 #  GIT_SUBMODULE_STRATEGY: recursive
@@ -12,3 +13,12 @@ build_vsim_mem_std_mode0:
   - cd RI5CY-sameIF/tb/core
   - source /eda/scripts/init_questa_core_prime
   - make RISCV_LIB=/opt/riscv-rv32ima-ilp32 MEM_MODE=0 MEM_TYPE=STD_MEM vsim-all
+
+build_vsim_mem_std_mode1:
+ stage: vsim_mem_std_mode1
+ tags: [eda_tools]
+ script:
+  - git submodule update --remote RI5CY-sameIF/rtl/fpnew
+  - cd RI5CY-sameIF/tb/core
+  - source /eda/scripts/init_questa_core_prime
+  - make RISCV_LIB=/opt/riscv-rv32ima-ilp32 MEM_MODE=1 MEM_TYPE=STD_MEM vsim-all
