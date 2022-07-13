@@ -1,146 +1,151 @@
+/*Bitwise custom program*/
+//Compute different bitwise logic operations on a user-defined vector 
+
 #include <stdio.h>
 #include <stdlib.h>
 
 int main(int argc, char *argv[])
 {    
 
-	int mask_or, mask_and, mask_xor, N = 5, i, sum_a = 0xFFFFFFFF, sum_b = 0xFFFFFFFF;
-	volatile int (*vector)[N];
-	volatile int (*stand_alone);
-	volatile int (*final_result);
+    int mask_or, mask_and, mask_xor, N = 5, i, sum_a = 0xFFFFFFFF, sum_b = 0xFFFFFFFF;
+    volatile int (*vector)[N];
+    volatile int (*stand_alone);
+    volatile int (*final_result);
 
     register unsigned int x0 asm("x0");
 	
-	//define variables' addresses
-	vector = (volatile int(*)[N]) 0x030000, 
-	stand_alone = (volatile int(*))0x30040, 
-	final_result= (volatile int(*))0x30044;
+    //define variables' addresses
+    vector = (volatile int(*)[N]) 0x030000, 
+    stand_alone = (volatile int(*))0x30040, 
+    final_result= (volatile int(*))0x30044;  
 
-	//configuration address, where the config of the memory is stored = 0x1fffc
-	//configure vector[N-1] address = 0x030010
-	//configure vector[N-2] address = 0x03000C
-    //configure vector[N-3] address = 0x30008
-    
+    //configuration address, where the config of the memory is stored.
+    int cnfAddress = 0x1fffc;
+	//configure vector[N-1] address
+	int andAddress = 0x030010;
+	//configure vector[N-2] address
+	int xorAddress  = 0x03000C;
+    //configure vector[N-3] address
+	int opAddress  = 0x30008;
 
-	//initialize mask values
-	mask_and  = 0x8F;
-	mask_or   = 0xF1;
-	mask_xor  = 0xF0;
-   
 
+    //initialize mask values
+    mask_and  = 0x8F;
+    mask_or   = 0xF1;
+    mask_xor  = 0xF0;
+   	
 	
-	
-	/* fill vector */
+    /* fill vector */
     for(i=0; i<N; i++){    
     	(*vector)[i] = i*13467;
     }
 
-	(*stand_alone) = (*vector)[1]+0x768;
-
-	
-	
+    (*stand_alone) = (*vector)[1]+0x768;
 	
 
-	/* OR operation */
+    /* OR operation */
 
-	//program LiM for range operation
-	asm volatile("sw_active_or %[result], %[input_i], 0"
+    //program LiM for range operation
+    asm volatile("sw_active_or %[result], %[input_i], 0"
     : [result] "=r" (N)
-    : [input_i] "r" (0x1fffc), "[result]" (N)
+    : [input_i] "r" (cnfAddress), "[result]" (N)
     );
 	
-	//sw operation to active OR LiM
-	(*vector)[0] = mask_or;
+    //sw operation to active OR LiM
+    (*vector)[0] = mask_or;
 
-	//program LiM for stand-alone operation
-	asm volatile("sw_active_or %[result], %[input_i], 0"
+    //program LiM for stand-alone operation
+    asm volatile("sw_active_or %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (x0)
+    : [input_i] "r" (cnfAddress), "[result]" (x0)
     );
 	(*stand_alone) = mask_or;
 
-	/* AND operation */
+    /* AND operation */
 
-
-	//program LiM for stand-alone operation
-	asm volatile("sw_active_and %[result], %[input_i], 0"
+    //program LiM for stand-alone operation
+    asm volatile("sw_active_and %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (x0)
+    : [input_i] "r" (cnfAddress), "[result]" (x0)
     );
 	
 
-	//lw_mask operation for mask_and computation
-	asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	: [result] "=r" (mask_and)
-	: [input_s] "r" (0x030010), [input_t] "r"  (mask_and), "[result]" (mask_and)
-	);
+    //lw_mask operation for mask_and computation
+    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+    : [result] "=r" (mask_and)
+    : [input_s] "r" (andAddress), [input_t] "r"  (mask_and), "[result]" (mask_and)
+    );
 
-	//program LiM for range operation
-	asm volatile("sw_active_and %[result], %[input_i], 0"
+    //program LiM for range operation
+    asm volatile("sw_active_and %[result], %[input_i], 0"
     : [result] "=r" (N)
-    : [input_i] "r" (0x1fffc), "[result]" (N)
+    : [input_i] "r" (cnfAddress), "[result]" (N)
     );
-	//sw operation to active AND LiM
-	(*vector)[0] = mask_and;
 
-	//program LiM for stand-alone operation
-	asm volatile("sw_active_and %[result], %[input_i], 0"
+    //sw operation to active AND LiM
+    (*vector)[0] = mask_and;
+
+    //program LiM for stand-alone operation
+    asm volatile("sw_active_and %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (x0)
+    : [input_i] "r" (cnfAddress), "[result]" (x0)
     );
+
 	(*stand_alone) = mask_and;
 
 
-	/* XOR operation*/
+    /* XOR operation*/
 
-	//program LiM for stand-alone operation
-	asm volatile("sw_active_xor %[result], %[input_i], 0"
+    //program LiM for stand-alone operation
+    asm volatile("sw_active_xor %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (x0)
+    : [input_i] "r" (cnfAddress), "[result]" (x0)
     );
 
 
-	//lw_mask operation for mask_xor computation
-	asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	: [result] "=r" (mask_xor)
-	: [input_s] "r" (0x03000C), [input_t] "r"  (mask_xor), "[result]" (mask_xor)
-	);
+    //lw_mask operation for mask_xor computation
+    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+    : [result] "=r" (mask_xor)
+    : [input_s] "r" (xorAddress), [input_t] "r"  (mask_xor), "[result]" (mask_xor)
+    );
 
 
-	//program LiM for range operation
-	asm volatile("sw_active_xor %[result], %[input_i], 0"
+    //program LiM for range operation
+    asm volatile("sw_active_xor %[result], %[input_i], 0"
     : [result] "=r" (N)
-    : [input_i] "r" (0x1fffc), "[result]" (N)
+    : [input_i] "r" (cnfAddress), "[result]" (N)
     );
-	(*vector)[0] = mask_xor;
 
-	//program LiM for stand-alone operation
-	asm volatile("sw_active_xor %[result], %[input_i], 0"
+    (*vector)[0] = mask_xor;
+
+    //program LiM for stand-alone operation
+    asm volatile("sw_active_xor %[result], %[input_i], 0"
     : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (x0)
+    : [input_i] "r" (cnfAddress), "[result]" (x0)
     );
-	(*stand_alone) = mask_xor;
+
+    (*stand_alone) = mask_xor;
 
     //lw_mask operation for ~(*vector)[N-3] computation exploting xor
-	asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	: [result] "=r" (sum_a)
-	: [input_s] "r" (0x30008), [input_t] "r"  (sum_a), "[result]" (sum_a)
-	);
-
-    //lw_mask operation for ~(*stand_alone) computation exploting xor
-	asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
-	: [result] "=r" (sum_b)
-	: [input_s] "r" (0x30040), [input_t] "r"  (sum_b), "[result]" (sum_b)
-	);
-
-
-	//restore standard operations
-	asm volatile("sw_active_none %[result], %[input_i], 0"
-    : [result] "=r" (x0)
-    : [input_i] "r" (0x1fffc), "[result]" (x0)
+    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+    : [result] "=r" (sum_a)
+    : [input_s] "r" (opAddress), [input_t] "r"  (sum_a), "[result]" (sum_a)
     );
 
-	(*final_result) = sum_a + sum_b;
+    //lw_mask operation for ~(*stand_alone) computation exploting xor
+    asm volatile("lw_mask %[result], %[input_s], %[input_t], 0 "
+    : [result] "=r" (sum_b)
+    : [input_s] "r" (&(*stand_alone)), [input_t] "r"  (sum_b), "[result]" (sum_b)
+    );
+
+
+    //restore standard operations
+    asm volatile("sw_active_none %[result], %[input_i], 0"
+    : [result] "=r" (x0)
+    : [input_i] "r" (cnfAddress), "[result]" (x0)
+    );
+
+    (*final_result) = sum_a + sum_b;
 
 
     return EXIT_SUCCESS;

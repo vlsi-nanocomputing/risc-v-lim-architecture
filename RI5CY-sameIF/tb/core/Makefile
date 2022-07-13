@@ -107,6 +107,17 @@ CSMITH_TIMEOUT_VERI      = 100
 # GCC configuration
 CUSTOM_GCC_FLAGS         =
 
+# Memory compilation variable - Set this parameter to compile the desired memory type
+
+MEM_TYPE    = RT_LIM_MEM
+
+### Available choices ###
+#STD_MEM    = compile standard memory
+#LIM_MEM    = compile standard memory with LiM functionalities
+#RT_LIM_MEM = compile Racetrack memory with/without LiM functionalities
+
+
+
 # ===================================================================
 # Default and all targets
 # ===================================================================
@@ -126,7 +137,7 @@ vlib: .lib-rtl
 
 # rebuild if we change some sourcefile
 .build-rtl: .lib-rtl $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
-	$(VLOG) -work $(VWORK) +incdir+$(RTLSRC_INCDIR) $(VLOG_FLAGS) \
+	$(VLOG) +define+$(MEM_TYPE) -work $(VWORK) +incdir+$(RTLSRC_INCDIR) $(VLOG_FLAGS) \
 	$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
 	touch .build-rtl
 
@@ -164,7 +175,7 @@ vcsify: $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
 		-timescale=1ns/1ns -j20\
 		-CC "-I$(VCS_HOME)/include -O3 -march=native" $(VCS_FLAGS) \
 		$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) \
-		+incdir+$(RTLSRC_INCDIR) 
+		+incdir+$(RTLSRC_INCDIR) +define+$(MEM_TYPE)
 
 vcs-run: vcsify firmware/firmware.hex
 	./simv $(SIMV_FLAGS)
