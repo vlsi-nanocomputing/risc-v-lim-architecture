@@ -1,0 +1,11 @@
+stages:
+ - build
+
+
+build_centos:
+ stage: build
+ tags: [eda_tools]
+ script:
+  - cd risc-v-lim-architecture/RI5CY-sameIF/tb/core
+  - source /eda/scripts/init_synopsys_vcs
+  - make RISCV_LIB=/opt/riscv-rv32ima-ilp32 vcs-run-bitwise-rt
