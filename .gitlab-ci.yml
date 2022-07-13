@@ -8,4 +8,4 @@ build_vsim_mem_std_mode0:
  script:
   - cd RI5CY-sameIF/tb/core
   - source /eda/scripts/init_questa_core_prime
-  - make RISCV_LIB=/opt/riscv-rv32ima-ilp32 MEM_MODE=0 MEM_TYPE=STD_MEM vsim-all-fp
+  - make RISCV_LIB=/opt/riscv-rv32ima-ilp32 MEM_MODE=0 MEM_TYPE=STD_MEM vsim-all
