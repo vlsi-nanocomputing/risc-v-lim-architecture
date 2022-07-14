@@ -177,6 +177,8 @@ vcsify: $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
 		$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) \
 		+incdir+$(RTLSRC_INCDIR) +define+$(MEM_TYPE)
 
+#STANDARD PROGRAMS (MEM_TYPE=STD_MEM)
+
 vcs-run: vcsify firmware/firmware.hex
 	./simv $(SIMV_FLAGS)
 
@@ -208,7 +210,7 @@ vcs-run-max_min: vcsify custom/max_min.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/max_min.hex"
 	mv trace_core_00_0.log TraceAlgorithms/max_min.log
 
-#PROGRAMS FOR RT MEMORY
+#PROGRAMS FOR RT MEMORY (MEM_TYPE = RT_LIM_MEM, MEM_MODE = 0)
 
 vcs-run-bitwise-rt: vcsify custom/bitwise.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise.hex" +verbose +t 1ns +j20 
@@ -232,7 +234,7 @@ vcs-run-xnor-rt: vcsify custom/xnor_net.hex
 
 
 
-#LIM PROGRAMS
+#LIM PROGRAMS (OLD COMPILER)
 
 vcs-run-test_lim: vcsify custom/test_lim.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/test_lim.hex"
@@ -258,7 +260,7 @@ vcs-run-transport_lim: vcsify custom/transport_min_cost_lim.hex
 	mv trace_core_00_0.log TraceAlgorithms/transport_lim.log
 
 
-#LIM PROGRAMS WITH NEW COMPILER AND INLINE ASSEMBLY
+#LIM PROGRAMS WITH NEW COMPILER AND INLINE ASSEMBLY (MEM_TYPE = LIM_MEM)
 
 vcs-run-bitwise-ext-asm: vcsify custom/bitwise_lim_ext_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose 
@@ -280,14 +282,8 @@ vcs-run-xnorlim: vcsify custom/xnor_net_lim.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/xnor_net_lim.hex"
 	mv trace_core_00_0.log TraceAlgorithms/xnor_net_lim.log
 
-#PROGRAMS FOR RT MEMORY
 
-vcs-run-bitwise-rt: vcsify custom/bitwise.hex
-	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise.hex" +verbose +t 1ns +j20 
-	mv trace_core_00_0.log TraceAlgorithms/bitwise_RT.log
-
-
-#LIM PROGRAMS FOR RT MEMORY WITH NEW COMPILER AND INLINE ASSEMBLY
+#LIM PROGRAMS FOR RT MEMORY WITH NEW COMPILER AND INLINE ASSEMBLY (MEM_TYPE = RT_LIM_MEM, MEM_MODE = 1)
 
 vcs-run-bitwise-ext-asm-rt: vcsify custom/bitwise_lim_ext_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose +t 1ns +j20 
