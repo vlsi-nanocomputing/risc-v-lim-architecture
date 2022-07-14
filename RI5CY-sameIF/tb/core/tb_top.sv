@@ -329,8 +329,8 @@ module tb_top
           .PULP_CLUSTER (PULP_CLUSTER),
           .FPU(FPU),
           .PULP_ZFINX(PULP_ZFINX),
-		  .MAX_SIZE(MAX_SIZE),	//Memory size
-		  .MEM_MODE(MEM_MODE),
+          .MAX_SIZE(MAX_SIZE),	//Memory size
+          .MEM_MODE(MEM_MODE),
           .DM_HALTADDRESS (DM_HALTADDRESS))
     riscv_wrapper_i
         (.clk_i          ( clk          ),
