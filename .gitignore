@@ -20,3 +20,8 @@ TAGS
 /Bender.local
 work/
 transcript
+.gitlab-ci.yml.*
+RI5CY-sameIF/tb/core/simv
+RI5CY-sameIF/tb/core/simv.daidir/
+RI5CY-sameIF/tb/core/ucli.key
+RI5CY-sameIF/tb/core/csrc/
