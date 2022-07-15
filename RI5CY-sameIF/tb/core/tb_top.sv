@@ -17,7 +17,7 @@
 module tb_top
     #(parameter INSTR_RDATA_WIDTH = 32,
       parameter RAM_ADDR_WIDTH = 22,
-	  parameter MEM_MODE = 1,    //working mode for RT memory 1=LiM, 0=std 
+      parameter MEM_MODE = 1,    //working mode for RT memory 1=LiM, 0=std 
       parameter BOOT_ADDR  = 'h180,
       parameter PULP_CLUSTER = 0,
       parameter FPU = 0,
@@ -81,17 +81,17 @@ module tb_top
 
 //Racetrack memory signals and parameters for initialization 
 
-        	
-	    //local parameter for memory initialization	(bytes)
-	    localparam MAX_SIZE_MEM = 16612; 	
+    //local parameter for memory initialization	(bytes)
+    localparam MAX_SIZE_MEM = 16612; 	
 
-		localparam words = MAX_SIZE_MEM/4; //compute number of words (32 bits)
+    localparam words = MAX_SIZE_MEM/4; //compute number of words (32 bits)
 
-		//dummy rom bytes
-		logic	[7:0]    dummy_rom [MAX_SIZE_MEM-1:0];				
-		//dummy rom word
-		logic [31:0] dummy_rom_w [words-1:0]; //32 bit parallelism
-		logic [RAM_ADDR_WIDTH-1:0]	rt_add='b0;
+    //dummy rom bytes
+    logic	[7:0]    dummy_rom [MAX_SIZE_MEM-1:0];				
+    //dummy rom word
+    logic [31:0] dummy_rom_w [words-1:0]; //32 bit parallelism
+    logic [RAM_ADDR_WIDTH-1:0]	rt_add='b0;
+
 `endif  
 
 
@@ -132,30 +132,30 @@ module tb_top
 
 			
     ///////////////////////////
-	// Racetrack memory initialization
-	///////////////////////////
+    // Racetrack memory initialization
+    ///////////////////////////
 			
 
 `ifdef RT_LIM_MEM    //racetrack memory part   
     
             $display("Start RT memory initialization");
 
-			//WRITE RACETRACK WITH READMEMH VALUES
+            //WRITE RACETRACK WITH READMEMH VALUES
 
-			$readmemh(firmware, dummy_rom);	//initialize dummy_rom
+            $readmemh(firmware, dummy_rom);	//initialize dummy_rom
 
 			
-			//initialize dummy word_rom
-			for(int i=0; i<words; i++) begin
-				dummy_rom_w[i] = {dummy_rom[i*4+3], dummy_rom[i*4+2], dummy_rom[i*4+1], dummy_rom[i*4+0]};
-			end  
+            //initialize dummy word_rom
+            for(int i=0; i<words; i++) begin
+                dummy_rom_w[i] = {dummy_rom[i*4+3], dummy_rom[i*4+2], dummy_rom[i*4+1], dummy_rom[i*4+0]};
+            end  
 
-			force  riscv_wrapper_i.ram_i.dp_ram_i.addr_b_i 				= rt_add;	//initialize address to 0
-			force  riscv_wrapper_i.ram_i.dp_ram_i.we_b_i 				= 1'b1;		//set write enable
-			force  riscv_wrapper_i.ram_i.dp_ram_i.logic_in_memory_funct = '0;		//prevent LiM operations 
-			force  riscv_wrapper_i.ram_i.dp_ram_i.we_b_funct_mem 		= 1'b0;		//prevent LiM operations 
-			force riscv_wrapper_i.ram_i.dp_ram_i.addr_b_range 			= '0;		//prevent strange behaviours with range
-			force  riscv_wrapper_i.ram_i.dp_ram_i.be_b_i 				= '1;		//write all bytes
+			force  riscv_wrapper_i.ram_i.dp_ram_i.addr_b_i              = rt_add;   //initialize address to 0
+			force  riscv_wrapper_i.ram_i.dp_ram_i.we_b_i                = 1'b1;     //set write enable
+			force  riscv_wrapper_i.ram_i.dp_ram_i.logic_in_memory_funct = '0;       //prevent LiM operations 
+			force  riscv_wrapper_i.ram_i.dp_ram_i.we_b_funct_mem        = 1'b0;     //prevent LiM operations 
+			force riscv_wrapper_i.ram_i.dp_ram_i.addr_b_range           = '0;       //prevent strange behaviours with range
+			force  riscv_wrapper_i.ram_i.dp_ram_i.be_b_i                = '1;       //write all bytes
 
 
 			//WRITE ROUTINE
@@ -185,8 +185,8 @@ module tb_top
 
 			end
 
-			repeat(3) begin				//wait 3 clock cycles
-					@(posedge clk);
+			repeat(3) begin         //wait 3 clock cycles
+			    @(posedge clk);
 			end
 
 
@@ -251,7 +251,7 @@ module tb_top
         forever begin
             #r_init_LO   riscv_wrapper_i.ram_i.dp_ram_i.read_pulse_i = 1'b1;
             #r_phase_HI  riscv_wrapper_i.ram_i.dp_ram_i.read_pulse_i = 1'b0;
-			#r_phase_LO  riscv_wrapper_i.ram_i.dp_ram_i.read_pulse_i = 1'b0;
+            #r_phase_LO  riscv_wrapper_i.ram_i.dp_ram_i.read_pulse_i = 1'b0;
         end
     end: read_pulse_gen
 	
@@ -260,7 +260,7 @@ module tb_top
         forever begin
             #w_init_LO   riscv_wrapper_i.ram_i.dp_ram_i.write_pulse_i = 1'b1;
             #w_phase_HI  riscv_wrapper_i.ram_i.dp_ram_i.write_pulse_i = 1'b0;
-			#w_phase_LO  riscv_wrapper_i.ram_i.dp_ram_i.write_pulse_i = 1'b0;
+            #w_phase_LO  riscv_wrapper_i.ram_i.dp_ram_i.write_pulse_i = 1'b0;
         end
     end: write_pulse_gen
 
@@ -329,8 +329,8 @@ module tb_top
           .PULP_CLUSTER (PULP_CLUSTER),
           .FPU(FPU),
           .PULP_ZFINX(PULP_ZFINX),
-		  .MAX_SIZE(MAX_SIZE),	//Memory size
-		  .MEM_MODE(MEM_MODE),
+          .MAX_SIZE(MAX_SIZE),	//Memory size
+          .MEM_MODE(MEM_MODE),
           .DM_HALTADDRESS (DM_HALTADDRESS))
     riscv_wrapper_i
         (.clk_i          ( clk          ),
