@@ -1,5 +1,0 @@
-How to set tb_top for simulations:
-
-	-Select working mode through MEM_MODE parameter (MEM_MODE = 1 -> LiM, MEM_MODE = 0 -> std. memory)
-	-Estimate program size from hex file
-	-Modify (if necessary) parameter MAX_SIZE_MEM

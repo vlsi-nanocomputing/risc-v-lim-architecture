@@ -107,6 +107,17 @@ CSMITH_TIMEOUT_VERI      = 100
 # GCC configuration
 CUSTOM_GCC_FLAGS         =
 
+# Memory compilation variable - Set this parameter to compile the desired memory type
+
+MEM_TYPE    = RT_LIM_MEM
+
+### Available choices ###
+#STD_MEM    = compile standard memory
+#LIM_MEM    = compile standard memory with LiM functionalities
+#RT_LIM_MEM = compile Racetrack memory with/without LiM functionalities
+
+
+
 # ===================================================================
 # Default and all targets
 # ===================================================================
@@ -126,7 +137,7 @@ vlib: .lib-rtl
 
 # rebuild if we change some sourcefile
 .build-rtl: .lib-rtl $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
-	$(VLOG) -work $(VWORK) +incdir+$(RTLSRC_INCDIR) $(VLOG_FLAGS) \
+	$(VLOG) +define+$(MEM_TYPE) -work $(VWORK) +incdir+$(RTLSRC_INCDIR) $(VLOG_FLAGS) \
 	$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
 	touch .build-rtl
 
@@ -164,7 +175,9 @@ vcsify: $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
 		-timescale=1ns/1ns -j20\
 		-CC "-I$(VCS_HOME)/include -O3 -march=native" $(VCS_FLAGS) \
 		$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) \
-		+incdir+$(RTLSRC_INCDIR) 
+		+incdir+$(RTLSRC_INCDIR) +define+$(MEM_TYPE)
+
+#STANDARD PROGRAMS (MEM_TYPE=STD_MEM)
 
 vcs-run: vcsify firmware/firmware.hex
 	./simv $(SIMV_FLAGS)
@@ -174,8 +187,12 @@ vcs-run-xnor: vcsify custom/xnor_net.hex
 	mv trace_core_00_0.log TraceAlgorithms/xnor_net.log
 
 vcs-run-bitwise: vcsify custom/bitwise.hex
-	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise.hex"
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise.hex" +verbose
 	mv trace_core_00_0.log TraceAlgorithms/bitwise.log
+
+vcs-run-bitwise-inv: vcsify custom/bitwise_inv.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_inv.hex" +verbose
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_inv.log
 
 vcs-run-bitmap: vcsify custom/bitmap_search.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitmap_search.hex"
@@ -193,17 +210,37 @@ vcs-run-max_min: vcsify custom/max_min.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/max_min.hex"
 	mv trace_core_00_0.log TraceAlgorithms/max_min.log
 
+#PROGRAMS FOR RT MEMORY (MEM_TYPE = RT_LIM_MEM, MEM_MODE = 0)
 
-#LIM PROGRAMS
-vcs-run-xnorlim: vcsify custom/xnor_net_lim.hex
-	./simv $(SIMV_FLAGS) "+firmware=custom/xnor_net_lim.hex"
-	mv trace_core_00_0.log TraceAlgorithms/xnor_net_lim.log
+vcs-run-bitwise-rt: vcsify custom/bitwise.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_RT.log
+
+vcs-run-bitwise-inv-rt: vcsify custom/bitwise_inv.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_inv.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_inv_RT.log
+
+vcs-run-bitmap-rt: vcsify custom/bitmap_search.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitmap_search.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/bitmap_RT.log
+
+vcs-run-aes-rt: vcsify custom/aes128_addroundkey.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/aes128_addroundkey.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/aes_RT.log
+
+vcs-run-xnor-rt: vcsify custom/xnor_net.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/xnor_net.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/xnor_net_RT.log
+
+
+
+#LIM PROGRAMS (OLD COMPILER)
 
 vcs-run-test_lim: vcsify custom/test_lim.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/test_lim.hex"
 
 vcs-run-bitwise_lim: vcsify custom/bitwise_lim.hex
-	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim.hex"
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim.hex" +verbose
 	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim.log
 
 vcs-run-bitmap_lim: vcsify custom/bitmap_search_lim.hex
@@ -222,7 +259,31 @@ vcs-run-transport_lim: vcsify custom/transport_min_cost_lim.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/transport_min_cost_lim.hex"
 	mv trace_core_00_0.log TraceAlgorithms/transport_lim.log
 
-#Run programs for RT memory
+
+#LIM PROGRAMS WITH NEW COMPILER AND INLINE ASSEMBLY (MEM_TYPE = LIM_MEM)
+
+vcs-run-bitwise-ext-asm: vcsify custom/bitwise_lim_ext_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose 
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim_ext_asm.log
+
+vcs-run-bitwise-inv-ext-asm: vcsify custom/bitwise_lim_ext_inv_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_inv_asm.hex" +verbose 
+	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim_ext_inv_asm.log
+
+vcs-run-bitmap-ext-asm: vcsify custom/bitmap_search_lim_ext_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitmap_search_lim_ext_asm.hex" +verbose 
+	mv trace_core_00_0.log TraceAlgorithms/bitmap_search_lim_ext_asm.log
+
+vcs-run-aes-ext-asm: vcsify custom/aes128_addroundkey_lim_ext_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/aes128_addroundkey_lim_ext_asm.hex" +verbose 
+	mv trace_core_00_0.log TraceAlgorithms/aes128_addroundkey_lim_ext_asm.log
+
+vcs-run-xnorlim: vcsify custom/xnor_net_lim.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/xnor_net_lim.hex"
+	mv trace_core_00_0.log TraceAlgorithms/xnor_net_lim.log
+
+
+#LIM PROGRAMS FOR RT MEMORY WITH NEW COMPILER AND INLINE ASSEMBLY (MEM_TYPE = RT_LIM_MEM, MEM_MODE = 1)
 
 vcs-run-bitwise-ext-asm-rt: vcsify custom/bitwise_lim_ext_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_asm.hex" +verbose +t 1ns +j20 
@@ -232,10 +293,17 @@ vcs-run-bitwise-ext-inv-asm-rt: vcsify custom/bitwise_lim_ext_inv_asm.hex
 	./simv $(SIMV_FLAGS) "+firmware=custom/bitwise_lim_ext_inv_asm.hex" +verbose +t 1ns +j20 
 	mv trace_core_00_0.log TraceAlgorithms/bitwise_lim_ext_inv_asm_RT.log
 
+vcs-run-bitmap-ext-asm-rt: vcsify custom/bitmap_search_lim_ext_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/bitmap_search_lim_ext_asm.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/bitmap_search_lim_ext_asm_RT.log
 
+vcs-run-aes-ext-asm-rt: vcsify custom/aes128_addroundkey_lim_ext_asm.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/aes128_addroundkey_lim_ext_asm.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/aes128_addroundkey_lim_ext_asm_RT.log
 
-
-
+vcs-run-xnorlim-ext-asm-rt: vcsify custom/xnor_net_lim.hex
+	./simv $(SIMV_FLAGS) "+firmware=custom/xnor_net_lim.hex" +verbose +t 1ns +j20 
+	mv trace_core_00_0.log TraceAlgorithms/xnor_net_lim_RT.log
 
 
 
@@ -364,6 +432,17 @@ custom/bitwise.elf: custom/bitwise.c
 		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
 		-lc -lm -lgcc
 
+custom/bitwise_inv.elf: custom/bitwise_inv.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		-T custom/link.ld \
+		-static \
+		custom/crt0.S \
+		$^ custom/syscalls.c custom/vectors.S \
+		-I $(RISCV_LIB)/riscv32-unknown-elf/include \
+		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc
+
 custom/transport_min_cost.elf: custom/transport_min_cost.c
 	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -o $@ -w -Os -g -nostdlib \
 		$(CUSTOM_GCC_FLAGS) \
@@ -463,6 +542,42 @@ custom/bitwise_lim_ext_inv_asm.elf: custom/bitwise_lim_ext_inv_asm.c
 		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
 		-lc -lm -lgcc
 
+custom/max_min_lim_ext_asm.elf: custom/max_min_lim_ext_asm.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -mabi=ilp32 -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		-T custom/link.ld \
+		-static \
+		custom/crt0.S \
+		$^ custom/syscalls.c custom/vectors.S \
+		-I $(RISCV_LIB)/riscv32-unknown-elf/include \
+		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc
+
+custom/bitmap_search_lim_ext_asm.elf: custom/bitmap_search_lim_ext_asm.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -mabi=ilp32 -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		-T custom/link.ld \
+		-static \
+		custom/crt0.S \
+		$^ custom/syscalls.c custom/vectors.S \
+		-I $(RISCV_LIB)/riscv32-unknown-elf/include \
+		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc
+
+custom/aes128_addroundkey_lim_ext_asm.elf: custom/aes128_addroundkey_lim_ext_asm.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32ima -mabi=ilp32 -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		-T custom/link.ld \
+		-static \
+		custom/crt0.S \
+		$^ custom/syscalls.c custom/vectors.S \
+		-I $(RISCV_LIB)/riscv32-unknown-elf/include \
+		-L $(RISCV_LIB)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc
+
+
+
+
 
 
 
@@ -496,7 +611,7 @@ custom-vsim-run-gui-aes: vsim-run-gui
 
 .PHONY: custom-vsim-run-gui-bitwise
 custom-vsim-run-gui-bitwise: vsim-all custom/bitwise_lim.hex
-custom-vsim-run-gui-bitwise: ALL_VSIM_FLAGS += "+firmware=custom/bitwise_lim.hex"
+custom-vsim-run-gui-bitwise: ALL_VSIM_FLAGS += "+firmware=custom/bitwise_lim.hex" +verbose
 custom-vsim-run-gui-bitwise: vsim-run-gui
 
 #LiM programs with new extended compiler
@@ -512,6 +627,10 @@ custom-vsim-run-gui-bitwise-ext-inv-asm: vsim-all custom/bitwise_lim_ext_inv_asm
 custom-vsim-run-gui-bitwise-ext-inv-asm: ALL_VSIM_FLAGS += "+firmware=custom/bitwise_lim_ext_inv_asm.hex" +verbose 
 custom-vsim-run-gui-bitwise-ext-inv-asm: vsim-run-gui
 
+.PHONY: custom-vsim-run-gui-maxmin-ext-asm
+custom-vsim-run-gui-maxmin-ext-asm: vsim-all custom/max_min_lim_ext_asm.hex
+custom-vsim-run-gui-maxmin-ext-asm: ALL_VSIM_FLAGS += "+firmware=custom/max_min_lim_ext_asm.hex" +verbose
+custom-vsim-run-gui-maxmin-ext-asm: vsim-run-gui
 
 
 .PHONY: custom-veri-run
