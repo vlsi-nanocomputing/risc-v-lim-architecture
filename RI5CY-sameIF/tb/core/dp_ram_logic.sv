@@ -1034,7 +1034,7 @@ module dp_ram_logic
     always_comb begin
         for (int i=0; i<4*N_VECTOR; i++) begin
             sub_mem[i]            = mem['h30000+i];
-			sub_mem_and[i]        = mem_and['h30000+i];
+            sub_mem_and[i]        = mem_and['h30000+i];
             sub_enabled_rows[i]   = enabled_rows['h30000+i];
             sub_word_wired_or[i]  = word_wired_or['h30000+i];
             sub_word_lines[i]     = word_lines_std_mem['h30000+i];
