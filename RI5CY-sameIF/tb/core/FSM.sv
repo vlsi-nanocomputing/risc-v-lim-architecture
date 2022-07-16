@@ -205,7 +205,7 @@ module FSM
 			    out_select_o        = 0;
 			    source_shift_sel_o  = 0;
 			    en_ff_read_o        = 0;
-		        w_en_p_o            = 0;
+                w_en_p_o            = 0;
 		    end
 			
 		    READ: begin
