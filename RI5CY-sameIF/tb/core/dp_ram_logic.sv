@@ -171,10 +171,10 @@ module dp_ram_logic
 `ifdef RT_LIM_MEM    //racetrack memory part
 
     //Racetrack waveforms
-       logic						   clk_m_i       = 1'b1;    //magnetic clock
-       logic						   Bz_s_i        = 1'b1;    //Magnetic field sign
-       logic						   write_pulse_i = 1'b1;    //write pulse for racetrack
-       logic						   read_pulse_i  = 1'b1;    //read pulse for racetrack
+    logic						   clk_m_i       = 1'b1;    //magnetic clock
+    logic						   Bz_s_i        = 1'b1;    //Magnetic field sign
+    logic						   write_pulse_i = 1'b1;    //write pulse for racetrack
+    logic						   read_pulse_i  = 1'b1;    //read pulse for racetrack
  
 `endif
 
@@ -282,7 +282,7 @@ module dp_ram_logic
      assign addr_mem_dec = addr_b_int_dec/3;	
 
 
-	 /*Decoder for range operations (LiM mode)*/	
+     /*Decoder for range operations (LiM mode)*/	
 
      // RANGE DECODER
      /* Normal decoder - Initial address decoder*/
@@ -416,15 +416,15 @@ module dp_ram_logic
 
 
 
-	//N. SHIFT GENERATION
+    //N. SHIFT GENERATION
     assign addr_b_range_dec = addr_b_range>>2;
 
-    assign ADDR_int 		= (MEM_MODE) ? addr_b_int_dec: addr_mem_dec;
+    assign ADDR_int         = (MEM_MODE) ? addr_b_int_dec: addr_mem_dec;
 	
     assign ADDR_int_par     = ADDR_int /blocks;
 	
     //select n shift based on the memory mode
-    assign n_shift 			= ADDR_int_par[1:0]; //In LiM mode takes addr_dec, in std. mem . mode takes addr_dec/3 
+    assign n_shift          = ADDR_int_par[1:0]; //In LiM mode takes addr_dec, in std. mem . mode takes addr_dec/3 
 
 
 `elsif LIM_MEM //LiM standard memory part
@@ -598,25 +598,25 @@ module dp_ram_logic
 	)
 	racetrack_memory
 	(
-		.rstn_i(rst_ni),											
-		.clk_i(clk_i),													
-		.clk_m_i(clk_m_i),											
-		.Bz_s_i(Bz_s_i),  											
-		.en_ab_i(en_b_int_rt),  									
-		.be_b_i(be_b_int),											
-		.range_active_i(range_active),								
-		.write_pulse_i(write_pulse_i),								
-		.read_pulse_i(read_pulse_i),													
-		.word_lines(word_lines_p),									
-		.write_data_i(wdata_b_int),									
-		.write_en_data_i(we_b_int),									
-		.mask_i(mask),												
-		.n_shift_i(n_shift),  	
-		.logic_in_memory_funct_int_i(logic_in_memory_funct_int),	
+        .rstn_i(rst_ni),											
+        .clk_i(clk_i),													
+        .clk_m_i(clk_m_i),											
+        .Bz_s_i(Bz_s_i),  											
+        .en_ab_i(en_b_int_rt),  									
+        .be_b_i(be_b_int),											
+        .range_active_i(range_active),								
+        .write_pulse_i(write_pulse_i),								
+        .read_pulse_i(read_pulse_i),													
+        .word_lines(word_lines_p),									
+        .write_data_i(wdata_b_int),									
+        .write_en_data_i(we_b_int),									
+        .mask_i(mask),												
+        .n_shift_i(n_shift),  	
+        .logic_in_memory_funct_int_i(logic_in_memory_funct_int),	
         .word_sel_i(word_sel_tri),									
 		
-		.data_o(rdata_b_o),											
-		.valid_o(rvalid_rt_int)										
+        .data_o(rdata_b_o),											
+        .valid_o(rvalid_rt_int)										
 	);
 
 
