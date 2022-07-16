@@ -4,16 +4,16 @@ import riscv_defines::*;
 
 module RT_memory
    #(   parameter ADDR_WIDTH = 22,
-        parameter MAX_SIZE	 = 1024,   	//max number of bytes		
+        parameter MAX_SIZE   = 1024,   	//max number of bytes		
         parameter CNT_WIDTH  = 2,		//only 2 bits required (max 3 shifts)
-        parameter Nr 		 = 4, 		//number of racetrack
-        parameter Nb 		 = 32, 		//rcetrack length
-        parameter Np 		 = 8,
-        parameter NMU 		 = 8,
-        parameter NWL		 = 4096,	//random number, set during module instantiation
+        parameter Nr         = 4, 		//number of racetrack
+        parameter Nb         = 32, 		//rcetrack length
+        parameter Np         = 8,
+        parameter NMU        = 8,
+        parameter NWL        = 4096,	//random number, set during module instantiation
         parameter MEM_MODE   = 1		//std. mode is LiM
-	)
-	(
+    )
+    (
         input  logic                    clk_i,                          //FSM clock 
         input  logic                    rstn_i,				
         input  logic                    clk_m_i,                        //magnetic clock for shift operation
@@ -33,15 +33,15 @@ module RT_memory
 	    
         output logic [Nr*NMU-1:0]       data_o,
         output logic                    valid_o				
-	);
+    );
 	
 	
-	localparam bytes  = MAX_SIZE;			
-	localparam par    = Nr*NMU;                     //data parallelism
-	localparam words  = bytes/4;                    //number of 32bits words
-	localparam blocks = words/Nb;		 
-	localparam Nov = Nb - ((Nb/Np)*Np -(Nb/Np))-1;  //N of overhead cells within the racetrack
-	localparam Nsp = Nb/Np;                         //N of spacing cells within the racetrack
+    localparam bytes  = MAX_SIZE;			
+    localparam par    = Nr*NMU;                     //data parallelism
+    localparam words  = bytes/4;                    //number of 32bits words
+    localparam blocks = words/Nb;		 
+    localparam Nov = Nb - ((Nb/Np)*Np -(Nb/Np))-1;  //N of overhead cells within the racetrack
+    localparam Nsp = Nb/Np;                         //N of spacing cells within the racetrack
 	
 	
 	  
