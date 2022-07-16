@@ -14,51 +14,51 @@ module RT_memory
 		parameter MEM_MODE   = 1		//std. mode is LiM
 	)
 	(
-		input  logic 					clk_i,							//FSM clock 
-		input  logic					rstn_i,				
-	    input  logic					clk_m_i,   						//magnetic clock for shift operation
-	    input  logic					Bz_s_i,    						
-	    input  logic					en_ab_i,   						//start memory transaction signal
-		input  logic [3:0]				be_b_i,							//byte selector signal
-	    input  logic					write_pulse_i,					//read current waveform
-	    input  logic					read_pulse_i,					//write current waveform
-	    input  logic					range_active_i, 				//range active signal
-	    input  logic [NWL-1:0]			word_lines,				
-	    input  logic [Nr*NMU-1:0]		write_data_i,					//input write data
-	    input  logic					write_en_data_i,				//write enable 
-	    input  logic [Nr*NMU-1:0]	    mask_i,							//input write mask
-		input  logic [7:0]              logic_in_memory_funct_int_i, 	//opcode for LiM operations
-		input  logic [1:0]				n_shift_i,     					//takes ADDR's LSBs to generate N of shifts      
-		input  logic [2:0]  			word_sel_i,						//word selection signal for std. mem. mode
+        input  logic                    clk_i,                          //FSM clock 
+        input  logic                    rstn_i,				
+        input  logic                    clk_m_i,                        //magnetic clock for shift operation
+        input  logic                    Bz_s_i,    						
+        input  logic                    en_ab_i,                        //start memory transaction signal
+        input  logic [3:0]              be_b_i,                         //byte selector signal
+        input  logic                    write_pulse_i,                  //read current waveform
+        input  logic                    read_pulse_i,                   //write current waveform
+        input  logic                    range_active_i,                 //range active signal
+        input  logic [NWL-1:0]          word_lines,				
+        input  logic [Nr*NMU-1:0]       write_data_i,                   //input write data
+        input  logic                    write_en_data_i,                //write enable 
+        input  logic [Nr*NMU-1:0]       mask_i,                         //input write mask
+        input  logic [7:0]              logic_in_memory_funct_int_i,    //opcode for LiM operations
+        input  logic [1:0]              n_shift_i,                      //takes ADDR's LSBs to generate N of shifts      
+        input  logic [2:0]              word_sel_i,                     //word selection signal for std. mem. mode
 	    
-	    output logic [Nr*NMU-1:0] 		data_o,
-	    output logic					valid_o				
+	    output logic [Nr*NMU-1:0]       data_o,
+	    output logic                    valid_o				
 	);
 	
 	
 	localparam bytes  = MAX_SIZE;			
-	localparam par    = Nr*NMU;						//data parallelism
-	localparam words  = bytes/4; 					//number of 32bits words
+	localparam par    = Nr*NMU;                     //data parallelism
+	localparam words  = bytes/4;                    //number of 32bits words
 	localparam blocks = words/Nb;		 
-	localparam Nov = Nb - ((Nb/Np)*Np -(Nb/Np))-1;	//N of overhead cells within the racetrack
-	localparam Nsp = Nb/Np;							//N of spacing cells within the racetrack
+	localparam Nov = Nb - ((Nb/Np)*Np -(Nb/Np))-1;  //N of overhead cells within the racetrack
+	localparam Nsp = Nb/Np;                         //N of spacing cells within the racetrack
 	
 	
 	  
-	logic							shift_done_s;       //done signal for set shifter
-	logic							shift_done_r;       //done signal for reset shifter
-	logic							shift_en_s;         //init signal for set shifter
-	logic							shift_en_r;         //init signal for reset shifter
-	logic							shift_select;       //enable shifting
-	logic							shift_m;            //shift waveform module
-	logic							shift_s;            //shift waveform sign
-	logic							w_en_d;             //write enable for data  sent to  racetrack
+	logic                           shift_done_s;       //done signal for set shifter
+	logic                           shift_done_r;       //done signal for reset shifter
+	logic                           shift_en_s;         //init signal for set shifter
+	logic                           shift_en_r;         //init signal for reset shifter
+	logic                           shift_select;       //enable shifting
+	logic                           shift_m;            //shift waveform module
+	logic                           shift_s;            //shift waveform sign
+	logic                           w_en_d;             //write enable for data  sent to  racetrack
 	logic							w_en_m;             //write enable for mask  sent to  racetrack
-	logic							w_en_p;             //write enable for program racetrack  sent to  racetrack
-	logic							w_pulse;            //write current pulse
-	logic							r_en;               //read enable for data & logic sent to racetrack
-	logic							r_pulse_d;          //read current pulse for data/logic
-	logic							r_pulse_m;          //read current pulse for mask-data
+	logic                           w_en_p;             //write enable for program racetrack  sent to  racetrack
+	logic                           w_pulse;            //write current pulse
+	logic                           r_en;               //read enable for data & logic sent to racetrack
+	logic                           r_pulse_d;          //read current pulse for data/logic
+	logic                           r_pulse_m;          //read current pulse for mask-data
 	logic                           r_pulse_p;          //read current pulse for program-data
 	logic                           shift_pulses;       //shift pulses generated by shifter modules
 	logic                           shift_set;          //shift pulses generated by set shifter
@@ -84,20 +84,20 @@ module RT_memory
 	
 	
 	
-    logic [Nr*NMU-1:0]				write_int;          //intermediate signal fro byte write
+    logic [Nr*NMU-1:0]              write_int;          //intermediate signal fro byte write
     logic [blocks*Nr*NMU-1:0] 		write_int_par;      //Bitwise AND arrays	
 	
     logic [blocks*Nr*NMU-1:0] 		data_and_d;         //Bitwise AND arrays
     logic [blocks*Nr*NMU-1:0] 		data_xor_d;         //Bitwise XOR arrays
     logic [blocks*Nr*NMU-1:0] 		data_or_d;          //Bitwise OR  arrays
     logic [blocks*Nr*NMU-1:0]		data_xnor_d;        //Bitwise XNOR  arrays
-    logic [Nr*NMU-1:0]				program_w;          //input write program racetrack 
+    logic [Nr*NMU-1:0]              program_w;          //input write program racetrack 
 	
 	
-    logic [Nr*NMU-1:0] 				data_d_int;         //out FF input, selects between data and mask-data	
-    logic [Nr*NMU-1:0] 				data_d_tmp;			
+    logic [Nr*NMU-1:0]              data_d_int;         //out FF input, selects between data and mask-data	
+    logic [Nr*NMU-1:0]              data_d_tmp;			
     logic [Nr*NMU-1:0]	    		mask_int;           //internal input write data for mask racetrack  
-    logic [Nr*NMU-1:0] 				write_int_tmp;			
+    logic [Nr*NMU-1:0]              write_int_tmp;			
 		
 	//======================================================================
     // RACETRACK WAVEFORM GENERATION
