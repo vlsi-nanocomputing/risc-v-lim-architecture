@@ -192,9 +192,9 @@ module FSM
 			
 			PORT_SET: begin
 				
-				shift_en_s_o		= 1;
-				shift_en_r_o		= 0;
-				shift_select_o		= 1;
+				shift_en_s_o        = 1;
+				shift_en_r_o        = 0;
+				shift_select_o      = 1;
 				shift_s_o           = 1;
 				w_en_d_o            = 0;
 				w_en_m_o            = 0;
@@ -210,9 +210,9 @@ module FSM
 			
 			READ: begin
 				
-				shift_en_s_o		= 0;
-				shift_en_r_o		= 0;
-				shift_select_o		= 0;
+				shift_en_s_o        = 0;
+				shift_en_r_o        = 0;
+				shift_select_o      = 0;
 				shift_s_o           = 1;
 				w_en_d_o            = 0;
 				w_en_m_o            = 0;
@@ -228,9 +228,9 @@ module FSM
 			
 			WRITE: begin
 				
-				shift_en_s_o		= 0;
-				shift_en_r_o		= 0;
-				shift_select_o		= 0;
+				shift_en_s_o        = 0;
+				shift_en_r_o        = 0;
+				shift_select_o      = 0;
 				shift_s_o           = 0;
 				w_en_d_o            = 1;
 				w_en_m_o            = 0;
@@ -247,9 +247,9 @@ module FSM
 			
 			WRITE_MASK_NAND: begin	//write mask from external register	
 					
-				shift_en_s_o		= 0;	
-				shift_en_r_o		= 0;	
-				shift_select_o		= 0;			
+				shift_en_s_o        = 0;	
+				shift_en_r_o        = 0;	
+				shift_select_o      = 0;			
 				shift_s_o           = 0;	
 				w_en_d_o            = 0;	
 				w_en_m_o            = 1;	//write mask
@@ -266,9 +266,9 @@ module FSM
 			
 			WRITE_MASK_NOR: begin	//write mask from external register
             	
-				shift_en_s_o		= 0;
-				shift_en_r_o		= 0;	
-				shift_select_o		= 0;			
+				shift_en_s_o        = 0;
+				shift_en_r_o        = 0;	
+				shift_select_o      = 0;			
 				shift_s_o           = 0;	
 				w_en_d_o            = 0;	
 				w_en_m_o            = 1;	//write mask
@@ -286,9 +286,9 @@ module FSM
 				
 			LIM_NAND: begin	
 			
-            	shift_en_s_o		= 0;
-            	shift_en_r_o		= 0;
-            	shift_select_o		= 0;
+            	shift_en_s_o        = 0;
+            	shift_en_r_o        = 0;
+            	shift_select_o      = 0;
             	shift_s_o           = 0;
             	w_en_d_o            = 0;
             	w_en_m_o            = 0;
@@ -306,9 +306,9 @@ module FSM
 				
 			LIM_NOR: begin	
 				
-				shift_en_s_o		= 0;	
-				shift_en_r_o		= 0;	
-				shift_select_o		= 0;	
+				shift_en_s_o        = 0;	
+				shift_en_r_o        = 0;	
+				shift_select_o      = 0;	
 				shift_s_o           = 0;	
 				w_en_d_o            = 0;	
 				w_en_m_o            = 0;	
@@ -325,9 +325,9 @@ module FSM
 			
 			READ_LIM: begin
 				
-				shift_en_s_o		= 0;
-				shift_en_r_o		= 0;
-				shift_select_o		= 0;
+				shift_en_s_o        = 0;
+				shift_en_r_o        = 0;
+				shift_select_o      = 0;
 				shift_s_o           = 1;
 				w_en_d_o            = 0;
 				w_en_m_o            = 0;
@@ -343,9 +343,9 @@ module FSM
 			
 			WRITE_LIM: begin
 				
-				shift_en_s_o		= 0;
-				shift_en_r_o		= 0;
-				shift_select_o		= 0;
+				shift_en_s_o        = 0;
+				shift_en_r_o        = 0;
+				shift_select_o      = 0;
 				shift_s_o           = 0;
 				w_en_d_o            = 1;	//write computed value
 				w_en_m_o            = 0;
@@ -361,9 +361,9 @@ module FSM
 			
 			PORT_RESET: begin
 				
-				shift_en_s_o		= 0;
-				shift_en_r_o		= 1;
-				shift_select_o		= 1;
+				shift_en_s_o        = 0;
+				shift_en_r_o        = 1;
+				shift_select_o      = 1;
 				shift_s_o           = 0;
 				w_en_d_o            = 0;
 				w_en_m_o            = 0;
