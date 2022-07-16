@@ -208,6 +208,7 @@ module tb_top
         
             // make the core start fetching instruction immediately after the firmware is loaded in memory
             fetch_enable = '1;
+            $display("Start simulaion time recording: time=%0t", $time);
 
         end else begin
             $display("No firmware specified");
@@ -317,6 +318,7 @@ module tb_top
                 $display("EXIT SUCCESS");
             else
                 $display("EXIT FAILURE: %d", exit_value);
+            $display("Finish simulaion time recording: time=%0t", $time);
             $finish;
         end
     end
