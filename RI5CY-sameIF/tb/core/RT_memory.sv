@@ -2,8 +2,6 @@
 import riscv_defines::*;
 
 
-
-
 module RT_memory
 	#(	parameter ADDR_WIDTH = 22,
 		parameter MAX_SIZE	 = 1024,   	//max number of bytes		
@@ -82,19 +80,31 @@ module RT_memory
 	logic [1:0]						n_shift_rst;		//out of N shift FF
 	logic							source_shift_sel;	//select shift source (set or reset shifter)
 	logic							en_ff_read;			//enable for data out FF
+	
+	
+	
+	
 	logic [Nr*NMU-1:0]				write_int;			//intermediate signal fro byte write
-	logic [Nr*NMU-1:0] 				data_and_d;			//Bitwise AND active block data out
-	logic [Nr*NMU-1:0] 				data_xor_d;			//Bitwise XOR active block data out
-	logic [Nr*NMU-1:0] 				data_or_d;			//Bitwise OR active block data out
-	logic [Nr*NMU-1:0]				data_xnor_d;			//Bitwise XNOR active block data out
-	logic							en_lim_buf;			//enable signa for LiM buffer FF
-	logic [Nr*NMU-1:0]				lim_buf;			//LiM buffer (store data values before byte write operation)
+	
+	logic [blocks*Nr*NMU-1:0] 		write_int_par;			//Bitwise AND arrays	//NEW
+	
+	
+	
+	
+	logic [blocks*Nr*NMU-1:0] 		data_and_d;			//Bitwise AND arrays
+	logic [blocks*Nr*NMU-1:0] 		data_xor_d;			//Bitwise XOR arrays
+	logic [blocks*Nr*NMU-1:0] 		data_or_d;			//Bitwise OR  arrays
+	logic [blocks*Nr*NMU-1:0]		data_xnor_d;		//Bitwise XNOR  arrays
 	logic [Nr*NMU-1:0]				program_w; 			//input write program racetrack 
 	
 	
 	logic [Nr*NMU-1:0] 				data_d_int;			//out FF input, selects between data and mask-data	
-	logic [Nr*NMU-1:0]	    		mask_int;			//internal input write data for mask racetrack  	
 	
+	logic [Nr*NMU-1:0] 				data_d_tmp;			//NEW
+	
+	logic [Nr*NMU-1:0]	    		mask_int;			//internal input write data for mask racetrack  
+	
+	logic [Nr*NMU-1:0] 				write_int_tmp;		//NEW		
 		
 	//======================================================================
     // RACETRACK WAVEFORM GENERATION
@@ -140,7 +150,8 @@ module RT_memory
 		    .current_s_mask_i(shift_m),	
 			.current_s_program_i(shift_s),
 			.current_m_program_i(shift_m),
-			.write_data_i(write_int),		
+			//.write_data_i(write_int),				
+			.write_data_i(write_int_par[i*par +: par]),		//NEW
 		    .write_en_data_i(w_pulse_data),			//input for mask racetrack
 			.write_mask_i(mask_int),
 		    .write_en_mask_i(w_pulse_mask),
@@ -166,7 +177,7 @@ module RT_memory
 	endgenerate
 	
 	//=====================================
-	//ACTIVE BLOCK MUX
+	//ACTIVE BLOCK MUX for MEM MODE/No range operations
 	//=====================================
 	//selects 32 bits output based on the active block
 	always_comb begin
@@ -185,7 +196,7 @@ module RT_memory
 	end
 	
 		
-	//data_d selection for following logic
+	//data_d_int selection for MEM MODE
 	always_comb begin
 		data_d_int = data_d;	//LiM mode takes data racetrack
 			if(!MEM_MODE) begin	//select different input data_d in std. mem mode (data racetrack or mask-data racetrack)
@@ -208,17 +219,28 @@ module RT_memory
 	//LiM ARRAYS
 	//=====================================
 
-	assign data_and_d  = ~data_d; 			//invert NAND output (exploit Racetrack LiM result)
-	assign data_or_d   = ~data_d; 			//invert NOR output  (exploit Racetrack LiM result)
-	assign data_xor_d  = data_d ^ mask_i; 	//compute XOR logic operation
+	//NEW
+
+
+	assign data_and_d  = ~r_data_int; 			//invert NAND output (exploit Racetrack LiM result)
+	assign data_or_d   = ~r_data_int; 			//invert NOR output  (exploit Racetrack LiM result)
+	
+	always_comb begin	//compute xor operation for each block output
+		for (int i=0; i<blocks; i=i+1)begin
+			data_xor_d[i*par +: par] =r_data_int[i*par +: par] ^ mask_i; 	//compute XOR logic operation
+		end
+	end
+	
 	assign data_xnor_d = ~data_xor_d;		//compute NXOR logic operation
 		
 	
 	
 	//=====================================
-	//OUT DATA REGISTER + BYTE SELECTION + LiM STORE FUNCTIONALITIES
+	//OUT DATA REGISTER + LiM STORE FUNCTIONALITIES
 	//=====================================
-	//Range operations are done on the full word, range_active_i bypasses byte selection
+	//LiM operations are done on the full word
+	
+	//NEW
 	
 	always @(posedge clk_i, negedge rstn_i) begin
        if ( !rstn_i) begin
@@ -230,154 +252,223 @@ module RT_memory
 			unique case (logic_in_memory_funct_int_i)
 		
 				FUNCT_AND: begin
-					if(be_b_i[0] || range_active_i)begin	//active read if at least 8bit are read
-						for(int i=0; i<4; i++)begin			//range_active disables byte operations (full word selection)
-								if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_and_d[i*8 +: 8];
+					for (int i=0; i<blocks; i=i+1)begin //find active block
+						if(enabled_block[i]==1) begin
+							data_o = data_and_d[i*par +: par];
 						end
 					end
+				
 			end	
 			
 				FUNCT_OR: begin
-					if(be_b_i[0] || range_active_i)begin
-						for(int i=0; i<4; i++)begin
-								if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_or_d[i*8 +: 8];
+					for (int i=0; i<blocks; i=i+1)begin //find active block
+						if(enabled_block[i]==1) begin
+							data_o = data_or_d[i*par +: par];
 						end
 					end
 	
 			end
 			
 				FUNCT_XOR: begin
-					if(be_b_i[0] || range_active_i)begin
-						for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_xor_d[i*8 +: 8];
+					for (int i=0; i<blocks; i=i+1)begin //find active block
+						if(enabled_block[i]==1) begin
+							data_o = data_xor_d[i*par +: par];
 						end
 					end
+				
 			end
 			
 			
 			FUNCT_NAND: begin
-					if(be_b_i[0] || range_active_i)begin	
-						for(int i=0; i<4; i++)begin			
-								if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_d[i*8 +: 8];
+			
+				    for (int i=0; i<blocks; i=i+1)begin //find active block
+						if(enabled_block[i]==1) begin
+							data_o = r_data_int[i*par +: par];
 						end
 					end
+			
 			end	
 			
 			
 			FUNCT_NOR: begin
-					if(be_b_i[0] || range_active_i)begin
-						for(int i=0; i<4; i++)begin
-								if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_d[i*8 +: 8];
-						end
-					end
-	
+				
+				for (int i=0; i<blocks; i=i+1)begin //find active block
+			    	if(enabled_block[i]==1) begin
+			    		data_o = r_data_int[i*par +: par];
+			    	end
+			    end
+				
 			end
 			
 			FUNCT_XNOR: begin
-					if(be_b_i[0] || range_active_i)begin
-						for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_xnor_d[i*8 +: 8];
+			
+			
+				for (int i=0; i<blocks; i=i+1)begin //find active block
+						if(enabled_block[i]==1) begin
+							data_o = data_xnor_d[i*par +: par];
 						end
 					end
+
 			end
 						
 			
 		
 				default: begin
-					if(be_b_i[0] || range_active_i)begin
-						for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) data_o[i*8 +: 8] = data_d_int[i*8 +: 8];	
-						end	
+				
+					if(MEM_MODE) begin	//LiM mode std
+						for (int i=0; i<blocks; i=i+1)begin //find active block
+						
+							if(enabled_block[i]==1) begin
+								data_d_tmp	= r_data_int[i*par +: par];	//out data of active block
+							end
+							
+								if(be_b_i[0])begin					//read active bytes
+									for(int i=0; i<4; i++)begin
+										if(be_b_i[i]) data_o[i*8 +: 8] = data_d_tmp[i*8 +: 8];	
+									end	
+								end
+						end
+					end else begin	//Mem mode std
+						if(be_b_i[0])begin
+							for(int i=0; i<4; i++)begin
+								if(be_b_i[i]) data_o[i*8 +: 8] = data_d_int[i*8 +: 8];	
+							end	
+						end
 					end
-			end
+				
+			end	
 			endcase			
 		end
 	end
 		
+		
+		
+		
+		
+		
 	//=====================================
-	//WRITE DATA IN BYTE SELECTION MUX + LiM STORE FUNCTIONALITIES
+	//WRITE DATA IN + LiM STORE FUNCTIONALITIES
 	//=====================================
-	always_comb begin		
-	write_int = data_d_int;	//not selected byte rewrites the original data, this prevent latch inferation
+	always_comb begin	
+
+
+	//NEW
+
+	write_int_par = r_data_int; //initialize write inputs to r_data_int
+	
+	write_int     = data_d_int;	//not selected byte rewrites the original data, this prevent latch inferation
+	write_int_tmp = data_d_int;	//not selected byte rewrites the original data, this prevent latch inferation
 	
 		unique case(logic_in_memory_funct_int_i)
 		//write operation can be don on each byte
-			FUNCT_AND: begin	
-                        for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) begin
-								write_int[i*8 +: 8] = data_and_d[i*8 +: 8];	//take logic value from ractrack
-							end else begin
-								write_int[i*8 +: 8] = lim_buf[i*8 +: 8];	//restore actual value
+			FUNCT_AND: begin
+
+
+						for (int i=0; i<blocks; i=i+1)begin //find active block
+							if(enabled_block[i]==1) begin
+								write_int_par[i*par +: par] = data_and_d[i*par +: par];
 							end
-						end	
+						end
+
+
 		end
 	
 			FUNCT_OR: begin
-                        for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) begin
-								write_int[i*8 +: 8] = data_or_d[i*8 +: 8];		//take logic value from ractrack
-							end else begin
-								write_int[i*8 +: 8] = lim_buf[i*8 +: 8];	//restore actual value
+						for (int i=0; i<blocks; i=i+1)begin //find active block
+							if(enabled_block[i]==1) begin
+								write_int_par[i*par +: par] = data_or_d[i*par +: par];
 							end
-						end	
+						end
+				
 		end
 		
 			FUNCT_XOR: begin
-                        for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) write_int[i*8 +: 8] = data_xor_d[i*8 +: 8];
-						end	
+			
+			
+						for (int i=0; i<blocks; i=i+1)begin //find active block
+							if(enabled_block[i]==1) begin
+								write_int_par[i*par +: par] = data_xor_d[i*par +: par];
+							end
+						end
+
 		end
 		
 			FUNCT_NAND: begin	
-                        for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) begin
-								write_int[i*8 +: 8] = data_d[i*8 +: 8];	//take logic value from ractrack
-							end else begin
-								write_int[i*8 +: 8] = lim_buf[i*8 +: 8];	//restore actual value
-							end
-						end	
+			
+			            //Provo a ripristinarlo ma tanto non senrve a nienete, è solo per completezza
+						
+						for (int i=0; i<blocks; i=i+1)begin //find active block
+			            	if(enabled_block[i]==1) begin
+			            		write_int_par[i*par +: par] = r_data_int[i*par +: par];
+			            	end
+			            end
+				
 		end
 		
 			FUNCT_NOR: begin
-                        for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) begin
-								write_int[i*8 +: 8] = data_d[i*8 +: 8];		//take logic value from ractrack
-							end else begin
-								write_int[i*8 +: 8] = lim_buf[i*8 +: 8];	//restore actual value
-							end
-						end	
+
+                        //Provo a ripristinarlo ma tanto non senrve a nienete, è solo per completezza
+			
+						for (int i=0; i<blocks; i=i+1)begin //find active block
+			            	if(enabled_block[i]==1) begin
+			            		write_int_par[i*par +: par] = r_data_int[i*par +: par];
+			            	end
+			            end
+				
 		end
 		
 		
 			FUNCT_XNOR: begin
-                        for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) write_int[i*8 +: 8] = data_xnor_d[i*8 +: 8];
-						end	
+			
+						for (int i=0; i<blocks; i=i+1)begin //find active block
+							if(enabled_block[i]==1) begin
+								write_int_par[i*par +: par] = data_xnor_d[i*par +: par];
+							end
+						end
+				
 		end
 		
-		
 				
-
+				
 			default: begin
-						for(int i=0; i<4; i++)begin
-							if(be_b_i[i] || range_active_i) write_int[i*8 +: 8] = write_data_i[i*8 +: 8];
-						end	
+				if(MEM_MODE) begin	//LiM mode std
+					for (int i=0; i<blocks; i=i+1)begin //find active block
+					
+							if(be_b_i[0])begin					
+								for(int i=0; i<4; i++)begin
+									if(be_b_i[i]) write_int_tmp[i*8 +: 8] = write_data_i[i*8 +: 8];	
+								end	
+							end
+							
+							if(enabled_block[i]==1) begin
+								write_int_par[i*par +: par] = write_int_tmp;	
+							end
+						
+					end
+				end else begin	//Mem mode std
+								
+					for (int i=0; i<blocks; i=i+1)begin //find active block
+					
+						if(be_b_i[0])begin	
+							for(int i=0; i<4; i++)begin
+								if(be_b_i[i]) write_int[i*8 +: 8] = write_data_i[i*8 +: 8];
+							end
+						end
+							
+							if(enabled_block[i]==1) begin
+								write_int_par[i*par +: par] = write_int;	
+							end
+						
+					end
+				
+				end
+				
 		end
 	
 		endcase	
 	end
 	
-	//=====================================
-	//LiM RESULT BUFFER
-	//=====================================
-	//store data before LiM write (useful for byte write), data is stored in the register, written byte over-writes old bytes
-	always @(posedge clk_i, negedge rstn_i) begin
-       if ( !rstn_i) begin
-			lim_buf <= '0;
-		end else if(en_lim_buf)  begin
-			lim_buf <= data_d;	//store data before LiM write (useful for byte write)
-		end
-	end
+	
 	
 	
 	
@@ -474,9 +565,10 @@ module RT_memory
 		.Bz_m_o(Bz_m),		
 		.out_select_o(out_select),
 		.source_shift_sel_o(source_shift_sel),
-		.en_ff_read_o(en_ff_read),	
-		.en_lim_buf_o(en_lim_buf)	
+		.en_ff_read_o(en_ff_read)
 	);
 		
 	
 endmodule
+
+
