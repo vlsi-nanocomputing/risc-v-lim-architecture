@@ -42,17 +42,17 @@ module dp_ram_logic
     );
 
 `ifdef RT_LIM_MEM    //LiM Racetrack memory part   
-        localparam bytes     = MAX_SIZE;
-        localparam words     = bytes/4; 	
-        localparam Nb        = 32;    //Length racetrack
-        localparam Nr        = 4;     //N racetrack in MU
-        localparam NMU       = 8;     //N Macro Unit
-        localparam par       = Nr*NMU;
-        localparam blocks    = words/Nb;	
+    localparam bytes     = MAX_SIZE;
+    localparam words     = bytes/4; 	
+    localparam Nb        = 32;    //Length racetrack
+    localparam Nr        = 4;     //N racetrack in MU
+    localparam NMU       = 8;     //N Macro Unit
+    localparam par       = Nr*NMU;
+    localparam blocks    = words/Nb;	
 
 
 	
-        localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
+    localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
 
 
 
@@ -76,7 +76,7 @@ module dp_ram_logic
 														
 														
     // Normal memory (global signals)
-	logic [7:0]                      mem[bytes];                   //memory array for isntruction part	
+    logic [7:0]                      mem[bytes];                    //memory array for isntruction part	
 						
 	
     logic [ADDR_WIDTH-1:0]           addr_a_int;                    //instruction addresses
@@ -136,7 +136,7 @@ module dp_ram_logic
     logic                            word_lines_lim[words];         //word_lines for LiM mode RT memory
     logic                            word_lines_tri[words_tri];     //word_lines for memory mode RT memory
     logic                            active_triplet[triplets];
-    logic [2:0]						 word_sel_tri;                  //word selection for memory mode
+    logic [2:0]                      word_sel_tri;                  //word selection for memory mode
     logic [1:0]                      n_shift;                       //n. of required shift
     logic [1:0]                      n_shift_lim;                   //n. of required shift for LiM mode
     logic [31:0]                     mask_count;                    //mask signal for max/min operation
@@ -187,7 +187,7 @@ module dp_ram_logic
 	
 
 
-	//======================================================================
+    //======================================================================
     // HANDSHAKING PROTOCOL 
     //====================================================================== 
 
@@ -204,24 +204,24 @@ module dp_ram_logic
             end
             else if (en_b_rt_valid || rvalid_rt) begin	
                  en_b_rt_q             <= en_b_i; 							
-                 wdata_b_rt_q      	   <= wdata_b_i;
-                 en_b_rt_valid_q   	   <= en_b_rt_valid;
-                 addr_b_rt_q		   <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-                 be_b_q				   <= be_b_i;
-                 we_b_q				   <= we_b_i;	
+                 wdata_b_rt_q          <= wdata_b_i;
+                 en_b_rt_valid_q       <= en_b_rt_valid;
+                 addr_b_rt_q           <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+                 be_b_q                <= be_b_i;
+                 we_b_q                <= we_b_i;	
 
             end
         end  
 	
 	
-	    // Valid signal for maxmin handshake
+        // Valid signal for maxmin handshake
         assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q           : en_b_i;
         assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q        : wdata_b_i;
         assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q         : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-        assign be_b_int			   = (en_b_rt_valid_q) ? be_b_q              : be_b_i;
-        assign we_b_int			   = (en_b_rt_valid_q) ? we_b_q              : we_b_i;		
+        assign be_b_int            = (en_b_rt_valid_q) ? be_b_q              : be_b_i;
+        assign we_b_int            = (en_b_rt_valid_q) ? we_b_q              : we_b_i;		
 
-	    //only sw_active_logic can be carried out in one clock cycle
+        //only sw_active_logic can be carried out in one clock cycle
         assign rvalid_b_o          = (en_b_rt_valid_q || en_b_rt_valid ) ?  rvalid_rt  : gnt_b_i; 	
 
 
@@ -275,18 +275,18 @@ module dp_ram_logic
  
 `ifdef RT_LIM_MEM    //racetrack memory part   
 
-        //MAP RISC address (4 by 4)
-	    assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
+     //MAP RISC address (4 by 4)
+     assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
 
-	    //MAP MEMORY MODE address 
-	    assign addr_mem_dec = addr_b_int_dec/3;	
+     //MAP MEMORY MODE address 
+     assign addr_mem_dec = addr_b_int_dec/3;	
 
 
-	    /*Decoder for range operations (LiM mode)*/	
+	 /*Decoder for range operations (LiM mode)*/	
 
-        // RANGE DECODER
-        /* Normal decoder - Initial address decoder*/
-        always_comb begin
+     // RANGE DECODER
+     /* Normal decoder - Initial address decoder*/
+     always_comb begin
          for (int i=0; i<words; i++) begin
              decoder_range_init_rt[i] = 1'b0;
          end
@@ -559,7 +559,7 @@ module dp_ram_logic
     always_comb asize_mem_int = {asize_mem[ADDR_WIDTH-1:0], 2'b0}; // Only 32 bits words are considered as vector elements
 
 	
-	assign opcode_mem   = logic_in_memory_funct[7:0]; 
+    assign opcode_mem   = logic_in_memory_funct[7:0]; 
     assign asize_mem    = logic_in_memory_funct[31:8];	
 
 `endif
@@ -613,7 +613,7 @@ module dp_ram_logic
 		.mask_i(mask),												
 		.n_shift_i(n_shift),  	
 		.logic_in_memory_funct_int_i(logic_in_memory_funct_int),	
-	    .word_sel_i(word_sel_tri),									
+        .word_sel_i(word_sel_tri),									
 		
 		.data_o(rdata_b_o),											
 		.valid_o(rvalid_rt_int)										
@@ -708,7 +708,7 @@ module dp_ram_logic
 			if ( stop_maxmin_iteration ) begin
                             for(int i=0; i<bytes; i=i+4) begin
                                 if( next_enabled_rows[i] ) begin
-									rdata_b_o[ 7: 0] <= mem[i    ];
+                                    rdata_b_o[ 7: 0] <= mem[i    ];
                                     rdata_b_o[15: 8] <= mem[i + 1];
                                     rdata_b_o[23:16] <= mem[i + 2];
                                     rdata_b_o[31:24] <= mem[i + 3];
@@ -828,9 +828,9 @@ module dp_ram_logic
             for (int i=0; i<bytes; i=i+4) begin
                    if( word_lines_std_mem[i] ) begin
                        rdata_b_o[ 7: 0] <= mem[i    ];
-					   rdata_b_o[15: 8] <= mem[i + 1];
-					   rdata_b_o[23:16] <= mem[i + 2];
-					   rdata_b_o[31:24] <= mem[i + 3];
+                       rdata_b_o[15: 8] <= mem[i + 1];
+                       rdata_b_o[23:16] <= mem[i + 2];
+                       rdata_b_o[31:24] <= mem[i + 3];
                    end
 		     end
         end
@@ -1024,7 +1024,7 @@ module dp_ram_logic
     localparam                       N_VECTOR = 32;
     logic                            sub_word_lines[4*N_VECTOR];
     logic [7:0]                      sub_mem[4*N_VECTOR];
-     logic [7:0]                      sub_mem_and[4*N_VECTOR];	
+    logic [7:0]                      sub_mem_and[4*N_VECTOR];	
     logic                            sub_enabled_rows[4*N_VECTOR];
     logic                            sub_word_wired_or[4*N_VECTOR];
     logic                            sub_word_lines_int[4*N_VECTOR];
