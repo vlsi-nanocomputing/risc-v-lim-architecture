@@ -286,20 +286,20 @@ module FSM
 				
 			LIM_NAND: begin	
 			
-            	shift_en_s_o        = 0;
-            	shift_en_r_o        = 0;
-            	shift_select_o      = 0;
-            	shift_s_o           = 0;
-            	w_en_d_o            = 0;
-            	w_en_m_o            = 0;
-            	r_en_o              = 0;
-            	r_valid_o           = 0;
-            	NAND_NOR_o          = 1;
-            	Bz_m_o              = 1;
-            	out_select_o        = 0;
-				source_shift_sel_o  = 0;
-				en_ff_read_o        = 0;
-				w_en_p_o            = 0;		
+                shift_en_s_o        = 0;
+                shift_en_r_o        = 0;
+                shift_select_o      = 0;
+                shift_s_o           = 0;
+                w_en_d_o            = 0;
+                w_en_m_o            = 0;
+                r_en_o              = 0;
+                r_valid_o           = 0;
+                NAND_NOR_o          = 1;
+                Bz_m_o              = 1;
+                out_select_o        = 0;
+                source_shift_sel_o  = 0;
+                en_ff_read_o        = 0;
+                w_en_p_o            = 0;		
 				
 				
 			end	
