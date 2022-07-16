@@ -30,8 +30,7 @@ module FSM
 		output logic					Bz_m_o,								//Bz field module
 		output logic					out_select_o,						//select data or LiM data for block output
 		output logic					source_shift_sel_o,					//selection signal source shift mux
-		output logic					en_ff_read_o,						//enable for external FF data stabilyzer
-		output logic					en_lim_buf_o						//enable signal for data buffer during byte write LiM
+		output logic					en_ff_read_o						//enable for external FF data stabilyzer
 	);
 
 	
@@ -40,7 +39,7 @@ module FSM
 	logic	[3:0]	cnt_lim;		//signal for LiM programming counter
 	logic			lim_done;		//notifies end of LiM oeperation
 	logic			r_en_byteW;		//read enable signal for write byte
-	logic			r_en_feedbackW;	//read enable signal for feedback write
+
 	
 
 	//===============================
@@ -188,7 +187,6 @@ module FSM
 				out_select_o		= 0; //std out is data
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;
 			end
 			
@@ -207,7 +205,6 @@ module FSM
 				out_select_o		= 0;
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;
 			end
 			
@@ -226,7 +223,6 @@ module FSM
 				out_select_o		= 0;
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 1;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;
 			end
 			
@@ -238,14 +234,13 @@ module FSM
 				shift_s_o			= 0;
 				w_en_d_o			= 1;
 				w_en_m_o			= 0;
-				r_en_o				= 0 || r_en_byteW || r_en_feedbackW;	//override read enable signal during byte write and LiM store
+				r_en_o				= 0 || r_en_byteW;	//override read enable signal during byte write 
 				r_valid_o			= 1; 				//generate valid signal to notify write operation
 				NAND_NOR_o			= 0;
 				Bz_m_o				= 0;
 				out_select_o		= 0;
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;
 				
 			end
@@ -258,14 +253,13 @@ module FSM
 				shift_s_o			= 0;	
 				w_en_d_o			= 0;	
 				w_en_m_o			= 1;	//write mask
-				r_en_o				= 0 || r_en_byteW || r_en_feedbackW; //override read enable signal during byte write and LiM store (save value in buf)	
+				r_en_o				= 0 || r_en_byteW; //override read enable signal during byte write 
 				r_valid_o			= 0;	
 				NAND_NOR_o			= 1;	
 				Bz_m_o				= 0;	
 				out_select_o		= 0;	
 				source_shift_sel_o	= 0;	
 				en_ff_read_o		= 0;	
-				en_lim_buf_o		= 1;	//save actual data value
 				w_en_p_o			= 1;	//write program bit			
 					
 			end	
@@ -278,14 +272,13 @@ module FSM
 				shift_s_o			= 0;	
 				w_en_d_o			= 0;	
 				w_en_m_o			= 1;	//write mask
-				r_en_o				= 0 || r_en_byteW || r_en_feedbackW; //override read enable signal during byte write and LiM store (save value in buf)	
+				r_en_o				= 0 || r_en_byteW; //override read enable signal during byte write 
 				r_valid_o			= 0;	
 				NAND_NOR_o			= 0;	
 				Bz_m_o				= 0;	
 				out_select_o		= 0;	
 				source_shift_sel_o	= 0;	
 				en_ff_read_o		= 0;	
-				en_lim_buf_o		= 1;	//save actual data value
 				w_en_p_o			= 1;	//write program bit			
 					
 			end	
@@ -306,7 +299,6 @@ module FSM
             	out_select_o		= 0;
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;		
 				
 				
@@ -327,7 +319,6 @@ module FSM
 				out_select_o		= 0;	
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;
 			end
 			
@@ -347,7 +338,6 @@ module FSM
 				out_select_o		= 1;	//select logic output
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 1;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;
 			end
 			
@@ -366,7 +356,6 @@ module FSM
 				out_select_o		= 1;	//select logic output
 				source_shift_sel_o	= 0;
 				en_ff_read_o		= 0;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;
 			end
 			
@@ -385,7 +374,6 @@ module FSM
 				out_select_o		= 0;
 				source_shift_sel_o	= 1; //select sampled n shift
 				en_ff_read_o		= 0;
-				en_lim_buf_o		= 0;
 				w_en_p_o			= 0;
 				
 			end
@@ -435,23 +423,6 @@ module FSM
 		
 		endcase
 	end
-	
-	//===============================
-	//FEEDBACK WRITE LOGIC
-	//===============================
-	//Before a byte write read actual value, only active bytes are overwritten
-	always_comb begin
-		unique case(logic_in_memory_funct_int_i) 
-			
-			 FUNCT_NONE:  r_en_feedbackW = 1'b0; //do not read during a standard access (write wdata_i)
-			
-			
-			default: r_en_feedbackW = 1'b1;	//during LiM operations read stored data (useful for LiM store operations)
-		
-		endcase
-	end
-	
-	
 	
 	
 	
