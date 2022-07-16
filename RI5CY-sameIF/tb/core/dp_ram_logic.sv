@@ -12,6 +12,7 @@
 import riscv_defines::*;
 `define DEBUG
 
+ 
 
 module dp_ram_logic
     #(parameter ADDR_WIDTH = 10, 
