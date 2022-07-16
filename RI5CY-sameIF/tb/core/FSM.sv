@@ -172,59 +172,59 @@ module FSM
 	//OUTPUT DECODE
 	always_comb begin
 		unique case(state)
-		   IDLE: begin
+            IDLE: begin
 				
-			    shift_en_s_o        = 0;
-			    shift_en_r_o        = 0;
-			    shift_select_o      = 0;
-			    shift_s_o           = 1; //select left value
-			    w_en_d_o            = 0;
-			    w_en_m_o            = 0;
-			    r_en_o              = 0;
-			    r_valid_o           = 0;
-			    NAND_NOR_o          = 0;
-			    Bz_m_o              = 0;
-			    out_select_o        = 0; //std out is data
-			    source_shift_sel_o  = 0;
-			    en_ff_read_o        = 0;
-			    w_en_p_o            = 0;
-		    end
-			
-		    PORT_SET: begin
-				
-			    shift_en_s_o        = 1;
-			    shift_en_r_o        = 0;
-			    shift_select_o      = 1;
-			    shift_s_o           = 1;
-			    w_en_d_o            = 0;
-			    w_en_m_o            = 0;
-			    r_en_o              = 0;
-			    r_valid_o           = 0;
-			    NAND_NOR_o          = 0;
-			    Bz_m_o              = 0;
-			    out_select_o        = 0;
-			    source_shift_sel_o  = 0;
-			    en_ff_read_o        = 0;
+                shift_en_s_o        = 0;
+                shift_en_r_o        = 0;
+                shift_select_o      = 0;
+                shift_s_o           = 1; //select left value
+                w_en_d_o            = 0;
+                w_en_m_o            = 0;
+                r_en_o              = 0;
+                r_valid_o           = 0;
+                NAND_NOR_o          = 0;
+                Bz_m_o              = 0;
+                out_select_o        = 0; //std out is data
+                source_shift_sel_o  = 0;
+                en_ff_read_o        = 0;
                 w_en_p_o            = 0;
-		    end
+            end
 			
-		    READ: begin
+            PORT_SET: begin
 				
-			    shift_en_s_o        = 0;
-			    shift_en_r_o        = 0;
-			    shift_select_o      = 0;
-			    shift_s_o           = 1;
-			    w_en_d_o            = 0;
-			    w_en_m_o            = 0;
-			    r_en_o              = 1;
-			    r_valid_o           = 1;
-			    NAND_NOR_o          = 0;
-			    Bz_m_o              = 0;
-			    out_select_o        = 0;
-			    source_shift_sel_o  = 0;
-			    en_ff_read_o        = 1;
-			    w_en_p_o            = 0;
-		    end
+                shift_en_s_o        = 1;
+                shift_en_r_o        = 0;
+                shift_select_o      = 1;
+                shift_s_o           = 1;
+                w_en_d_o            = 0;
+                w_en_m_o            = 0;
+                r_en_o              = 0;
+                r_valid_o           = 0;
+                NAND_NOR_o          = 0;
+                Bz_m_o              = 0;
+                out_select_o        = 0;
+                source_shift_sel_o  = 0;
+                en_ff_read_o        = 0;
+                w_en_p_o            = 0;
+            end
+			
+            READ: begin
+				
+                shift_en_s_o        = 0;
+                shift_en_r_o        = 0;
+                shift_select_o      = 0;
+                shift_s_o           = 1;
+                w_en_d_o            = 0;
+                w_en_m_o            = 0;
+                r_en_o              = 1;
+                r_valid_o           = 1;
+                NAND_NOR_o          = 0;
+                Bz_m_o              = 0;
+                out_select_o        = 0;
+                source_shift_sel_o  = 0;
+                en_ff_read_o        = 1;
+                w_en_p_o            = 0;
+            end
 			
 		    WRITE: begin
 				
