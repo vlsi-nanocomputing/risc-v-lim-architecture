@@ -4,14 +4,14 @@ import riscv_defines::*;
 
 module RT_memory
    #(   parameter ADDR_WIDTH = 22,
-        parameter MAX_SIZE   = 1024,   	//max number of bytes		
-        parameter CNT_WIDTH  = 2,		//only 2 bits required (max 3 shifts)
-        parameter Nr         = 4, 		//number of racetrack
-        parameter Nb         = 32, 		//rcetrack length
+        parameter MAX_SIZE   = 1024,    //max number of bytes		
+        parameter CNT_WIDTH  = 2,       //only 2 bits required (max 3 shifts)
+        parameter Nr         = 4,       //number of racetrack
+        parameter Nb         = 32,      //rcetrack length
         parameter Np         = 8,
         parameter NMU        = 8,
-        parameter NWL        = 4096,	//random number, set during module instantiation
-        parameter MEM_MODE   = 1		//std. mode is LiM
+        parameter NWL        = 4096,    //random number, set during module instantiation
+        parameter MEM_MODE   = 1        //std. mode is LiM
     )
     (
         input  logic                    clk_i,                          //FSM clock 
