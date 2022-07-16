@@ -3,15 +3,15 @@ import riscv_defines::*;
 
 
 module RT_memory
-	#(	parameter ADDR_WIDTH = 22,
-		parameter MAX_SIZE	 = 1024,   	//max number of bytes		
-		parameter CNT_WIDTH  = 2,		//only 2 bits required (max 3 shifts)
-		parameter Nr 		 = 4, 		//number of racetrack
-		parameter Nb 		 = 32, 		//rcetrack length
-		parameter Np 		 = 8,
-		parameter NMU 		 = 8,
-		parameter NWL		 = 4096,	//random number, set during module instantiation
-		parameter MEM_MODE   = 1		//std. mode is LiM
+   #(   parameter ADDR_WIDTH = 22,
+        parameter MAX_SIZE	 = 1024,   	//max number of bytes		
+        parameter CNT_WIDTH  = 2,		//only 2 bits required (max 3 shifts)
+        parameter Nr 		 = 4, 		//number of racetrack
+        parameter Nb 		 = 32, 		//rcetrack length
+        parameter Np 		 = 8,
+        parameter NMU 		 = 8,
+        parameter NWL		 = 4096,	//random number, set during module instantiation
+        parameter MEM_MODE   = 1		//std. mode is LiM
 	)
 	(
         input  logic                    clk_i,                          //FSM clock 
@@ -31,8 +31,8 @@ module RT_memory
         input  logic [1:0]              n_shift_i,                      //takes ADDR's LSBs to generate N of shifts      
         input  logic [2:0]              word_sel_i,                     //word selection signal for std. mem. mode
 	    
-	    output logic [Nr*NMU-1:0]       data_o,
-	    output logic                    valid_o				
+        output logic [Nr*NMU-1:0]       data_o,
+        output logic                    valid_o				
 	);
 	
 	
@@ -53,7 +53,7 @@ module RT_memory
 	logic                           shift_m;            //shift waveform module
 	logic                           shift_s;            //shift waveform sign
 	logic                           w_en_d;             //write enable for data  sent to  racetrack
-	logic							w_en_m;             //write enable for mask  sent to  racetrack
+    logic                           w_en_m;             //write enable for mask  sent to  racetrack
 	logic                           w_en_p;             //write enable for program racetrack  sent to  racetrack
 	logic                           w_pulse;            //write current pulse
 	logic                           r_en;               //read enable for data & logic sent to racetrack
@@ -85,25 +85,25 @@ module RT_memory
 	
 	
     logic [Nr*NMU-1:0]              write_int;          //intermediate signal fro byte write
-    logic [blocks*Nr*NMU-1:0] 		write_int_par;      //Bitwise AND arrays	
+    logic [blocks*Nr*NMU-1:0]       write_int_par;      //Bitwise AND arrays	
 	
-    logic [blocks*Nr*NMU-1:0] 		data_and_d;         //Bitwise AND arrays
-    logic [blocks*Nr*NMU-1:0] 		data_xor_d;         //Bitwise XOR arrays
-    logic [blocks*Nr*NMU-1:0] 		data_or_d;          //Bitwise OR  arrays
-    logic [blocks*Nr*NMU-1:0]		data_xnor_d;        //Bitwise XNOR  arrays
+    logic [blocks*Nr*NMU-1:0]       data_and_d;         //Bitwise AND arrays
+    logic [blocks*Nr*NMU-1:0]       data_xor_d;         //Bitwise XOR arrays
+    logic [blocks*Nr*NMU-1:0]       data_or_d;          //Bitwise OR  arrays
+    logic [blocks*Nr*NMU-1:0]       data_xnor_d;        //Bitwise XNOR  arrays
     logic [Nr*NMU-1:0]              program_w;          //input write program racetrack 
 	
 	
     logic [Nr*NMU-1:0]              data_d_int;         //out FF input, selects between data and mask-data	
     logic [Nr*NMU-1:0]              data_d_tmp;			
-    logic [Nr*NMU-1:0]	    		mask_int;           //internal input write data for mask racetrack  
+    logic [Nr*NMU-1:0]              mask_int;           //internal input write data for mask racetrack  
     logic [Nr*NMU-1:0]              write_int_tmp;			
 		
 	//======================================================================
     // RACETRACK WAVEFORM GENERATION
     //====================================================================== 
-	assign shift_m 		   = shift_select & shift_pulses;														//generate pulses for shift oepration
-	assign w_pulse_data    = (MEM_MODE) ? w_en_d & write_pulse_i : (w_en_d & write_pulse_i & word_sel_i[0]);   	//generate pulses for data write operation		
+	assign shift_m 		   = shift_select & shift_pulses;                                                       //generate pulses for shift oepration
+	assign w_pulse_data    = (MEM_MODE) ? w_en_d & write_pulse_i : (w_en_d & write_pulse_i & word_sel_i[0]);    //generate pulses for data write operation		
 	assign w_pulse_mask    = (MEM_MODE) ? w_en_m & write_pulse_i : (w_en_d & write_pulse_i &  word_sel_i[1]);   //generate pulses for mask write operation & data-mask oepration
 	assign w_pulse_program = (MEM_MODE) ? w_en_p & write_pulse_i : (w_en_d & write_pulse_i &  word_sel_i[2]);   //generate pulses for prog write operation & prog-mask oepration
 	
@@ -130,17 +130,17 @@ module RT_memory
 		RT_block_i
 		(
             .rstn_i(rstn_i),
-		    .Bz_s_i(Bz_s_i),
-		    .Bz_m_i(Bz_m),
-		    .read_current_d_i(r_pulse_d),			//read current waveform for data/logic
+            .Bz_s_i(Bz_s_i),
+            .Bz_m_i(Bz_m),
+            .read_current_d_i(r_pulse_d),			//read current waveform for data/logic
             .read_current_m_i(r_pulse_m),			//read current waveform for mask-data		
             .read_current_p_i(r_pulse_p),			//read current waveform for program-data	
-		    .current_s_lim_i(shift_s),
-		    .current_m_lim_i(shift_m),
-		    .current_s_data_i(shift_s),
-		    .current_m_data_i(shift_m),
-		    .current_m_mask_i(shift_s),
-		    .current_s_mask_i(shift_m),	
+            .current_s_lim_i(shift_s),
+            .current_m_lim_i(shift_m),
+            .current_s_data_i(shift_s),
+            .current_m_data_i(shift_m),
+            .current_m_mask_i(shift_s),
+            .current_s_mask_i(shift_m),	
             .current_s_program_i(shift_s),
             .current_m_program_i(shift_m),			
             .write_data_i(write_int_par[i*par +: par]),		
