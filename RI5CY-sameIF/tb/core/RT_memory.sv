@@ -210,12 +210,10 @@ module RT_memory
 	//=====================================
 	//LiM ARRAYS
 	//=====================================
+    //This logic perfroms external logic computations (AND, OR, XOR, XNOR)
 
-	//NEW
-
-
-	assign data_and_d  = ~r_data_int; 			//invert NAND output (exploit Racetrack LiM result)
-	assign data_or_d   = ~r_data_int; 			//invert NOR output  (exploit Racetrack LiM result)
+	assign data_and_d  = ~r_data_int; 			//during AND computation invert built-in NAND result (exploit Racetrack LiM result)
+	assign data_or_d   = ~r_data_int; 			//during OR  computation invert built-in NOR result  (exploit Racetrack LiM result)
 	
 	always_comb begin	//compute xor operation for each block output
 		for (int i=0; i<blocks; i=i+1)begin
