@@ -253,7 +253,7 @@ module FSM
                 shift_s_o           = 0;	
                 w_en_d_o            = 0;	
                 w_en_m_o            = 1;	//write mask
-                r_en_o              = 0 || r_en_byteW; //override read enable signal during byte write 
+                r_en_o              = 0;
                 r_valid_o           = 0;	
                 NAND_NOR_o          = 1;	
                 Bz_m_o              = 0;	
@@ -272,7 +272,7 @@ module FSM
                 shift_s_o           = 0;	
                 w_en_d_o            = 0;	
                 w_en_m_o            = 1;	//write mask
-                r_en_o              = 0 || r_en_byteW; //override read enable signal during byte write 
+                r_en_o              = 0;
                 r_valid_o           = 0;	
                 NAND_NOR_o          = 0;	
                 Bz_m_o              = 0;	
