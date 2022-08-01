@@ -53,7 +53,9 @@ module tb_top
 	const time w_phase_HI		= 1ns;
 	const time w_phase_LO		= 6ns;
 
-	
+	//Variables for Execution time estimation
+	time start_sim;
+    time t_exec;
 
 
     // clock and reset for tb
@@ -318,7 +320,8 @@ module tb_top
                 $display("EXIT SUCCESS");
             else
                 $display("EXIT FAILURE: %d", exit_value);
-            $display("Finish simulaion time recording: time=%0t", $time);
+            t_exec = $time - start_sim;
+            $display("Start simulation time : time=%0t, Finish simulaion time recording: time=%0t, Execution time=%0t", start_sim, $time, t_exec);
             $finish;
         end
     end
