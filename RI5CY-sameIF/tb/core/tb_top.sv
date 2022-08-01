@@ -53,8 +53,8 @@ module tb_top
 	const time w_phase_HI		= 1ns;
 	const time w_phase_LO		= 6ns;
 
-	//Variables for Execution time estimation
-	time start_sim;
+    //Variables for Execution time estimation
+    time start_sim;
     time t_exec;
 
 
