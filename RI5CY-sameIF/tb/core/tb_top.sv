@@ -53,7 +53,9 @@ module tb_top
 	const time w_phase_HI		= 1ns;
 	const time w_phase_LO		= 6ns;
 
-	
+    //Variables for Execution time estimation
+    time start_sim;
+    time t_exec;
 
 
     // clock and reset for tb
@@ -208,6 +210,7 @@ module tb_top
         
             // make the core start fetching instruction immediately after the firmware is loaded in memory
             fetch_enable = '1;
+            $display("Start simulaion time recording: time=%0t", $time);
 
         end else begin
             $display("No firmware specified");
@@ -317,6 +320,8 @@ module tb_top
                 $display("EXIT SUCCESS");
             else
                 $display("EXIT FAILURE: %d", exit_value);
+            t_exec = $time - start_sim;
+            $display("Start simulation time : time=%0t, Finish simulaion time recording: time=%0t, Execution time=%0t", start_sim, $time, t_exec);
             $finish;
         end
     end

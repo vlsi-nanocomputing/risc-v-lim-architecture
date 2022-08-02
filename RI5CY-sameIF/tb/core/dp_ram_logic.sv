@@ -12,6 +12,7 @@
 import riscv_defines::*;
 `define DEBUG
 
+ 
 
 module dp_ram_logic
     #(parameter ADDR_WIDTH = 10, 
@@ -25,47 +26,47 @@ module dp_ram_logic
      input  logic                          en_a_i,
      input  logic [ADDR_WIDTH-1:0]         addr_a_i,
      input  logic [31:0]                   wdata_a_i,
-     output logic [INSTR_RDATA_WIDTH-1:0]  rdata_a_o, 	//output read instruction
-     input  logic                          we_a_i, 		//set to 0 in mm_ram (always load)
-     input  logic [3:0]                    be_a_i, 		// set to all 1s in mm_ram, always want 32-bits
+     output logic [INSTR_RDATA_WIDTH-1:0]  rdata_a_o,   //output read instruction
+     input  logic                          we_a_i,      //set to 0 in mm_ram (always load)
+     input  logic [3:0]                    be_a_i,      // set to all 1s in mm_ram, always want 32-bits
 
 	
-     input  logic                          en_b_i, 		// Bank request from amo_shim
-     input  logic [ADDR_WIDTH-1:0]         addr_b_i, 	//data address 
-     input  logic [31:0]                   wdata_b_i, 	//input data
-     output logic [31:0]                   rdata_b_o, 	//output read data
-     input  logic                          we_b_i,  	//  1: Store, 0: Load from amo_shim
-     input  logic [3:0]                    be_b_i, 		// Byte enable from amo_shim
-     input  logic                          gnt_b_i, 	//bank grant from amo shim
-     output logic                          rvalid_b_o 	//data valid signal
+     input  logic                          en_b_i,      // Bank request from amo_shim
+     input  logic [ADDR_WIDTH-1:0]         addr_b_i,    //data address 
+     input  logic [31:0]                   wdata_b_i,   //input data
+     output logic [31:0]                   rdata_b_o,   //output read data
+     input  logic                          we_b_i,      //  1: Store, 0: Load from amo_shim
+     input  logic [3:0]                    be_b_i,      // Byte enable from amo_shim
+     input  logic                          gnt_b_i,     //bank grant from amo shim
+     output logic                          rvalid_b_o   //data valid signal
     );
 
 `ifdef RT_LIM_MEM    //LiM Racetrack memory part   
-        localparam bytes     = MAX_SIZE;
-        localparam words     = bytes/4; 	
-        localparam Nb        = 32; //Length racetrack
-        localparam Nr        = 4; //N racetrack in MU
-        localparam NMU       = 8; //N Macro Unit
-        localparam par     	 = Nr*NMU;
-        localparam blocks  	 = words/Nb;	
+    localparam bytes     = MAX_SIZE;
+    localparam words     = bytes/4; 	
+    localparam Nb        = 32;    //Length racetrack
+    localparam Nr        = 4;     //N racetrack in MU
+    localparam NMU       = 8;     //N Macro Unit
+    localparam par       = Nr*NMU;
+    localparam blocks    = words/Nb;	
 
 
 	
-        localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
+    localparam LOGIC_MEM_FUNCT_ADDRESS = 32'h0001fffc; //Special LiM programming address
 
 
 
 
 `elsif LIM_MEM   //LiM memory part
 
-        localparam bytes = 2**ADDR_WIDTH;
-        localparam words = bytes/4; 
-        localparam LOGIC_MEM_FUNCT_ADDRESS = (bytes/32-4);
+    localparam bytes = 2**ADDR_WIDTH;
+    localparam words = bytes/4; 
+    localparam LOGIC_MEM_FUNCT_ADDRESS = (bytes/32-4);
 
 `elsif STD_MEM  //standard memory part
 
-        localparam bytes = 2**ADDR_WIDTH;
-        localparam words = 1; //remove unnecessary signals with ifdef
+    localparam bytes = 2**ADDR_WIDTH;
+    localparam words = 1; //remove unnecessary signals with ifdef
 	
 `endif
   
@@ -75,11 +76,11 @@ module dp_ram_logic
 														
 														
     // Normal memory (global signals)
-	logic [7:0]                      mem[bytes];			       //memory array for isntruction part	
+    logic [7:0]                      mem[bytes];                    //memory array for isntruction part	
 						
 	
-    logic [ADDR_WIDTH-1:0]           addr_a_int;					//instruction addresses
-    logic [ADDR_WIDTH-1:0]           addr_b_int;					//data addresses
+    logic [ADDR_WIDTH-1:0]           addr_a_int;                    //instruction addresses
+    logic [ADDR_WIDTH-1:0]           addr_b_int;                    //data addresses
 
 
 `ifndef RT_LIM_MEM
@@ -95,49 +96,49 @@ module dp_ram_logic
 `ifndef STD_MEM
  
     // Logic-in-memory signals
-    logic [ADDR_WIDTH-1:0]           asize_mem_int;					//range operation without byte offset (2 LSBs)
-    logic [ADDR_WIDTH-1:0]           addr_b_range_end;				//range operation end address
-    logic [ADDR_WIDTH-1:0]		     ADDR_int_par;                  //address coding for higher range parallelism
-    logic [ADDR_WIDTH-1:0]		     ADDR_int;		                //output of address mux
-    logic                            en_b_int;						// Bank request internal (after manipulation)
+    logic [ADDR_WIDTH-1:0]           asize_mem_int;                 //range operation without byte offset (2 LSBs)
+    logic [ADDR_WIDTH-1:0]           addr_b_range_end;              //range operation end address
+    logic [ADDR_WIDTH-1:0]           ADDR_int_par;                  //address coding for higher range parallelism
+    logic [ADDR_WIDTH-1:0]           ADDR_int;                      //output of address mux
+    logic                            en_b_int;                      // Bank request internal (after manipulation)
     logic [31:0]                     wdata_b_int;
     logic                            word_lines[words];             //wordlines for word addressed memory
     logic                            word_lines_int[words];
-    logic                            range_active;					//signal that identifies a range operation
+    logic                            range_active;                  //signal that identifies a range operation
     logic [31:0]                     mask;	
-    logic [7:0]                      logic_in_memory_funct_int; 	//Logic function after masking 
-    logic [31:0]                     logic_in_memory_funct; 		//LiM programming cell
-    logic [23:0]                     asize_mem;						//Range for LiM operations
-    logic                            we_b_funct_mem;				//Notifies LiM programming
-    logic [7:0]                      opcode_mem; 					//Opcode for LiM operations
-    logic							 en_b_rt_valid;	 		 
-    logic							 en_b_rt_valid_q;	
-    logic                            en_b_rt_q;						//sampled en_b 
-    logic [ADDR_WIDTH-1:0]           addr_b_rt_q;					//sampeld address for RT
-    logic [31:0]                     wdata_b_rt_q;					//sambled write_data for RT
-    logic							 rvalid_rt;						//valid signal from RT 
-    logic							 rvalid_rt_int;					//internal valid signal from RT (useful for range oprations)
-    logic [3:0]						 be_b_int;						//internal be_b
-    logic [3:0]						 be_b_q;						//sampled be_b signal 
-    logic [words-1:0]                word_lines_p;					//packed wordlines for dummy RT
-    logic   					     en_b_int_rt;					//masked start transaction signal for RT
-    logic [ADDR_WIDTH-1:0]           addr_b_range;					//address in range operations
-    logic							 ld;							//load enable for counter in range decoder
-    logic							 cnt_en;						//enable for counter in range decoder
-    logic							 cmp_end_add;					//comparator for end address in range decoder	
-    logic [ADDR_WIDTH-1:0]           addr_b_range_cmp;				//address end decremented by four for the comparators			
-    logic							 we_b_q;				
-    logic							 we_b_int;				
-    logic [ADDR_WIDTH-1:0]         	 addr_b_int_dec;				//decoded address (divide by 4)
-    logic [ADDR_WIDTH-1:0]         	 addr_b_range_dec;				//decoded address (divide by 4)
-    logic [ADDR_WIDTH-1:0]         	 addr_mem_dec;					//decoded address (divide by 3) for memory mode
-    logic                            decoder_init[words]; 			//initial decoder for word addressed memory
-    logic                            word_lines_lim[words]; 		//word_lines for LiM mode RT memory
-    logic							 word_lines_tri[words_tri];		//word_lines for memory mode RT memory
-    logic							 active_triplet[triplets];
-    logic [2:0]						 word_sel_tri;					//word selection for memory mode
-    logic [1:0]						 n_shift;						//n. of required shift
-    logic [1:0]						 n_shift_lim;					//n. of required shift for LiM mode
+    logic [7:0]                      logic_in_memory_funct_int;     //Logic function after masking 
+    logic [31:0]                     logic_in_memory_funct;         //LiM programming cell
+    logic [23:0]                     asize_mem;                     //Range for LiM operations
+    logic                            we_b_funct_mem;                //Notifies LiM programming
+    logic [7:0]                      opcode_mem;                    //Opcode for LiM operations
+    logic                            en_b_rt_valid;	 		 
+    logic                            en_b_rt_valid_q;	
+    logic                            en_b_rt_q;                     //sampled en_b 
+    logic [ADDR_WIDTH-1:0]           addr_b_rt_q;                   //sampeld address for RT
+    logic [31:0]                     wdata_b_rt_q;                  //sambled write_data for RT
+    logic                            rvalid_rt;                     //valid signal from RT 
+    logic                            rvalid_rt_int;                 //internal valid signal from RT (useful for range oprations)
+    logic [3:0]                      be_b_int;                      //internal be_b
+    logic [3:0]                      be_b_q;                        //sampled be_b signal 
+    logic [words-1:0]                word_lines_p;                  //packed wordlines for dummy RT
+    logic                            en_b_int_rt;                   //masked start transaction signal for RT
+    logic [ADDR_WIDTH-1:0]           addr_b_range;                  //address in range operations
+    logic                            ld;                            //load enable for counter in range decoder
+    logic                            cnt_en;                        //enable for counter in range decoder
+    logic                            cmp_end_add;                   //comparator for end address in range decoder	
+    logic [ADDR_WIDTH-1:0]           addr_b_range_cmp;              //address end decremented by four for the comparators			
+    logic                            we_b_q;				
+    logic                            we_b_int;				
+    logic [ADDR_WIDTH-1:0]           addr_b_int_dec;                //decoded address (divide by 4)
+    logic [ADDR_WIDTH-1:0]           addr_b_range_dec;              //decoded address (divide by 4)
+    logic [ADDR_WIDTH-1:0]           addr_mem_dec;                  //decoded address (divide by 3) for memory mode
+    logic                            decoder_init[words];           //initial decoder for word addressed memory
+    logic                            word_lines_lim[words];         //word_lines for LiM mode RT memory
+    logic                            word_lines_tri[words_tri];     //word_lines for memory mode RT memory
+    logic                            active_triplet[triplets];
+    logic [2:0]                      word_sel_tri;                  //word selection for memory mode
+    logic [1:0]                      n_shift;                       //n. of required shift
+    logic [1:0]                      n_shift_lim;                   //n. of required shift for LiM mode
     logic [31:0]                     mask_count;                    //mask signal for max/min operation
     logic                            start_maxmin;                  //start signal for max/min operation
     logic                            stop_maxmin_iteration;         //stop signal for max/min operation                
@@ -160,9 +161,9 @@ module dp_ram_logic
     logic [7:0]                      mem_xor[bytes];
 
 
-    logic 	          				 word_lines_reord[words];       //reordered word lines
+    logic                            word_lines_reord[words];         //reordered word lines
     logic                            decoder_range_end_rt[words];     //range decoder end wordlines for word addr. memory
-    logic                            decoder_range_init_rt[bytes];     //range decoder init wordlines for byte addr. memory
+    logic                            decoder_range_init_rt[bytes];    //range decoder init wordlines for byte addr. memory
 
 `endif
 
@@ -170,10 +171,10 @@ module dp_ram_logic
 `ifdef RT_LIM_MEM    //racetrack memory part
 
     //Racetrack waveforms
-       logic						   clk_m_i       = 1'b1; 		//magnetic clock
-	   logic						   Bz_s_i        = 1'b1; 		//Magnetic field sign
-	   logic						   write_pulse_i = 1'b1;	//write pulse for racetrack
-	   logic						   read_pulse_i  = 1'b1;	//read pulse for racetrack
+    logic						   clk_m_i       = 1'b1;    //magnetic clock
+    logic						   Bz_s_i        = 1'b1;    //Magnetic field sign
+    logic						   write_pulse_i = 1'b1;    //write pulse for racetrack
+    logic						   read_pulse_i  = 1'b1;    //read pulse for racetrack
  
 `endif
 
@@ -186,41 +187,41 @@ module dp_ram_logic
 	
 
 
-	//======================================================================
+    //======================================================================
     // HANDSHAKING PROTOCOL 
     //====================================================================== 
 
     
 `ifdef RT_LIM_MEM    //racetrack memory part
 	
-	    assign en_b_rt_valid = en_b_i && !we_b_funct_mem;	//generate enable signal for sampling input signals
+        assign en_b_rt_valid = en_b_i && !we_b_funct_mem;	//generate enable signal for sampling input signals
 
 	
-	    //sample input signal for handshake
-	    always_ff @(posedge clk_i, negedge rst_ni) begin
+        //sample input signal for handshake
+        always_ff @(posedge clk_i, negedge rst_ni) begin
             if (~rst_ni) begin								//if reset is 0 (active low) set the signal to 0
                  en_b_rt_valid_q   <= 1'b0;
             end
             else if (en_b_rt_valid || rvalid_rt) begin	
                  en_b_rt_q             <= en_b_i; 							
-			     wdata_b_rt_q      	   <= wdata_b_i;
-                 en_b_rt_valid_q   	   <= en_b_rt_valid;
-			     addr_b_rt_q		   <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-			     be_b_q				   <= be_b_i;
-			     we_b_q				   <= we_b_i;	
+                 wdata_b_rt_q          <= wdata_b_i;
+                 en_b_rt_valid_q       <= en_b_rt_valid;
+                 addr_b_rt_q           <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+                 be_b_q                <= be_b_i;
+                 we_b_q                <= we_b_i;	
 
             end
         end  
 	
 	
-	    // Valid signal for maxmin handshake
-        assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q        	 : en_b_i;
-        assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q      	 : wdata_b_i;
-        assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q       	 : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-	    assign be_b_int			   = (en_b_rt_valid_q) ? be_b_q        	     : be_b_i;
-	    assign we_b_int			   = (en_b_rt_valid_q) ? we_b_q				 : we_b_i;		
+        // Valid signal for maxmin handshake
+        assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q           : en_b_i;
+        assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q        : wdata_b_i;
+        assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q         : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+        assign be_b_int            = (en_b_rt_valid_q) ? be_b_q              : be_b_i;
+        assign we_b_int            = (en_b_rt_valid_q) ? we_b_q              : we_b_i;		
 
-	    //only sw_active_logic can be carried out in one clock cycle
+        //only sw_active_logic can be carried out in one clock cycle
         assign rvalid_b_o          = (en_b_rt_valid_q || en_b_rt_valid ) ?  rvalid_rt  : gnt_b_i; 	
 
 
@@ -274,20 +275,20 @@ module dp_ram_logic
  
 `ifdef RT_LIM_MEM    //racetrack memory part   
 
-        //MAP RISC address (4 by 4)
-	    assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
+     //MAP RISC address (4 by 4)
+     assign addr_b_int_dec = addr_b_int >> 2; //divide by 4
 
-	    //MAP MEMORY MODE address 
-	    assign addr_mem_dec = addr_b_int_dec/3;	
+     //MAP MEMORY MODE address 
+     assign addr_mem_dec = addr_b_int_dec/3;	
 
 
-	    /*Decoder for range operations (LiM mode)*/	
+     /*Decoder for range operations (LiM mode)*/	
 
-        // RANGE DECODER
-        /* Normal decoder - Initial address decoder*/
-        always_comb begin
+     // RANGE DECODER
+     /* Normal decoder - Initial address decoder*/
+     always_comb begin
          for (int i=0; i<words; i++) begin
-            decoder_range_init_rt[i] = 1'b0;
+             decoder_range_init_rt[i] = 1'b0;
          end
         decoder_range_init_rt[addr_b_int_dec] = 1'b1;
      end
@@ -350,18 +351,18 @@ module dp_ram_logic
 		end
 	  end
   
-     //std_wordlines: wordlines for std. mem. mode
-	      always_comb begin
-		        for (int i=0; i<words_tri; i++) begin
-		            word_lines_tri[i] = 1'b0; //initiaize to 0 wordlines
-		        end
-		     word_lines_tri[addr_b_int_dec] = 1'b1 & !MEM_MODE; //NEW
-		  end
+    //std_wordlines: wordlines for std. mem. mode
+        always_comb begin
+            for (int i=0; i<words_tri; i++) begin
+                word_lines_tri[i] = 1'b0; //initiaize to 0 wordlines
+            end
+            word_lines_tri[addr_b_int_dec] = 1'b1 & !MEM_MODE; //NEW
+        end
 
 
 	
-     // WORDLINE MUX
-  	 assign word_lines = (MEM_MODE) ? word_lines_lim : active_triplet;   //MEM_MODE = 1 LiM mode
+    // WORDLINE MUX
+    assign word_lines = (MEM_MODE) ? word_lines_lim : active_triplet;   //MEM_MODE = 1 LiM mode
 	
 
 
@@ -415,15 +416,15 @@ module dp_ram_logic
 
 
 
-	//N. SHIFT GENERATION
-	assign addr_b_range_dec = addr_b_range>>2;
+    //N. SHIFT GENERATION
+    assign addr_b_range_dec = addr_b_range>>2;
 
-    assign ADDR_int 		= (MEM_MODE) ? addr_b_int_dec: addr_mem_dec;
+    assign ADDR_int         = (MEM_MODE) ? addr_b_int_dec: addr_mem_dec;
 	
-	assign ADDR_int_par     = ADDR_int /blocks;
+    assign ADDR_int_par     = ADDR_int /blocks;
 	
     //select n shift based on the memory mode
-	assign n_shift 			= ADDR_int_par[1:0]; //In LiM mode takes addr_dec, in std. mem . mode takes addr_dec/3 
+    assign n_shift          = ADDR_int_par[1:0]; //In LiM mode takes addr_dec, in std. mem . mode takes addr_dec/3 
 
 
 `elsif LIM_MEM //LiM standard memory part
@@ -558,7 +559,7 @@ module dp_ram_logic
     always_comb asize_mem_int = {asize_mem[ADDR_WIDTH-1:0], 2'b0}; // Only 32 bits words are considered as vector elements
 
 	
-	assign opcode_mem   = logic_in_memory_funct[7:0]; 
+    assign opcode_mem   = logic_in_memory_funct[7:0]; 
     assign asize_mem    = logic_in_memory_funct[31:8];	
 
 `endif
@@ -597,25 +598,25 @@ module dp_ram_logic
 	)
 	racetrack_memory
 	(
-		.rstn_i(rst_ni),											
-		.clk_i(clk_i),													
-		.clk_m_i(clk_m_i),											
-		.Bz_s_i(Bz_s_i),  											
-		.en_ab_i(en_b_int_rt),  									
-		.be_b_i(be_b_int),											
-		.range_active_i(range_active),								
-		.write_pulse_i(write_pulse_i),								
-		.read_pulse_i(read_pulse_i),													
-		.word_lines(word_lines_p),									
-		.write_data_i(wdata_b_int),									
-		.write_en_data_i(we_b_int),									
-		.mask_i(mask),												
-		.n_shift_i(n_shift),  	
-		.logic_in_memory_funct_int_i(logic_in_memory_funct_int),	
-	    .word_sel_i(word_sel_tri),									
+        .rstn_i(rst_ni),											
+        .clk_i(clk_i),													
+        .clk_m_i(clk_m_i),											
+        .Bz_s_i(Bz_s_i),  											
+        .en_ab_i(en_b_int_rt),  									
+        .be_b_i(be_b_int),											
+        .range_active_i(range_active),								
+        .write_pulse_i(write_pulse_i),								
+        .read_pulse_i(read_pulse_i),													
+        .word_lines(word_lines_p),									
+        .write_data_i(wdata_b_int),									
+        .write_en_data_i(we_b_int),									
+        .mask_i(mask),												
+        .n_shift_i(n_shift),  	
+        .logic_in_memory_funct_int_i(logic_in_memory_funct_int),	
+        .word_sel_i(word_sel_tri),									
 		
-		.data_o(rdata_b_o),											
-		.valid_o(rvalid_rt_int)										
+        .data_o(rdata_b_o),											
+        .valid_o(rvalid_rt_int)										
 	);
 
 
@@ -641,9 +642,9 @@ module dp_ram_logic
                         for (int i=0; i<bytes; i=i+4) begin
                             if( word_lines_std_mem[i] ) begin
                                 rdata_b_o[ 7: 0] <= mem_and[i    ];
-								rdata_b_o[15: 8] <= mem_and[i + 1];
-								rdata_b_o[23:16] <= mem_and[i + 2];
-								rdata_b_o[31:24] <= mem_and[i + 3];
+                                rdata_b_o[15: 8] <= mem_and[i + 1];
+                                rdata_b_o[23:16] <= mem_and[i + 2];
+                                rdata_b_o[31:24] <= mem_and[i + 3];
                             end
                         end	
 		end
@@ -652,9 +653,9 @@ module dp_ram_logic
                         for (int i=0; i<bytes; i=i+4) begin
                             if( word_lines_std_mem[i] ) begin
                                 rdata_b_o[ 7: 0] <= mem_or[i    ];
-								rdata_b_o[15: 8] <= mem_or[i + 1];
-								rdata_b_o[23:16] <= mem_or[i + 2];
-								rdata_b_o[31:24] <= mem_or[i + 3];
+                                rdata_b_o[15: 8] <= mem_or[i + 1];
+                                rdata_b_o[23:16] <= mem_or[i + 2];
+                                rdata_b_o[31:24] <= mem_or[i + 3];
                             end
                         end
 		end
@@ -663,9 +664,9 @@ module dp_ram_logic
                         for (int i=0; i<bytes; i=i+4) begin
                             if( word_lines_std_mem[i] ) begin
                                 rdata_b_o[ 7: 0] <= mem_xor[i    ];
-								rdata_b_o[15: 8] <= mem_xor[i + 1];
-								rdata_b_o[23:16] <= mem_xor[i + 2];
-								rdata_b_o[31:24] <= mem_xor[i + 3];
+                                rdata_b_o[15: 8] <= mem_xor[i + 1];
+                                rdata_b_o[23:16] <= mem_xor[i + 2];
+                                rdata_b_o[31:24] <= mem_xor[i + 3];
                             end
                         end
 		end
@@ -674,9 +675,9 @@ module dp_ram_logic
                         for (int i=0; i<bytes; i=i+4) begin
                             if( word_lines_std_mem[i] ) begin
                                 rdata_b_o[ 7: 0] <= ~(mem_or[i    ]);
-								rdata_b_o[15: 8] <= ~(mem_or[i + 1]);
-								rdata_b_o[23:16] <= ~(mem_or[i + 2]);
-								rdata_b_o[31:24] <= ~(mem_or[i + 3]);
+                                rdata_b_o[15: 8] <= ~(mem_or[i + 1]);
+                                rdata_b_o[23:16] <= ~(mem_or[i + 2]);
+                                rdata_b_o[31:24] <= ~(mem_or[i + 3]);
                             end
                         end
 		end
@@ -685,9 +686,9 @@ module dp_ram_logic
                         for (int i=0; i<bytes; i=i+4) begin
                             if( word_lines_std_mem[i] ) begin
                                 rdata_b_o[ 7: 0] <= ~(mem_and[i    ]);
-								rdata_b_o[15: 8] <= ~(mem_and[i + 1]);
-								rdata_b_o[23:16] <= ~(mem_and[i + 2]);
-								rdata_b_o[31:24] <= ~(mem_and[i + 3]);
+                                rdata_b_o[15: 8] <= ~(mem_and[i + 1]);
+                                rdata_b_o[23:16] <= ~(mem_and[i + 2]);
+                                rdata_b_o[31:24] <= ~(mem_and[i + 3]);
                             end
                         end
 		end
@@ -696,9 +697,9 @@ module dp_ram_logic
                         for (int i=0; i<bytes; i=i+4) begin
                             if( word_lines_std_mem[i] ) begin
                                 rdata_b_o[ 7: 0] <= ~(mem_xor[i    ]);
-								rdata_b_o[15: 8] <= ~(mem_xor[i + 1]);
-								rdata_b_o[23:16] <= ~(mem_xor[i + 2]);
-								rdata_b_o[31:24] <= ~(mem_xor[i + 3]);
+                                rdata_b_o[15: 8] <= ~(mem_xor[i + 1]);
+                                rdata_b_o[23:16] <= ~(mem_xor[i + 2]);
+                                rdata_b_o[31:24] <= ~(mem_xor[i + 3]);
                             end
                         end
 		end
@@ -707,10 +708,10 @@ module dp_ram_logic
 			if ( stop_maxmin_iteration ) begin
                             for(int i=0; i<bytes; i=i+4) begin
                                 if( next_enabled_rows[i] ) begin
-									rdata_b_o[ 7: 0] <= mem[i    ];
-									rdata_b_o[15: 8] <= mem[i + 1];
-									rdata_b_o[23:16] <= mem[i + 2];
-									rdata_b_o[31:24] <= mem[i + 3];
+                                    rdata_b_o[ 7: 0] <= mem[i    ];
+                                    rdata_b_o[15: 8] <= mem[i + 1];
+                                    rdata_b_o[23:16] <= mem[i + 2];
+                                    rdata_b_o[31:24] <= mem[i + 3];
                                 end
                             end
                         end
@@ -720,9 +721,9 @@ module dp_ram_logic
 			for (int i=0; i<bytes; i=i+4) begin
                             if( word_lines_std_mem[i] ) begin
                                 rdata_b_o[ 7: 0] <= mem[i    ];
-								rdata_b_o[15: 8] <= mem[i + 1];
-								rdata_b_o[23:16] <= mem[i + 2];
-								rdata_b_o[31:24] <= mem[i + 3];
+                                rdata_b_o[15: 8] <= mem[i + 1];
+                                rdata_b_o[23:16] <= mem[i + 2];
+                                rdata_b_o[31:24] <= mem[i + 3];
                             end
                         end
 		end
@@ -762,43 +763,43 @@ module dp_ram_logic
             unique case (logic_in_memory_funct_int)
                 FUNCT_AND: begin
                         mem_in[row  ] = mem_and[row  ];
-						mem_in[row+1] = mem_and[row+1];
+                        mem_in[row+1] = mem_and[row+1];
                         mem_in[row+2] = mem_and[row+2];
                         mem_in[row+3] = mem_and[row+3];
 		end
                 FUNCT_OR: begin
                         mem_in[row  ] = mem_or[row  ];
-						mem_in[row+1] = mem_or[row+1];
+                        mem_in[row+1] = mem_or[row+1];
                         mem_in[row+2] = mem_or[row+2];
                         mem_in[row+3] = mem_or[row+3];
 		end
                 FUNCT_XOR: begin
                         mem_in[row  ] = mem_xor[row  ];
-						mem_in[row+1] = mem_xor[row+1];
+                        mem_in[row+1] = mem_xor[row+1];
                         mem_in[row+2] = mem_xor[row+2];
                         mem_in[row+3] = mem_xor[row+3];
 		end
 				FUNCT_NOR: begin
                         mem_in[row  ] = ~(mem_or[row  ]);
-						mem_in[row+1] = ~(mem_or[row+1]);
+                        mem_in[row+1] = ~(mem_or[row+1]);
                         mem_in[row+2] = ~(mem_or[row+2]);
                         mem_in[row+3] = ~(mem_or[row+3]);
 		end
 				FUNCT_NAND: begin
                         mem_in[row  ] = ~(mem_and[row  ]);
-						mem_in[row+1] = ~(mem_and[row+1]);
+                        mem_in[row+1] = ~(mem_and[row+1]);
                         mem_in[row+2] = ~(mem_and[row+2]);
                         mem_in[row+3] = ~(mem_and[row+3]);
 		end
 				FUNCT_XNOR: begin
                         mem_in[row  ] = ~(mem_xor[row  ]);
-						mem_in[row+1] = ~(mem_xor[row+1]);
+                        mem_in[row+1] = ~(mem_xor[row+1]);
                         mem_in[row+2] = ~(mem_xor[row+2]);
                         mem_in[row+3] = ~(mem_xor[row+3]);
 		end
 
                 default: begin
-			mem_in[row  ] = wdata_b_i[ 0+:8];
+			            mem_in[row  ] = wdata_b_i[ 0+:8];
                         mem_in[row+1] = wdata_b_i[ 8+:8];
                         mem_in[row+2] = wdata_b_i[16+:8];
                         mem_in[row+3] = wdata_b_i[24+:8];
@@ -827,9 +828,9 @@ module dp_ram_logic
             for (int i=0; i<bytes; i=i+4) begin
                    if( word_lines_std_mem[i] ) begin
                        rdata_b_o[ 7: 0] <= mem[i    ];
-					   rdata_b_o[15: 8] <= mem[i + 1];
-					   rdata_b_o[23:16] <= mem[i + 2];
-					   rdata_b_o[31:24] <= mem[i + 3];
+                       rdata_b_o[15: 8] <= mem[i + 1];
+                       rdata_b_o[23:16] <= mem[i + 2];
+                       rdata_b_o[31:24] <= mem[i + 3];
                    end
 		     end
         end
@@ -1023,7 +1024,7 @@ module dp_ram_logic
     localparam                       N_VECTOR = 32;
     logic                            sub_word_lines[4*N_VECTOR];
     logic [7:0]                      sub_mem[4*N_VECTOR];
-	logic [7:0]                      sub_mem_and[4*N_VECTOR];	
+    logic [7:0]                      sub_mem_and[4*N_VECTOR];	
     logic                            sub_enabled_rows[4*N_VECTOR];
     logic                            sub_word_wired_or[4*N_VECTOR];
     logic                            sub_word_lines_int[4*N_VECTOR];
@@ -1033,7 +1034,7 @@ module dp_ram_logic
     always_comb begin
         for (int i=0; i<4*N_VECTOR; i++) begin
             sub_mem[i]            = mem['h30000+i];
-			sub_mem_and[i]        = mem_and['h30000+i];
+            sub_mem_and[i]        = mem_and['h30000+i];
             sub_enabled_rows[i]   = enabled_rows['h30000+i];
             sub_word_wired_or[i]  = word_wired_or['h30000+i];
             sub_word_lines[i]     = word_lines_std_mem['h30000+i];
