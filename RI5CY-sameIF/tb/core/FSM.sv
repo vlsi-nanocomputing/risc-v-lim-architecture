@@ -36,11 +36,11 @@ module FSM
 	
 	enum {IDLE,PORT_SET,READ,WRITE, WRITE_MASK_NAND, WRITE_MASK_NOR , LIM_NOR, LIM_NAND, READ_LIM, WRITE_LIM, PORT_RESET} state, next_state;
 	
-	logic	[3:0]	cnt_lim;		//signal for LiM programming counter
-	logic           lim_done;		//notifies end of LiM oeperation
-	logic           r_en_byteW;		//read enable signal for write byte
+    logic	[3:0]	cnt_lim;		//signal for LiM programming counter
+    logic           lim_done;		//notifies end of LiM oeperation
+    logic           r_en_byteW;		//read enable signal for write byte
     logic           en_valid;
-    logic			rst_valid;
+    logic           rst_valid;
 	
 
 	//===============================
@@ -179,8 +179,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 0;
-                en_valid			= 0;
-                rst_valid			= 0;
+                en_valid            = 0;
+                rst_valid           = 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0; //std out is data
@@ -198,8 +198,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 0;
-                en_valid			= 0;
-                rst_valid			= 1;
+                en_valid            = 0;
+                rst_valid           = 1;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
@@ -217,8 +217,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 1;
-                en_valid			= 0;
-                rst_valid			= 0;
+                en_valid            = 0;
+                rst_valid           = 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
@@ -236,8 +236,8 @@ module FSM
                 w_en_d_o            = 1;
                 w_en_m_o            = 0;
                 r_en_o              = 0 || r_en_byteW;	//override read enable signal during byte write 
-                en_valid			= 0;
-                rst_valid			= 0;  				
+                en_valid            = 0;
+                rst_valid           = 0;  				
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
@@ -256,8 +256,8 @@ module FSM
                 w_en_d_o            = 0;	
                 w_en_m_o            = 1;	//write mask
                 r_en_o              = 0;
-                en_valid			= 1;
-                rst_valid			= 0;
+                en_valid            = 1;
+                rst_valid           = 0;
                 NAND_NOR_o          = 1;	
                 Bz_m_o              = 0;	
                 out_select_o        = 0;	
@@ -276,8 +276,8 @@ module FSM
                 w_en_d_o            = 0;	
                 w_en_m_o            = 1;	//write mask
                 r_en_o              = 0;
-                en_valid			= 1;
-                rst_valid			= 0;	
+                en_valid            = 1;
+                rst_valid           = 0;	
                 NAND_NOR_o          = 0;	
                 Bz_m_o              = 0;	
                 out_select_o        = 0;	
@@ -297,8 +297,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 0;
-                en_valid			= 0;
-                rst_valid			= 0;
+                en_valid            = 0;
+                rst_valid           = 0;
                 NAND_NOR_o          = 1;
                 Bz_m_o              = 1;
                 out_select_o        = 0;
@@ -318,8 +318,8 @@ module FSM
                 w_en_d_o            = 0;	
                 w_en_m_o            = 0;	
                 r_en_o              = 0;	
-                en_valid			= 0;
-                rst_valid			= 0;	
+                en_valid            = 0;
+                rst_valid           = 0;	
                 NAND_NOR_o          = 0;	
                 Bz_m_o              = 1;	
                 out_select_o        = 0;	
@@ -338,8 +338,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 1;
-                en_valid			= 0;
-                rst_valid			= 0;
+                en_valid            = 0;
+                rst_valid           = 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 1;	//select logic output
@@ -357,8 +357,8 @@ module FSM
                 w_en_d_o            = 1;	//write computed value
                 w_en_m_o            = 0;
                 r_en_o              = 1; 	//read computed value
-                en_valid			= 0;
-                rst_valid			= 0;
+                en_valid            = 0;
+                rst_valid           = 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 1;	//select logic output
@@ -376,8 +376,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 0;
-                en_valid			= 0;
-                rst_valid			= 0;
+                en_valid            = 0;
+                rst_valid           = 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
