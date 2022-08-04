@@ -43,19 +43,19 @@ module tb_top
     const time CLK_FSM_PHASE_HI       = 5ns;
     const time CLK_FSM_PHASE_LO       = 5ns;
 	
-	const time CLK_M_PHASE_HI     = 1ns;
-	const time CLK_M_PHASE_LO     = 1ns;
+    const time CLK_M_PHASE_HI     = 1ns;
+    const time CLK_M_PHASE_LO     = 1ns;
 	
-	const time BZs_PHASE_HI     = 10ns;
-	const time BZs_PHASE_LO     = 10ns;
+    const time BZs_PHASE_HI     = 10ns;
+    const time BZs_PHASE_LO     = 10ns;
 	
-	const time r_init_LO		= 1ns;
-	const time r_phase_HI		= 1ns;
-	const time r_phase_LO		= 8ns;
+    const time r_init_LO		= 1ns;
+    const time r_phase_HI		= 1ns;
+    const time r_phase_LO		= 8ns;
 	
-	const time w_init_LO		= 3ns;
-	const time w_phase_HI		= 1ns;
-	const time w_phase_LO		= 6ns;
+    const time w_init_LO		= 3ns;
+    const time w_phase_HI		= 1ns;
+    const time w_phase_LO		= 6ns;
 
     //Variables for Execution time estimation
     time start_sim;
