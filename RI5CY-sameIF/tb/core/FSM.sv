@@ -39,7 +39,8 @@ module FSM
 	logic	[3:0]	cnt_lim;		//signal for LiM programming counter
 	logic           lim_done;		//notifies end of LiM oeperation
 	logic           r_en_byteW;		//read enable signal for write byte
-
+    logic           en_valid;
+    logic			rst_valid;
 	
 
 	//===============================
@@ -155,12 +156,9 @@ module FSM
 			PORT_RESET: begin
 			
 				if(shift_done_r_i)begin
-					if(en_i)begin		//serve a new memory request without passing from IDLE state
-						next_state = PORT_SET;
-					end else begin
 						next_state = IDLE;
-					end
-				end else begin
+				end 
+                else begin
 					next_state = PORT_RESET;
 				end
 			end
@@ -181,7 +179,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 0;
-                r_valid_o           = 0;
+                en_valid			= 0;
+                rst_valid			= 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0; //std out is data
@@ -199,7 +198,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 0;
-                r_valid_o           = 0;
+                en_valid			= 0;
+                rst_valid			= 1;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
@@ -217,7 +217,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 1;
-                r_valid_o           = 1;
+                en_valid			= 0;
+                rst_valid			= 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
@@ -235,7 +236,8 @@ module FSM
                 w_en_d_o            = 1;
                 w_en_m_o            = 0;
                 r_en_o              = 0 || r_en_byteW;	//override read enable signal during byte write 
-                r_valid_o           = 1; 				//generate valid signal to notify write operation
+                en_valid			= 0;
+			    rst_valid			= 0;  				
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
@@ -254,7 +256,8 @@ module FSM
                 w_en_d_o            = 0;	
                 w_en_m_o            = 1;	//write mask
                 r_en_o              = 0;
-                r_valid_o           = 0;	
+                en_valid			= 1;
+                rst_valid			= 0;
                 NAND_NOR_o          = 1;	
                 Bz_m_o              = 0;	
                 out_select_o        = 0;	
@@ -273,7 +276,8 @@ module FSM
                 w_en_d_o            = 0;	
                 w_en_m_o            = 1;	//write mask
                 r_en_o              = 0;
-                r_valid_o           = 0;	
+                en_valid			= 1;
+                rst_valid			= 0;	
                 NAND_NOR_o          = 0;	
                 Bz_m_o              = 0;	
                 out_select_o        = 0;	
@@ -293,7 +297,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 0;
-                r_valid_o           = 0;
+                en_valid			= 0;
+                rst_valid			= 0;
                 NAND_NOR_o          = 1;
                 Bz_m_o              = 1;
                 out_select_o        = 0;
@@ -313,7 +318,8 @@ module FSM
                 w_en_d_o            = 0;	
                 w_en_m_o            = 0;	
                 r_en_o              = 0;	
-                r_valid_o           = 0;	
+                en_valid			= 0;
+                rst_valid			= 0;	
                 NAND_NOR_o          = 0;	
                 Bz_m_o              = 1;	
                 out_select_o        = 0;	
@@ -332,7 +338,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 1;
-                r_valid_o           = 1;
+                en_valid			= 0;
+                rst_valid			= 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 1;	//select logic output
@@ -350,7 +357,8 @@ module FSM
                 w_en_d_o            = 1;	//write computed value
                 w_en_m_o            = 0;
                 r_en_o              = 1; 	//read computed value
-                r_valid_o           = 1;
+                en_valid			= 0;
+                rst_valid			= 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 1;	//select logic output
@@ -368,7 +376,8 @@ module FSM
                 w_en_d_o            = 0;
                 w_en_m_o            = 0;
                 r_en_o              = 0;
-                r_valid_o           = 0;
+                en_valid			= 0;
+                rst_valid			= 0;
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
@@ -423,6 +432,20 @@ module FSM
 		
 		endcase
 	end
+
+    //===============================
+    //RVALID REGISTER
+    //===============================
+    always_ff @(posedge clk_i, negedge rstn_i) begin
+        if(!rstn_i) begin	
+            r_valid_o <= 1'b0;
+        end
+        if(rst_valid) begin
+            r_valid_o <= 1'b0;
+        end else if(en_valid)begin
+            r_valid_o <= 1'b1;
+        end
+    end
 	
 	
 	
