@@ -211,11 +211,11 @@ module dp_ram_logic
             end
             else if (en_b_andor_valid || rvalid_rt) begin	
                  en_b_rt_q             <= en_b_i; 							
-			     wdata_b_rt_q      	   <= wdata_b_i;
+                 wdata_b_rt_q          <= wdata_b_i;
                  en_b_andor_valid_q    <= en_b_andor_valid;
-			     addr_b_rt_q		   <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-			     be_b_q				   <= be_b_i;
-			     we_b_q				   <= we_b_i;	
+                 addr_b_rt_q           <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+                 be_b_q                <= be_b_i;
+                 we_b_q                <= we_b_i;	
 
             end
         end  
@@ -225,15 +225,15 @@ module dp_ram_logic
         assign en_b_int            = (en_b_andor_valid_q) ? en_b_andor_valid_q   : en_b_i;
         assign wdata_b_int         = (en_b_andor_valid_q) ? wdata_b_rt_q      	 : wdata_b_i;
         assign addr_b_int          = (en_b_andor_valid_q) ? addr_b_rt_q       	 : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-	    assign be_b_int			   = (en_b_andor_valid_q) ? be_b_q        	     : be_b_i;
-	    assign we_b_int			   = (en_b_andor_valid_q) ? we_b_q				 : we_b_i;		
+        assign be_b_int			   = (en_b_andor_valid_q) ? be_b_q        	     : be_b_i;
+        assign we_b_int			   = (en_b_andor_valid_q) ? we_b_q				 : we_b_i;		
 
 
         always_ff @(posedge clk_i, negedge rst_ni) begin
-           if (~rst_ni) begin								//if reset is 0 (active low) set the signal to 0
-                 rvalid_rt_q   <= 1'b0;
+            if (~rst_ni) begin								//if reset is 0 (active low) set the signal to 0
+                rvalid_rt_q   <= 1'b0;
             end
-            rvalid_rt_q <= rvalid_rt_int;
+                rvalid_rt_q <= rvalid_rt_int;
         end
 
 
@@ -612,32 +612,32 @@ module dp_ram_logic
 	)
 	racetrack_memory
 	(
-		.rstn_i(rst_ni),											
+        .rstn_i(rst_ni),											
         .clk_i(clk_rt),												
-		.clk_m_i(clk_m_i),											
-		.Bz_s_i(Bz_s_i),  											
-		.en_ab_i(en_b_int_rt),  									
-		.be_b_i(be_b_int),											
-		.range_active_i(range_active),								
-		.write_pulse_i(write_pulse_i),								
-		.read_pulse_i(read_pulse_i),													
-		.word_lines(word_lines_p),									
-		.write_data_i(wdata_b_int),									
-		.write_en_data_i(we_b_int),									
-		.mask_i(mask),												
-		.n_shift_i(n_shift),  	
-		.logic_in_memory_funct_int_i(logic_in_memory_funct_int),	
-	    .word_sel_i(word_sel_tri),									
+        .clk_m_i(clk_m_i),											
+        .Bz_s_i(Bz_s_i),  											
+        .en_ab_i(en_b_int_rt),  									
+        .be_b_i(be_b_int),											
+        .range_active_i(range_active),								
+        .write_pulse_i(write_pulse_i),								
+        .read_pulse_i(read_pulse_i),													
+        .word_lines(word_lines_p),									
+        .write_data_i(wdata_b_int),									
+        .write_en_data_i(we_b_int),									
+        .mask_i(mask),												
+        .n_shift_i(n_shift),  	
+        .logic_in_memory_funct_int_i(logic_in_memory_funct_int),	
+        .word_sel_i(word_sel_tri),									
 			
         .data_o(rdata_b_rt),										
-		.valid_o(rvalid_rt_int)										
+        .valid_o(rvalid_rt_int)										
 	);
 
     //stabilize out RT data
-    always_ff @(posedge clk_i) begin
-	    if (en_b_int && !we_b_i) begin
-            rdata_b_o <= rdata_b_rt;
-        end
+   always_ff @(posedge clk_i) begin
+       if (en_b_int && !we_b_i) begin
+           rdata_b_o <= rdata_b_rt;
+       end
     end
 
 
