@@ -237,7 +237,7 @@ module FSM
                 w_en_m_o            = 0;
                 r_en_o              = 0 || r_en_byteW;	//override read enable signal during byte write 
                 en_valid			= 0;
-			    rst_valid			= 0;  				
+                rst_valid			= 0;  				
                 NAND_NOR_o          = 0;
                 Bz_m_o              = 0;
                 out_select_o        = 0;
