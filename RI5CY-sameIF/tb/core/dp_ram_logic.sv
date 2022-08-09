@@ -12,7 +12,9 @@
 import riscv_defines::*;
 `define DEBUG
 
- 
+
+
+
 
 module dp_ram_logic
     #(parameter ADDR_WIDTH = 10, 
@@ -111,8 +113,6 @@ module dp_ram_logic
     logic [23:0]                     asize_mem;                     //Range for LiM operations
     logic                            we_b_funct_mem;                //Notifies LiM programming
     logic [7:0]                      opcode_mem;                    //Opcode for LiM operations
-    logic                            en_b_rt_valid;	 		 
-    logic                            en_b_rt_valid_q;	
     logic                            en_b_rt_q;                     //sampled en_b 
     logic [ADDR_WIDTH-1:0]           addr_b_rt_q;                   //sampeld address for RT
     logic [31:0]                     wdata_b_rt_q;                  //sambled write_data for RT
@@ -155,7 +155,11 @@ module dp_ram_logic
     logic                            result_word_wired_or[bytes];   //result wired or array
     logic                            enabled_rows[bytes];           //enabled rows for max/min operations
     logic                            next_enabled_rows[bytes];      //next enabled rows for max/min operations
-    
+    logic                            en_b_andor_valid;
+    logic                            en_b_andor_valid_q;
+    logic                            gnt_b_i_q;
+    logic                            rvalid_rt_q;
+        
     logic [7:0]                      mem_and[bytes];
     logic [7:0]                      mem_or[bytes];
     logic [7:0]                      mem_xor[bytes];
@@ -175,7 +179,9 @@ module dp_ram_logic
     logic						   Bz_s_i        = 1'b1;    //Magnetic field sign
     logic						   write_pulse_i = 1'b1;    //write pulse for racetrack
     logic						   read_pulse_i  = 1'b1;    //read pulse for racetrack
- 
+    logic                          clk_rt;                      //rt clock (10MHz)
+    logic [31:0]                   rdata_b_rt;
+
 `endif
 
 
@@ -194,18 +200,19 @@ module dp_ram_logic
     
 `ifdef RT_LIM_MEM    //racetrack memory part
 	
-        assign en_b_rt_valid = en_b_i && !we_b_funct_mem;	//generate enable signal for sampling input signals
-
+        // Registers to mantain stable the input data in case of maxmin request
+        assign en_b_andor_valid = ((opcode_mem == FUNCT_AND) || (opcode_mem == FUNCT_OR) || (opcode_mem == FUNCT_NAND) || (opcode_mem == FUNCT_NOR)) && en_b_i && !we_b_funct_mem;
 	
-        //sample input signal for handshake
-        always_ff @(posedge clk_i, negedge rst_ni) begin
+	
+	    //sample input signal for handshake
+	    always_ff @(posedge clk_i, negedge rst_ni) begin
             if (~rst_ni) begin								//if reset is 0 (active low) set the signal to 0
-                 en_b_rt_valid_q   <= 1'b0;
+                 en_b_andor_valid_q   <= 1'b0;
             end
-            else if (en_b_rt_valid || rvalid_rt) begin	
+            else if (en_b_andor_valid || rvalid_rt) begin	
                  en_b_rt_q             <= en_b_i; 							
                  wdata_b_rt_q          <= wdata_b_i;
-                 en_b_rt_valid_q       <= en_b_rt_valid;
+                 en_b_andor_valid_q    <= en_b_andor_valid;
                  addr_b_rt_q           <= {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
                  be_b_q                <= be_b_i;
                  we_b_q                <= we_b_i;	
@@ -214,16 +221,23 @@ module dp_ram_logic
         end  
 	
 	
-        // Valid signal for maxmin handshake
-        assign en_b_int            = (en_b_rt_valid_q) ? en_b_rt_q           : en_b_i;
-        assign wdata_b_int         = (en_b_rt_valid_q) ? wdata_b_rt_q        : wdata_b_i;
-        assign addr_b_int          = (en_b_rt_valid_q) ? addr_b_rt_q         : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
-        assign be_b_int            = (en_b_rt_valid_q) ? be_b_q              : be_b_i;
-        assign we_b_int            = (en_b_rt_valid_q) ? we_b_q              : we_b_i;		
+	    // Valid signal for rt handshake
+        assign en_b_int            = (en_b_andor_valid_q) ? en_b_andor_valid_q   : en_b_i;
+        assign wdata_b_int         = (en_b_andor_valid_q) ? wdata_b_rt_q      	 : wdata_b_i;
+        assign addr_b_int          = (en_b_andor_valid_q) ? addr_b_rt_q       	 : {addr_b_i[ADDR_WIDTH-1:2], 2'b0};
+        assign be_b_int			   = (en_b_andor_valid_q) ? be_b_q        	     : be_b_i;
+        assign we_b_int			   = (en_b_andor_valid_q) ? we_b_q				 : we_b_i;		
 
-        //only sw_active_logic can be carried out in one clock cycle
-        assign rvalid_b_o          = (en_b_rt_valid_q || en_b_rt_valid ) ?  rvalid_rt  : gnt_b_i; 	
 
+        always_ff @(posedge clk_i, negedge rst_ni) begin
+            if (~rst_ni) begin								//if reset is 0 (active low) set the signal to 0
+                rvalid_rt_q   <= 1'b0;
+            end
+                rvalid_rt_q <= rvalid_rt_int;
+        end
+
+
+        assign rvalid_b_o          = (en_b_andor_valid_q || en_b_andor_valid ) ?  (rvalid_rt_q && !gnt_b_i)   : gnt_b_i; 
 
 
 	
@@ -577,7 +591,7 @@ module dp_ram_logic
 	assign word_lines_p = { << { word_lines_reord }};
 
 
-	assign en_b_int_rt = en_b_int && !we_b_funct_mem;	//disable RT during sw_active_logic
+    assign en_b_int_rt = en_b_i && !we_b_funct_mem;    //disable RT during sw_active_logic programming
 
 
     /*RVALID_RT LOGIC*/
@@ -599,7 +613,7 @@ module dp_ram_logic
 	racetrack_memory
 	(
         .rstn_i(rst_ni),											
-        .clk_i(clk_i),													
+        .clk_i(clk_rt),												
         .clk_m_i(clk_m_i),											
         .Bz_s_i(Bz_s_i),  											
         .en_ab_i(en_b_int_rt),  									
@@ -614,10 +628,17 @@ module dp_ram_logic
         .n_shift_i(n_shift),  	
         .logic_in_memory_funct_int_i(logic_in_memory_funct_int),	
         .word_sel_i(word_sel_tri),									
-		
-        .data_o(rdata_b_o),											
+			
+        .data_o(rdata_b_rt),										
         .valid_o(rvalid_rt_int)										
 	);
+
+    //stabilize out RT data
+   always_ff @(posedge clk_i) begin
+       if (en_b_int && !we_b_i) begin
+           rdata_b_o <= rdata_b_rt;
+       end
+    end
 
 
 `elsif LIM_MEM    //LiM standard memory part

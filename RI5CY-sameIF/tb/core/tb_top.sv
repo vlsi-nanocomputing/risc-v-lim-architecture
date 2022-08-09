@@ -27,8 +27,9 @@ module tb_top
     // comment to record execution trace
     //`define TRACE_EXECUTION
 
-    const time CLK_PHASE_HI       = 5ns;
-    const time CLK_PHASE_LO       = 5ns;
+    const time CLK_PHASE_HI       = 20ns;  
+    const time CLK_PHASE_LO       = 20ns;
+
     const time CLK_PERIOD         = CLK_PHASE_HI + CLK_PHASE_LO;
     const time STIM_APPLICATION_DEL = CLK_PERIOD * 0.1;
     const time RESP_ACQUISITION_DEL = CLK_PERIOD * 0.9;
@@ -38,20 +39,23 @@ module tb_top
 
 
 	//time parameter for racetrack
+
+    const time CLK_FSM_PHASE_HI       = 5ns;
+    const time CLK_FSM_PHASE_LO       = 5ns;
 	
-	const time CLK_M_PHASE_HI     = 1ns;
-	const time CLK_M_PHASE_LO     = 1ns;
+    const time CLK_M_PHASE_HI     = 1ns;
+    const time CLK_M_PHASE_LO     = 1ns;
 	
-	const time BZs_PHASE_HI     = 10ns;
-	const time BZs_PHASE_LO     = 10ns;
+    const time BZs_PHASE_HI     = 10ns;
+    const time BZs_PHASE_LO     = 10ns;
 	
-	const time r_init_LO		= 1ns;
-	const time r_phase_HI		= 1ns;
-	const time r_phase_LO		= 8ns;
+    const time r_init_LO		= 1ns;
+    const time r_phase_HI		= 1ns;
+    const time r_phase_LO		= 8ns;
 	
-	const time w_init_LO		= 3ns;
-	const time w_phase_HI		= 1ns;
-	const time w_phase_LO		= 6ns;
+    const time w_init_LO		= 3ns;
+    const time w_phase_HI		= 1ns;
+    const time w_phase_LO		= 6ns;
 
     //Variables for Execution time estimation
     time start_sim;
@@ -164,7 +168,7 @@ module tb_top
 
 			repeat(words) begin
 
-				//force  riscv_wrapper_i.ram_i.dp_ram_i.wdata_b_i 	= 	dummy_rom_w[rt_add];
+				
 				force  riscv_wrapper_i.ram_i.dp_ram_i.wdata_b_i 	= 	dummy_rom_w[rt_add>>2];	//address now goes 4 by 4, butdummy_Rt_w uses std addresses
 				force  riscv_wrapper_i.ram_i.dp_ram_i.en_b_i    	= 1'b1;
 
@@ -175,12 +179,6 @@ module tb_top
 					@(posedge clk);
 				end
 				force  riscv_wrapper_i.ram_i.dp_ram_i.en_b_i	    = 1'b0;
-
-				@(posedge riscv_wrapper_i.ram_i.dp_ram_i.rvalid_b_o );	//wait valid signal
-				repeat(1) begin				//wait 1 clock cycle
-					@(posedge clk);
-				end
-
 
 				rt_add = rt_add +4; //update index
 				force  riscv_wrapper_i.ram_i.dp_ram_i.addr_b_i 		= rt_add; //update address in RT memory
@@ -210,8 +208,8 @@ module tb_top
         
             // make the core start fetching instruction immediately after the firmware is loaded in memory
             fetch_enable = '1;
-            $display("Start simulaion time recording: time=%0t", $time);
-
+            $display("Start execution time recording: time=%0t", $time);
+            start_sim = $time;
         end else begin
             $display("No firmware specified");
             $finish;
@@ -231,6 +229,15 @@ module tb_top
 	///////////////////////////
 	// Racetrack Signals generation
 	///////////////////////////
+
+    // clock fsm generation
+    initial begin: clock_rt_gen
+        forever begin
+            #CLK_FSM_PHASE_HI  riscv_wrapper_i.ram_i.dp_ram_i.clk_rt = 1'b0;
+            #CLK_FSM_PHASE_LO  riscv_wrapper_i.ram_i.dp_ram_i.clk_rt = 1'b1;
+        end
+    end: clock_rt_gen
+
 
 	// Bz_s generation
     initial begin: Bz_s_gen
