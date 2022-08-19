@@ -27,18 +27,18 @@ int main(int argc, char *argv[])
     *stand_alone = ~(*stand_alone | mask_nor);  //compute NOR on stand alone element
 
     /* NAND operation */
-    mask_and = ~(vector[N-1] & 0x8F);   //NAND mask computation
+    mask_nand = ~(vector[N-1] & 0x8F);   //NAND mask computation
     for(i=0; i<N; i++){
-    	vector[i] = ~(vector[i] & mask_and);    //compute NAND on each vector element
+    	vector[i] = ~(vector[i] & mask_nand);    //compute NAND on each vector element
     }
-    *stand_alone = ~(*stand_alone & mask_and);  //compute NAND on stand alone element
+    *stand_alone = ~(*stand_alone & mask_nand);  //compute NAND on stand alone element
   
     /* XNOR operation */
-    mask_xor = ~(vector[N-2] ^ 0xF0);   //XNOR mask computation
+    mask_xnor = ~(vector[N-2] ^ 0xF0);   //XNOR mask computation
     for(i=0; i<N; i++){
-    	vector[i] = ~(vector[i] ^ mask_xor);    //compute XNOR on each vector element
+    	vector[i] = ~(vector[i] ^ mask_xnor);    //compute XNOR on each vector element
     }
-    *stand_alone = ~(*stand_alone ^ mask_xor);  //compute XNOR on stand alone element
+    *stand_alone = ~(*stand_alone ^ mask_xnor);  //compute XNOR on stand alone element
 
     *final_result = ~vector[N-3] + ~(*stand_alone); //compute final result
      
