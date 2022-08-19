@@ -99,7 +99,7 @@ module RT_memory
     logic [Nr*NMU-1:0]              mask_int;           //internal input write data for mask racetrack  
     logic [Nr*NMU-1:0]              write_int_tmp;			
 		
-	//======================================================================
+    //======================================================================
     // RACETRACK WAVEFORM GENERATION
     //====================================================================== 
 	assign shift_m 		   = shift_select & shift_pulses;                                                       //generate pulses for shift oepration
@@ -207,21 +207,21 @@ module RT_memory
 	
 	
 	
-	//=====================================
-	//LiM ARRAYS
-	//=====================================
+    //=====================================
+    //LiM ARRAYS
+    //=====================================
     //This logic perfroms external logic computations (AND, OR, XOR, XNOR)
 
-	assign data_and_d  = ~r_data_int; 			//during AND computation invert built-in NAND result (exploit Racetrack LiM result)
-	assign data_or_d   = ~r_data_int; 			//during OR  computation invert built-in NOR result  (exploit Racetrack LiM result)
+    assign data_and_d  = ~r_data_int;            //during AND computation invert built-in NAND result (exploit Racetrack LiM result)
+    assign data_or_d   = ~r_data_int;            //during OR  computation invert built-in NOR result  (exploit Racetrack LiM result)
 	
-	always_comb begin	//compute xor operation for each block output
-		for (int i=0; i<blocks; i=i+1)begin
-			data_xor_d[i*par +: par] =r_data_int[i*par +: par] ^ mask_i; 	//compute XOR logic operation
-		end
-	end
+    always_comb begin	//compute xor operation for each block output
+        for (int i=0; i<blocks; i=i+1)begin
+            data_xor_d[i*par +: par] =r_data_int[i*par +: par] ^ mask_i;        //compute XOR logic operation
+        end
+    end
 	
-	assign data_xnor_d = ~data_xor_d;		//compute NXOR logic operation
+   assign data_xnor_d = ~data_xor_d;        //compute NXOR logic operation
 		
 	
 	
