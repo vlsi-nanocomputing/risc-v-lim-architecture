@@ -102,14 +102,14 @@ module RT_memory
     //======================================================================
     // RACETRACK WAVEFORM GENERATION
     //====================================================================== 
-	assign shift_m 		   = shift_select & shift_pulses;                                                       //generate pulses for shift oepration
-	assign w_pulse_data    = (MEM_MODE) ? w_en_d & write_pulse_i : (w_en_d & write_pulse_i & word_sel_i[0]);    //generate pulses for data write operation		
-	assign w_pulse_mask    = (MEM_MODE) ? w_en_m & write_pulse_i : (w_en_d & write_pulse_i &  word_sel_i[1]);   //generate pulses for mask write operation & data-mask oepration
-	assign w_pulse_program = (MEM_MODE) ? w_en_p & write_pulse_i : (w_en_d & write_pulse_i &  word_sel_i[2]);   //generate pulses for prog write operation & prog-mask oepration
+    assign shift_m 		   = shift_select & shift_pulses;                                                       //generate pulses for shift oepration
+    assign w_pulse_data    = (MEM_MODE) ? w_en_d & write_pulse_i : (w_en_d & write_pulse_i & word_sel_i[0]);    //generate pulses for data write operation		
+    assign w_pulse_mask    = (MEM_MODE) ? w_en_m & write_pulse_i : (w_en_d & write_pulse_i &  word_sel_i[1]);   //generate pulses for mask write operation & data-mask oepration
+    assign w_pulse_program = (MEM_MODE) ? w_en_p & write_pulse_i : (w_en_d & write_pulse_i &  word_sel_i[2]);   //generate pulses for prog write operation & prog-mask oepration
 	
-	assign r_pulse_d 		= r_en & read_pulse_i;		 //generate pulses for data/logic read  operation
-	assign r_pulse_m		= r_en & read_pulse_i;		 //generate pulses for data-mask read  operation
-	assign r_pulse_p		= r_en & read_pulse_i;		 //generate pulses for data-program read  operation
+    assign r_pulse_d 		= r_en & read_pulse_i;		 //generate pulses for data/logic read  operation
+    assign r_pulse_m		= r_en & read_pulse_i;		 //generate pulses for data-mask read  operation
+    assign r_pulse_p		= r_en & read_pulse_i;		 //generate pulses for data-program read  operation
 	
     //======================================================================
     // RACETRACK MEMORY ARRAY GENERATION
@@ -464,9 +464,9 @@ module RT_memory
     //INPUT MASK-DATA & PROGRAM-DATA SELECTION LOGIC
     //=====================================
 	
-	assign mask_int = (MEM_MODE)? mask_i : write_int;				//LiM mode selects input mask otherwise takes inout data
+    assign mask_int = (MEM_MODE)? mask_i : write_int;				//LiM mode selects input mask otherwise takes inout data
 	
-	assign program_w = (MEM_MODE)? {32{IN1_NAND_NORn}} : write_int; //LiM mode selects program bit	otherwise takes input data
+    assign program_w = (MEM_MODE)? {32{IN1_NAND_NORn}} : write_int; //LiM mode selects program bit	otherwise takes input data
 		
 	
 	
@@ -476,7 +476,7 @@ module RT_memory
     //N-SHIFT FF
     //=====================================
 	//stabilize input N  shift and use it during reset state
-	always @(posedge clk_i, negedge rstn_i) begin
+    always @(posedge clk_i, negedge rstn_i) begin
        if ( !rstn_i) begin
 			n_shift_rst <= 1'b0;
 		end else  begin
@@ -488,7 +488,7 @@ module RT_memory
     //SOURCE SHIFT (SET-RESET) MUX
     //=====================================
 	
-	assign shift_pulses = (source_shift_sel)? shift_rst : shift_set; //sel = 1 => rst pulses
+    assign shift_pulses = (source_shift_sel)? shift_rst : shift_set; //sel = 1 => rst pulses
 	
 	
 	
@@ -497,41 +497,41 @@ module RT_memory
     //=====================================
     //SHIFT WAVEFORM GENERATOR - SET
     //=====================================
-	shifter
-	#(.N_WIDTH(CNT_WIDTH),
-	  .CNT_WIDTH(CNT_WIDTH)
-	)
-	set_shift_generator
-	(.clk_i(clk_m_i), //magnetic clock 
-	 .init_i(shift_en_s), 
-	 .rstn_i(rstn_i),
-	 .N_i(n_shift_i),
-	 .shift_done_o(shift_done_s),
-	 .pulses(shift_set) 
-	);
+    shifter
+    #(.N_WIDTH(CNT_WIDTH),
+      .CNT_WIDTH(CNT_WIDTH)
+    )
+    set_shift_generator
+    (.clk_i(clk_m_i), //magnetic clock 
+     .init_i(shift_en_s), 
+     .rstn_i(rstn_i),
+     .N_i(n_shift_i),
+     .shift_done_o(shift_done_s),
+     .pulses(shift_set) 
+     );
 	
     //=====================================
     //SHIFT WAVEFORM GENERATOR - RESET
     //=====================================
-	shifter
-	#(.N_WIDTH(CNT_WIDTH),
-	  .CNT_WIDTH(CNT_WIDTH)
-	)
-	rst_shift_generator
-	(.clk_i(clk_m_i), //magnetic clock 
-	 .init_i(shift_en_r), 
-	 .rstn_i(rstn_i),
-	 .N_i(n_shift_rst),
-	 .shift_done_o(shift_done_r), 
-	 .pulses(shift_rst)
-	);
+    shifter
+    #(.N_WIDTH(CNT_WIDTH),
+      .CNT_WIDTH(CNT_WIDTH)
+    )
+    rst_shift_generator
+    (.clk_i(clk_m_i), //magnetic clock 
+     .init_i(shift_en_r), 
+     .rstn_i(rstn_i),
+     .N_i(n_shift_rst),
+     .shift_done_o(shift_done_r), 
+     .pulses(shift_rst)
+    );
 	
     //======================================================================
     // FSM
     //====================================================================== 
-	FSM
-	RT_array_controller
-	(
+    FSM
+    RT_array_controller
+    (
         .rstn_i(rstn_i),
         .clk_i(clk_i), 					//system clock
         .shift_done_s_i(shift_done_s), 
@@ -554,7 +554,7 @@ module RT_memory
         .out_select_o(out_select),
         .source_shift_sel_o(source_shift_sel),
         .en_ff_read_o(en_ff_read)
-	);
+    );
 		
 	
 endmodule
