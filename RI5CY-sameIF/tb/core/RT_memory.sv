@@ -159,50 +159,50 @@ module RT_memory
         end
     endgenerate
 	
-	//=====================================
-	//ACTIVE BLOCK DECODING
-	//=====================================
-	generate
-		for(i=0; i<blocks; i++) begin
-			assign enabled_block[i] = |(word_lines[i*Nb +: Nb]);	//group word lines to understan active block
-		end
-	endgenerate
+    //=====================================
+    //ACTIVE BLOCK DECODING
+    //=====================================
+    generate
+        for(i=0; i<blocks; i++) begin
+            assign enabled_block[i] = |(word_lines[i*Nb +: Nb]);	//group word lines to understan active block
+        end
+    endgenerate
 	
-	//=====================================
-	//ACTIVE BLOCK MUX for MEM MODE/No range operations
-	//=====================================
-	//selects 32 bits output based on the active block
-	always_comb begin
-	data_d   = '0;
-	data_m_d = '0;
-	data_p_d = '0;
+    //=====================================
+    //ACTIVE BLOCK MUX for MEM MODE/No range operations
+    //=====================================
+    //selects 32 bits output based on the active block
+    always_comb begin
+    data_d   = '0;
+    data_m_d = '0;
+    data_p_d = '0;
 	
-		for (int i=0; i<blocks; i=i+1)begin //find active port
-			if(enabled_block[i]==1) begin
-					data_d   = r_data_int[i*par +: par];
-					data_m_d = r_data_m_int[i*par +: par];
-					data_p_d = r_data_p_int[i*par +: par];
+        for (int i=0; i<blocks; i=i+1)begin //find active port
+            if(enabled_block[i]==1) begin
+                data_d   = r_data_int[i*par +: par];
+                data_m_d = r_data_m_int[i*par +: par];
+                data_p_d = r_data_p_int[i*par +: par];
 					
-			end
-		end
-	end
+            end
+        end
+    end
 	
 		
-	//data_d_int selection for MEM MODE
-	always_comb begin
-		data_d_int = data_d;	//LiM mode takes data racetrack
-			if(!MEM_MODE) begin	//select different input data_d in std. mem mode (data racetrack or mask-data racetrack)
+    //data_d_int selection for MEM MODE
+    always_comb begin
+        data_d_int = data_d;	//LiM mode takes data racetrack
+            if(!MEM_MODE) begin	//select different input data_d in std. mem mode (data racetrack or mask-data racetrack)
 					
-				 case(word_sel_i)
-					3'b001: data_d_int = data_d;	//word 0
-					3'b010: data_d_int = data_m_d;	//word 1
-					3'b100: data_d_int = data_p_d;  //word 2
+                case(word_sel_i)
+                    3'b001: data_d_int = data_d;	//word 0
+                    3'b010: data_d_int = data_m_d;	//word 1
+                    3'b100: data_d_int = data_p_d;  //word 2
 					
-					default: data_d_int = data_d;	//word 0
-				endcase
+                    default: data_d_int = data_d;	//word 0
+                endcase
 				
-			end
-	end
+            end
+    end
 	
 	
 	
