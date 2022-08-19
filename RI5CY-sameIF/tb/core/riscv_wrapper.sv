@@ -14,6 +14,8 @@
 module riscv_wrapper
     #(parameter INSTR_RDATA_WIDTH = 32,
       parameter RAM_ADDR_WIDTH = 20,
+	  parameter MAX_SIZE = 12000,
+	  parameter MEM_MODE =1,
       parameter BOOT_ADDR = 'h180,
       parameter PULP_CLUSTER = 0,
       parameter FPU = 0,
@@ -126,6 +128,8 @@ module riscv_wrapper
     // this handles read to RAM and memory mapped pseudo peripherals
     mm_ram
         #(.RAM_ADDR_WIDTH (RAM_ADDR_WIDTH),
+		  .MAX_SIZE(MAX_SIZE),	//Memory size
+		  .MEM_MODE(MEM_MODE),
           .INSTR_RDATA_WIDTH (INSTR_RDATA_WIDTH))
     ram_i
         (.clk_i                  ( clk_i                          ),

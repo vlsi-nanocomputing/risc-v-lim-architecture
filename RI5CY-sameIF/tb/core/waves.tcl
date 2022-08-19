@@ -34,11 +34,11 @@ if {$dp_ram ne ""} {
     foreach inst $dp_ram {
 	add wave -group [file tail $inst] $inst/*
     }
-    add wave -group [file tail $dp_ram]  $dp_ram/sub_mem
-    add wave -group [file tail $dp_ram]  $dp_ram/sub_enabled_rows
-    add wave -group [file tail $dp_ram]  $dp_ram/sub_word_wired_or
-    add wave -group [file tail $dp_ram]  $dp_ram/sub_word_lines
-    add wave -group [file tail $dp_ram]  $dp_ram/sub_word_lines_int
+   # add wave -group [file tail $dp_ram]  $dp_ram/sub_mem
+   # add wave -group [file tail $dp_ram]  $dp_ram/sub_word_lines
+   # add wave -group [file tail $dp_ram]  $dp_ram/sub_word_lines_int
+   # add wave -group [file tail $dp_ram]  $dp_ram/we_b_funct_mem
+
 }
 
 if {$rvcores ne ""} {

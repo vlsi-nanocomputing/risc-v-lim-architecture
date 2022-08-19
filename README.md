@@ -42,11 +42,25 @@ Build the toolchain:
 Where N is the number of threads.
 
 # Usage
-Enter the directory `RI5CY-sameIF/tb/core` and modify the makefile. In particular, change the variable `RISCV_LIB` with your `<tool_chain_install_path>` previously used in the configuration.
+Enter the directory `RI5CY-sameIF/tb/core` and modify the Makefile. In particular, change the variable `RISCV_LIB` with your `<tool_chain_install_path>` previously used in the configuration.
+
+Modify variable `MEM_TYPE` inside the Makefile to build the desired memory type.
+Available memories:
+- Standard memory (STD_MEM)
+- Standard memory with LiM functionalities (LIM_MEM)
+- Racetrack memory with LiM functionalities (RT_LIM_MEM)
+
+Racetrack memory supports two different modes, set the correct parameter `MEM_MODE` in file `RI5CY-sameIF/tb/core/tb_tob.sv` to choose the wanted configuration:
+- Memory mode (MEM_MODE = 0)
+- LiM mode    (MEM_MODE = 1)
+
+
 
 For executing a sample program run:
 
     $make custom-vsim-run
+
+
 
 
 
