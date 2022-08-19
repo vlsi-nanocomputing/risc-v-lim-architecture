@@ -225,10 +225,10 @@ module RT_memory
 		
 	
 	
-	//=====================================
-	//OUT DATA REGISTER + LiM STORE FUNCTIONALITIES
-	//=====================================
-	//LiM operations are done on the full word
+    //=====================================
+    //OUT DATA REGISTER + LiM STORE FUNCTIONALITIES
+    //=====================================
+    //LiM operations are done on the full word
 	
 	
 	always @(posedge clk_i, negedge rstn_i) begin
@@ -335,10 +335,10 @@ module RT_memory
 		
 		
 		
-	//=====================================
-	//WRITE DATA IN + LiM STORE FUNCTIONALITIES
-	//=====================================
-	always_comb begin	
+    //=====================================
+    //WRITE DATA IN + LiM STORE FUNCTIONALITIES
+    //=====================================
+    always_comb begin	
 
 
 
@@ -460,9 +460,9 @@ module RT_memory
 	
 	
 	
-	//=====================================
-	//INPUT MASK-DATA & PROGRAM-DATA SELECTION LOGIC
-	//=====================================
+    //=====================================
+    //INPUT MASK-DATA & PROGRAM-DATA SELECTION LOGIC
+    //=====================================
 	
 	assign mask_int = (MEM_MODE)? mask_i : write_int;				//LiM mode selects input mask otherwise takes inout data
 	
@@ -472,9 +472,9 @@ module RT_memory
 	
 	
 	
-	//=====================================
-	//N-SHIFT FF
-	//=====================================
+    //=====================================
+    //N-SHIFT FF
+    //=====================================
 	//stabilize input N  shift and use it during reset state
 	always @(posedge clk_i, negedge rstn_i) begin
        if ( !rstn_i) begin
@@ -484,9 +484,9 @@ module RT_memory
 		end
 	end
 	
-	//=====================================
-	//SOURCE SHIFT (SET-RESET) MUX
-	//=====================================
+    //=====================================
+    //SOURCE SHIFT (SET-RESET) MUX
+    //=====================================
 	
 	assign shift_pulses = (source_shift_sel)? shift_rst : shift_set; //sel = 1 => rst pulses
 	
@@ -494,9 +494,9 @@ module RT_memory
 	
 	
 	
-	//=====================================
-	//SHIFT WAVEFORM GENERATOR - SET
-	//=====================================
+    //=====================================
+    //SHIFT WAVEFORM GENERATOR - SET
+    //=====================================
 	shifter
 	#(.N_WIDTH(CNT_WIDTH),
 	  .CNT_WIDTH(CNT_WIDTH)
@@ -510,9 +510,9 @@ module RT_memory
 	 .pulses(shift_set) 
 	);
 	
-	//=====================================
-	//SHIFT WAVEFORM GENERATOR - RESET
-	//=====================================
+    //=====================================
+    //SHIFT WAVEFORM GENERATOR - RESET
+    //=====================================
 	shifter
 	#(.N_WIDTH(CNT_WIDTH),
 	  .CNT_WIDTH(CNT_WIDTH)
