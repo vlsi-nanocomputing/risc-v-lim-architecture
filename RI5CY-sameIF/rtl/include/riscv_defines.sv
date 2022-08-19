@@ -73,14 +73,19 @@ parameter REGC_ZERO = 2'b11;
 // LOGIC-IN-MEMORY custom
 parameter OPCODE_STORE_ACTIVE_LOGIC  = 7'h3b;
 parameter OPCODE_LOAD_MASK           = 7'h1b;
+parameter WAIT_LIM_CYCLES   		 = 2;
 
-parameter FUNCT_NONE = 3'b000;
-parameter FUNCT_XOR  = 3'b001;
-parameter FUNCT_AND  = 3'b010;
-parameter FUNCT_OR   = 3'b011;
-parameter FUNCT_MIN  = 3'b101;
-parameter FUNCT_MAX  = 3'b110;
 
+//Extended funct parameters for new store_active
+parameter FUNCT_NONE = 8'b00000000;
+parameter FUNCT_XOR  = 8'b00000001;
+parameter FUNCT_AND  = 8'b00000010;
+parameter FUNCT_OR   = 8'b00000011;
+parameter FUNCT_NAND = 8'b00001010;
+parameter FUNCT_NOR  = 8'b00001011;
+parameter FUNCT_XNOR = 8'b00001001;
+parameter FUNCT_MIN  = 8'b00000101;
+parameter FUNCT_MAX  = 8'b00000110;
 //////////////////////////////////////////////////////////////////////////////
 //      _    _    _   _    ___                       _   _                  //
 //     / \  | |  | | | |  / _ \ _ __   ___ _ __ __ _| |_(_) ___  _ __  ___  //

@@ -442,7 +442,8 @@ module riscv_decoder
         alu_op_c_mux_sel_o  = OP_C_LIM_FUNCT;
         // offset from immediate
         alu_operator_o      = ALU_ADD;
-        imm_b_mux_sel_o     = IMMB_I;
+        //take as immediate the one used in load_mask
+        imm_b_mux_sel_o     = IMMB_LOGMEM;
         alu_op_b_mux_sel_o  = OP_B_IMM;
         // store size
         data_type_o = 2'b00; // SW
