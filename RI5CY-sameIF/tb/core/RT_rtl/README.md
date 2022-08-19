@@ -15,9 +15,9 @@ The pNML Racetrack has a 3D structure composed by three different Racetracks:
 
 File `RT_32_8_4_line` instantiates all the basic Racetrack cells (`pNML_NAND_NOR`, `pNML_NAND_NOR_SOT`, `RT_cell`, `RT_read_write_SOT`) for each of the four different Racetracks.
 
-<img src="./images/RT_32_8_4_profile_3D.png" description="LiM pNML Racetrack structure">
+<img src="./images/RT_32_8_4_profile_3D.png" description="LiM pNML Racetrack structure"  style="display: inline-block; margin: 0 auto; max-width: 300px">
 
 The Racetrack array is instantiaed in `RT_memory` which wraps the raw memory core and adds surrounding logic for the correct functioning. Here `FSM` and `shifter` entities are instantiated. This modules includes also all the logic required for the LiM computations.
 
-<img src="./images/racetrack_array_arch.png" description="Racetrack memory array architecture">
+<img src="./images/racetrack_array_arch.png" description="Racetrack memory array architecture"  style="display: inline-block; margin: 0 auto; max-width: 300px">
 
