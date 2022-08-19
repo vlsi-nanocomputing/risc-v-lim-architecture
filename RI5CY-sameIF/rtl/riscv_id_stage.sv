@@ -783,7 +783,7 @@ module riscv_id_stage
   end
 
   // Logic-in-memory operator
-	assign logic_in_memory_funct = {operand_c_fw_id[23:0],instr[24:20], instr[14:12]};
+    assign logic_in_memory_funct = {operand_c_fw_id[23:0],instr[24:20], instr[14:12]};
 
   ///////////////////////////////////////////////////////////////////////////
   //  ___                              _ _       _              ___ ____   //
