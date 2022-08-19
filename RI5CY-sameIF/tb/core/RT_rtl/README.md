@@ -33,7 +33,7 @@ Word organization
 --------------------------
 The Racetrack memory is capable of parallel LiM store operations by performing parallel accesses in each Block. This feature requires a different word organizayion within the memory.
 
-<img src="./images/word_organization.png" align="center" width="50%" height="50%">
+<img src="./images/word_organization.png" align="center" width="25%" height="25%">
 
 
 
