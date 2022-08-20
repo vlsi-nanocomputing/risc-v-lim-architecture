@@ -63,7 +63,7 @@ RTLSRC_HOME             := ../..
 RTLSRC_TB_PKG           :=
 RTLSRC_TB_TOP           := tb_top.sv
 RTLSRC_TB               := $(filter-out riscv_tb_pkg.sv tb_top_verilator.sv,\
-				            $(wildcard *.sv))
+                            $(wildcard *.sv))
 RTLSRC_TB_RT            := $(wildcard ./RT_rtl/*.sv)
 RTLSRC_VERI_TB          := $(filter-out tb_top.sv, $(wildcard *.sv))
 RTLSRC_INCDIR           := $(RTLSRC_HOME)/rtl/include
