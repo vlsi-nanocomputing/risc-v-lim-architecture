@@ -5,7 +5,7 @@ This folder contains all the RTL files of the Racetrack memory.
 Memory organization
 --------------------------
 In the following a brief insight of the hierarchical architecture of the memory will be given.
-The Racetrack memory array is made up by multiple basic elements called Blocks, the required number of Blocks is istantiated automatically based on the memory size. the file `RT_memory` intantiates the required number of Blocks based on the memory parameters.
+The Racetrack memory array is made up by multiple basic elements called Blocks, the required number of Blocks is istantiated automatically based on the memory size. The file `RT_memory` intantiates the required number of Blocks based on the memory parameters.
 Each block is internally divided in multiple Macro Units, 32x32 bits arrays composed by several Racetracks. The file `RT_block` instantiates the required number of Macro Units based on the memory parameters, then hierarchically the file `RT_32_8_4_MU` instantiates all the required Racetracks.
 The Racetrack has a 3D structure composed by four different Racetracks:
 * Logic Racetrack : computes and stores LiM results
@@ -19,7 +19,7 @@ The file `RT_32_8_4_line` instantiates all the basic Racetrack cells (`pNML_NAND
 
 Memory architecture
 --------------------------
-The Racetrack array is instantiaed in the file `RT_memory` which wraps the raw memory core and adds surrounding logic for the correct functioning (i.e. `FSM` and `shifter` modules), this module includes also all the logic required for the LiM computations. 
+The Racetrack array is instantiaed in the file `RT_memory`, which wraps the raw memory core and adds surrounding logic for the correct functioning (i.e. `FSM` and `shifter` modules), this module includes also all the logic required for the LiM computations. 
 
 <img src="./images/racetrack_array_arch.png" align="center" width="50%" height="50%">
 
