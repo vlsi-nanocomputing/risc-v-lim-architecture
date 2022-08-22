@@ -60,25 +60,26 @@ VERI_CFLAGS             = -O2
 
 # RTL source files
 RTLSRC_HOME             := ../..
-RTLSRC_TB_PKG		:=
-RTLSRC_TB_TOP		:= tb_top.sv
-RTLSRC_TB		:= $(filter-out riscv_tb_pkg.sv tb_top_verilator.sv,\
-				$(wildcard *.sv))
+RTLSRC_TB_PKG           :=
+RTLSRC_TB_TOP           := tb_top.sv
+RTLSRC_TB               := $(filter-out riscv_tb_pkg.sv tb_top_verilator.sv,\
+                            $(wildcard *.sv))
+RTLSRC_TB_RT            := $(wildcard ./RT_rtl/*.sv)
 RTLSRC_VERI_TB          := $(filter-out tb_top.sv, $(wildcard *.sv))
 RTLSRC_INCDIR           := $(RTLSRC_HOME)/rtl/include
-RTLSRC_PKG		:= $(RTLSRC_HOME)/rtl/fpnew/src/fpnew_pkg.sv \
-				$(addprefix $(RTLSRC_HOME)/rtl/include/,\
-				apu_core_package.sv riscv_defines.sv \
-				riscv_tracer_defines.sv ../../tb/tb_riscv/include/perturbation_defines.sv)
-RTLSRC			:= $(filter-out $(RTLSRC_HOME)/rtl/riscv_register_file_latch.sv,\
-				$(wildcard $(RTLSRC_HOME)/rtl/*.sv) $(RTLSRC_HOME)/tb/tb_riscv/riscv_random_stall.sv $(RTLSRC_HOME)/tb/tb_riscv/riscv_random_interrupt_generator.sv)
-RTLSRC_FPNEW_INCDIR := $(RTLSRC_HOME)/rtl/fpnew/src/common_cells/include
-RTLSRC_FPNEWPKG     := $(RTLSRC_HOME)/rtl/fpnew/src/fpu_div_sqrt_mvp/hdl/defs_div_sqrt_mvp.sv
-RTLSRC_FPNEW        := $(wildcard $(RTLSRC_HOME)/rtl/fpnew/src/*.sv) $(wildcard $(RTLSRC_HOME)/rtl/fpnew/src/fpu_div_sqrt_mvp/hdl/*.sv) \
-                    $(wildcard $(RTLSRC_HOME)/rtl/fpnew/src/common_cells/src/*.sv) $(wildcard $(RTLSRC_HOME)/rtl/fpnew/src/common_cells/src/deprecated/*.sv)
+RTLSRC_PKG              := $(RTLSRC_HOME)/rtl/fpnew/src/fpnew_pkg.sv \
+                            $(addprefix $(RTLSRC_HOME)/rtl/include/,\
+                            apu_core_package.sv riscv_defines.sv \
+                            riscv_tracer_defines.sv ../../tb/tb_riscv/include/perturbation_defines.sv)
+RTLSRC                  := $(filter-out $(RTLSRC_HOME)/rtl/riscv_register_file_latch.sv,\
+                            $(wildcard $(RTLSRC_HOME)/rtl/*.sv) $(RTLSRC_HOME)/tb/tb_riscv/riscv_random_stall.sv $(RTLSRC_HOME)/tb/tb_riscv/riscv_random_interrupt_generator.sv)
+RTLSRC_FPNEW_INCDIR     := $(RTLSRC_HOME)/rtl/fpnew/src/common_cells/include
+RTLSRC_FPNEWPKG         := $(RTLSRC_HOME)/rtl/fpnew/src/fpu_div_sqrt_mvp/hdl/defs_div_sqrt_mvp.sv
+RTLSRC_FPNEW            := $(wildcard $(RTLSRC_HOME)/rtl/fpnew/src/*.sv) $(wildcard $(RTLSRC_HOME)/rtl/fpnew/src/fpu_div_sqrt_mvp/hdl/*.sv) \
+                            $(wildcard $(RTLSRC_HOME)/rtl/fpnew/src/common_cells/src/*.sv) $(wildcard $(RTLSRC_HOME)/rtl/fpnew/src/common_cells/src/deprecated/*.sv)
 # TODO: clean this up
-RTLSRC_VLOG_TB_TOP	:= $(basename $(notdir $(RTLSRC_TB_TOP)))
-RTLSRC_VOPT_TB_TOP	:= $(RTLSRC_VLOG_TB_TOP)#$(addsuffix _vopt, $(RTLSRC_VLOG_TB_TOP))
+RTLSRC_VLOG_TB_TOP      := $(basename $(notdir $(RTLSRC_TB_TOP)))
+RTLSRC_VOPT_TB_TOP      := $(RTLSRC_VLOG_TB_TOP)#$(addsuffix _vopt, $(RTLSRC_VLOG_TB_TOP))
 
 # riscv toolchain install path
 RISCV_LIB               ?= <tool_chain_install_path>
@@ -136,9 +137,9 @@ vlib: .lib-rtl
 	touch .lib-rtl
 
 # rebuild if we change some sourcefile
-.build-rtl: .lib-rtl $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
+.build-rtl: .lib-rtl $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)
 	$(VLOG) +define+$(MEM_TYPE) -work $(VWORK) +incdir+$(RTLSRC_INCDIR) $(VLOG_FLAGS) \
-	$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
+	$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)
 	touch .build-rtl
 
 vsim-all: .build-rtl
@@ -149,9 +150,9 @@ vsim-all: .build-rtl
 	touch .opt-rtl
 
 # rebuild if we change some sourcefile
-.build-rtl-fp: .lib-rtl $(RTLSRC_PKG) $(RTLSRC_FPNEWPKG) $(RTLSRC_FPNEW) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
+.build-rtl-fp: .lib-rtl $(RTLSRC_PKG) $(RTLSRC_FPNEWPKG) $(RTLSRC_FPNEW) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)
 	$(VLOG) -work $(VWORK) +incdir+$(RTLSRC_INCDIR) +incdir+$(RTLSRC_FPNEW_INCDIR) $(VLOG_FLAGS) \
-	$(RTLSRC_PKG) $(RTLSRC_FPNEWPKG) $(RTLSRC_FPNEW) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
+	$(RTLSRC_PKG) $(RTLSRC_FPNEWPKG) $(RTLSRC_FPNEW) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)
 	touch .build-rtl-fp
 
 vsim-all-fp: .opt-rtl-fp
@@ -170,11 +171,11 @@ dpiheader: .build-tb
 # ===================================================================
 #ORIGIANL TIMESCALE -timescale=1ns/1ps 
 
-vcsify: $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB)
+vcsify: $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)
 	$(VCS) +vc -sverilog -race=all -ignore unique_checks -full64 \
 		-timescale=1ns/1ns -j20\
 		-CC "-I$(VCS_HOME)/include -O3 -march=native" $(VCS_FLAGS) \
-		$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) \
+		$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)\
 		+incdir+$(RTLSRC_INCDIR) +define+$(MEM_TYPE)
 
 #STANDARD PROGRAMS (MEM_TYPE=STD_MEM)
