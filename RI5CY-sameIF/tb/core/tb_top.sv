@@ -146,9 +146,6 @@ module tb_top
                          $time, firmware);
             $readmemh(firmware, riscv_wrapper_i.ram_i.dp_ram_i.mem);
 
-			
-
-        $display("Display localparam value = 0x%0d", MEM_MODE);
 
 
     ///////////////////////////
