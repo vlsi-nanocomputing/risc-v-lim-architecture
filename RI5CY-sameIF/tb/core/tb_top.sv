@@ -17,12 +17,23 @@
 module tb_top
     #(parameter INSTR_RDATA_WIDTH = 32,
       parameter RAM_ADDR_WIDTH = 22,
-      parameter MEM_MODE = 1,    //working mode for RT memory 1=LiM, 0=std 
       parameter BOOT_ADDR  = 'h180,
       parameter PULP_CLUSTER = 0,
       parameter FPU = 0,
       parameter PULP_ZFINX = 0,
       parameter DM_HALTADDRESS = 32'h1A110800);
+
+    //Set MEM_MODE parameter for Racetrack
+    `ifdef MODE_1
+
+    localparam MEM_MODE = 1;
+
+    `elsif MODE_0
+
+    localparam MEM_MODE = 0;
+
+    `endif 
+
 
     // comment to record execution trace
     //`define TRACE_EXECUTION
