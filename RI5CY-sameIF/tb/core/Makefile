@@ -117,6 +117,13 @@ MEM_TYPE    = RT_LIM_MEM
 #LIM_MEM    = compile standard memory with LiM functionalities
 #RT_LIM_MEM = compile Racetrack memory with/without LiM functionalities
 
+# Racetrack memory operational mode
+
+MEM_MODE    = MODE_0
+
+# MODE_0 = Work as a standard memory
+# MODE_1 = work as a LiM architecture
+
 
 
 # ===================================================================
@@ -138,7 +145,7 @@ vlib: .lib-rtl
 
 # rebuild if we change some sourcefile
 .build-rtl: .lib-rtl $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)
-	$(VLOG) +define+$(MEM_TYPE) -work $(VWORK) +incdir+$(RTLSRC_INCDIR) $(VLOG_FLAGS) \
+	$(VLOG) +define+$(MEM_TYPE) +define+$(MEM_MODE) -work $(VWORK) +incdir+$(RTLSRC_INCDIR) $(VLOG_FLAGS) \
 	$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)
 	touch .build-rtl
 
@@ -176,7 +183,7 @@ vcsify: $(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)
 		-timescale=1ns/1ns -j20\
 		-CC "-I$(VCS_HOME)/include -O3 -march=native" $(VCS_FLAGS) \
 		$(RTLSRC_PKG) $(RTLSRC) $(RTLSRC_TB_PKG) $(RTLSRC_TB) $(RTLSRC_TB_RT)\
-		+incdir+$(RTLSRC_INCDIR) +define+$(MEM_TYPE)
+		+incdir+$(RTLSRC_INCDIR) +define+$(MEM_TYPE) +define+$(MEM_MODE)
 
 #STANDARD PROGRAMS (MEM_TYPE=STD_MEM)
 
